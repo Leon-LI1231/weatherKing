@@ -1,0 +1,16 @@
+services:
+  db1:
+    image: mysql/mysql-server:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: weatherkings_db
+      MYSQL_ROOT_HOST: '%'
+    volumes:
+      - wkdata:/var/lib/mysql
+    ports:
+      - "4306:3306"
+
+volumes:
+  wkdata:
+
