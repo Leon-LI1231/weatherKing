@@ -1,14 +1,20 @@
-# Minimal dev container for a Vite-based React app
-FROM node:20-alpine
+# Use official Node.js image
+FROM node:18
 
+# Set working directory
 WORKDIR /app
 
+# Copy package files
 COPY package*.json ./
-RUN npm ci
 
+# Install dependencies
+RUN npm install
+
+# Copy the rest of your app
 COPY . .
 
+# Expose port 5173
 EXPOSE 5173
 
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
-
+# Start the development server
+CMD ["npm", "start"]
