@@ -11,6 +11,19 @@ services:
     ports:
       - "4306:3306"
 
+# Frontend service
+# After running `docker-compose up --build`, access the frontend at http://localhost:5173
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - PORT=5173
+
 volumes:
   wkdata:
 
