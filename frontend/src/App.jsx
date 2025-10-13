@@ -7,7 +7,7 @@ function App() {
   // Function called on button click
   const fetchData = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/hello");
+      const response = await fetch("http://localhost:8080/api/dummies");
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
