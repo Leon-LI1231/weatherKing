@@ -10,214 +10,77 @@ import App from '../components/App';
  * 
  * Test Cases:
  * -----------
- * 1. Button Existence & Interaction:
- *    ✓ button exists and is rendered correctly
- *    ✓ button can be clicked without errors
+ * 1. Initial Render Tests:
+ *    ✓ App component renders without crashing
+ *    ✓ Login component is displayed by default
  * 
- * 2. Successful API Response Tests:
- *    ✓ successful button press displays backend response
- * 
- * 3. Error Handling Tests:
- *    ✓ failed button press displays error message when API returns error
- *    ✓ network error displays appropriate error message
- * 
- * 4. Advanced Functionality Tests:
- *    ✓ multiple button presses work correctly
- *    ✓ button remains clickable during and after API call
+ * 2. Navigation Tests:
+ *    ✓ clicking "Create Account" button navigates to CreateAccount component
+ *    ✓ clicking "Cancel" button in CreateAccount navigates back to Login component
  * 
  *  Run all tests: npm test
- *  Run specific test: npm test -- --testNamePattern="test name"
+ *  Run App.test.jsx only: npm test -- App.test.jsx
+ * Run specific test: npm test -- --testNamePattern="test name"
  * ======================================================
  */
 
 // Mock fetch globally
 global.fetch = jest.fn();
 
-describe('App Component Button Tests', () => {
+describe('App Component Tests', () => {
   beforeEach(() => {
     // Clear all mocks before each test
-    fetch.mockClear();
+    jest.clearAllMocks();
   });
 
-  test('button exists and is rendered correctly', () => {
+  test('App component renders Login by default', () => {
     render(<App />);
-    
-    // Check that the button exists with correct text
-    const button = screen.getByRole('button', { name: /get backend data/i });
-    expect(button).toBeInTheDocument();
-    
-    // Check that the button has the expected styling attributes
-    expect(button).toHaveStyle({
-      cursor: 'pointer'
-    });
+    // Check that Login component is rendered by default
+    expect(screen.getByRole('heading', { name: /Login/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Login/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Create Account/i })).toBeInTheDocument();
   });
 
-  test('button can be clicked without errors', () => {
-    // Mock successful API response
+  test('navigates to CreateAccount when "Create Account" button is clicked', () => {
+    render(<App />);
+    const createAccountButton = screen.getByRole('button', { name: /Create Account/i });
+    fireEvent.click(createAccountButton);
+    // Should now show CreateAccount component
+    expect(screen.getByRole('heading', { name: /Create Account/i })).toBeInTheDocument();
+  });
+
+  test('navigates back to Login from CreateAccount when Cancel is clicked', () => {
+    render(<App />);
+    // Navigate to CreateAccount first
+    const createAccountButton = screen.getByRole('button', { name: /Create Account/i });
+    fireEvent.click(createAccountButton);
+    // Now click Cancel to go back to Login
+    const cancelButton = screen.getByRole('button', { name: /Cancel/i });
+    fireEvent.click(cancelButton);
+    // Should be back to Login
+    expect(screen.getByRole('heading', { name: /Login/i })).toBeInTheDocument();
+  });
+
+  test('navigates to Dashboard after successful login', async () => {
+    // Mock successful login response
     fetch.mockResolvedValueOnce({
       ok: true,
-      text: async () => 'Test response',
+      text: async () => 'Login successful!',
     });
-
     render(<App />);
+    const usernameInput = screen.getByPlaceholderText('Username');
+    const passwordInput = screen.getByPlaceholderText('Password');
+    const loginButton = screen.getByRole('button', { name: /Login/i });
     
-    const button = screen.getByRole('button', { name: /get backend data/i });
+    // Fill in login form and submit
+    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
+    fireEvent.change(passwordInput, { target: { value: 'password' } });
+    fireEvent.click(loginButton);
     
-    // Should not throw an error when clicked
-    expect(() => fireEvent.click(button)).not.toThrow();
-    
-    // Verify fetch was called after click
-    expect(fetch).toHaveBeenCalledTimes(1);
-  });
-
-  test('successful button press displays backend response', async () => {
-    const mockResponse = 'Hello from backend!';
-    
-    // Mock successful API response
-    fetch.mockResolvedValueOnce({
-      ok: true,
-      text: async () => mockResponse,
-    });
-
-    render(<App />);
-    
-    const button = screen.getByRole('button', { name: /get backend data/i });
-    
-    // Initially no message should be displayed
-    expect(screen.queryByText(mockResponse)).not.toBeInTheDocument();
-    
-    // Click the button
-    fireEvent.click(button);
-
-    // Wait for and verify the successful response message appears
+    // Should navigate to Dashboard
     await waitFor(() => {
-      expect(screen.getByText(mockResponse)).toBeInTheDocument();
+      expect(screen.getByText(/Welcome, testuser!/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Logout/i })).toBeInTheDocument();
     });
-
-    // Verify the message has the expected styling
-    const messageElement = screen.getByText(mockResponse);
-    expect(messageElement).toHaveStyle({
-      color: 'blue'
-    });
-
-    // Verify fetch was called with correct parameters
-    expect(fetch).toHaveBeenCalledWith('http://localhost:8080/api/dummies');
-    expect(fetch).toHaveBeenCalledTimes(1);
-  });
-
-  test('failed button press displays error message when API returns error', async () => {
-    // Mock failed API response (network request succeeds but API returns error status)
-    fetch.mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-    });
-
-    render(<App />);
-    
-    const button = screen.getByRole('button', { name: /get backend data/i });
-    
-    // Click the button
-    fireEvent.click(button);
-
-    // Wait for and verify the error message appears
-    await waitFor(() => {
-      expect(screen.getByText('Failed to fetch data from backend')).toBeInTheDocument();
-    });
-
-    // Verify the error message has the expected styling
-    const errorElement = screen.getByText('Failed to fetch data from backend');
-    expect(errorElement).toHaveStyle({
-      color: 'blue'
-    });
-  });
-
-  test('network error displays appropriate error message', async () => {
-    // Mock network error (request completely fails)
-    const networkError = new Error('Network connection failed');
-    fetch.mockRejectedValueOnce(networkError);
-
-    render(<App />);
-    
-    const button = screen.getByRole('button', { name: /get backend data/i });
-    
-    // Click the button
-    fireEvent.click(button);
-
-    // Wait for and verify the error message appears
-    await waitFor(() => {
-      expect(screen.getByText('Failed to fetch data from backend')).toBeInTheDocument();
-    });
-  });
-
-  test('multiple button presses work correctly', async () => {
-    const firstResponse = 'First response';
-    const secondResponse = 'Second response';
-    
-    // Mock multiple API responses
-    fetch
-      .mockResolvedValueOnce({
-        ok: true,
-        text: async () => firstResponse,
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        text: async () => secondResponse,
-      });
-
-    render(<App />);
-    
-    const button = screen.getByRole('button', { name: /get backend data/i });
-    
-    // First button press
-    fireEvent.click(button);
-    await waitFor(() => {
-      expect(screen.getByText(firstResponse)).toBeInTheDocument();
-    });
-
-    // Second button press
-    fireEvent.click(button);
-    await waitFor(() => {
-      expect(screen.getByText(secondResponse)).toBeInTheDocument();
-    });
-
-    // Verify fetch was called twice
-    expect(fetch).toHaveBeenCalledTimes(2);
-    
-    // Verify only the latest message is shown (second response should replace first)
-    expect(screen.queryByText(firstResponse)).not.toBeInTheDocument();
-    expect(screen.getByText(secondResponse)).toBeInTheDocument();
-  });
-
-  test('button remains clickable during and after API call', async () => {
-    // Mock API response with delay
-    fetch.mockImplementationOnce(
-      () => new Promise(resolve => 
-        setTimeout(() => resolve({
-          ok: true,
-          text: async () => 'Delayed response',
-        }), 100)
-      )
-    );
-
-    render(<App />);
-    
-    const button = screen.getByRole('button', { name: /get backend data/i });
-    
-    // Button should be enabled initially
-    expect(button).not.toBeDisabled();
-    
-    // Click the button
-    fireEvent.click(button);
-    
-    // Button should still be enabled during API call (component doesn't disable it)
-    expect(button).not.toBeDisabled();
-    
-    // Wait for response
-    await waitFor(() => {
-      expect(screen.getByText('Delayed response')).toBeInTheDocument();
-    });
-    
-    // Button should still be enabled after API call completes
-    expect(button).not.toBeDisabled();
   });
 });
