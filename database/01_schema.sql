@@ -38,6 +38,71 @@ CREATE TABLE `DummyTable` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `bets`
+--
+
+DROP TABLE IF EXISTS `bets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bets` (
+  `bet_id` int NOT NULL AUTO_INCREMENT,
+  `bet_type` enum('a','b','c') DEFAULT NULL,
+  `set_line` decimal(12,1) DEFAULT NULL,
+  `total_amount_bet` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `bet_hit` tinyint(1) NOT NULL DEFAULT '0',
+  `bet_start` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `bet_close` datetime DEFAULT NULL,
+  PRIMARY KEY (`bet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `player_bets`
+--
+
+DROP TABLE IF EXISTS `player_bets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `player_bets` (
+  `player_bet_id` int NOT NULL AUTO_INCREMENT,
+  `bet_id` int NOT NULL,
+  `uid` int NOT NULL,
+  `bet_amount` decimal(10,2) NOT NULL COMMENT 'Bet amount in USD (two decimal places for cents)',
+  `bet_to_pay` decimal(10,2) DEFAULT NULL,
+  `bet_success` tinyint(1) DEFAULT NULL COMMENT 'True if the bet won, False if lost, NULL if not yet resolved',
+  `time_placed` datetime DEFAULT NULL COMMENT 'When the bet was actually submitted and confirmed',
+  `time_made` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'When the user started creating the bet (added to slip)',
+  PRIMARY KEY (`player_bet_id`),
+  KEY `uid` (`uid`),
+  KEY `bet_id` (`bet_id`),
+  CONSTRAINT `player_bets_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`uid`),
+  CONSTRAINT `player_bets_ibfk_2` FOREIGN KEY (`bet_id`) REFERENCES `bets` (`bet_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `users` (
+  `uid` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(35) NOT NULL,
+  `email` varchar(35) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `balance_usd` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `is_disabled` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_login_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`uid`),
+  UNIQUE KEY `unique_users` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Dumping events for database 'weatherkings_db'
 --
 
@@ -54,4 +119,4 @@ CREATE TABLE `DummyTable` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-10-06 21:55:25
+-- Dump completed on 2025-10-19 23:37:51
