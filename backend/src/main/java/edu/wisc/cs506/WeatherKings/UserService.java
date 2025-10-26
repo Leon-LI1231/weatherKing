@@ -15,9 +15,13 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public void createUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+    public String createUser(User user) {
+        if (userRepository.existsByUsername(user.getUsername())) {
+            return "Username already exists";
+        }
+
         userRepository.save(user);
+        return "Account created successfully!";
     }
 
     public boolean validateUser(String username, String rawPassword) {
