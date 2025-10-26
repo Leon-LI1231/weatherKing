@@ -12,25 +12,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 public class UserController {
+
     private final UserService userService;
-    public UserController(UserService userService) { this.userService = userService; }
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> registerUser(@RequestBody Map<String, String> body) {
-        String username = body.get("username");
-        String email = body.get("email");
-        String password = body.get("password");
-        String result = userService.registerUser(username, email, password);
-        HttpStatus status = result.equals("User registered successfully.") ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST;
-        return new ResponseEntity<>(Map.of("message", result), status);
+    public ResponseEntity<?> register(@RequestBody User user) {
+        userService.createUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("message", "User registered successfully."));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> loginUser(@RequestBody Map<String, String> body) {
-        String username = body.get("username");
-        String password = body.get("password");
-        String result = userService.loginUser(username, password);
-        HttpStatus status = result.equals("Login successful.") ? HttpStatus.OK : HttpStatus.UNAUTHORIZED;
-        return new ResponseEntity<>(Map.of("message", result), status);
+    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
+        boolean valid = userService.validateUser(request.get("username"), request.get("password"));
+        if (valid) {
+            return ResponseEntity.ok(Map.of("message", "Login successful."));
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "Invalid credentials."));
     }
 }
