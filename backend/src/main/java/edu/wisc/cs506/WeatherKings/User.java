@@ -2,6 +2,7 @@ package edu.wisc.cs506.WeatherKings;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,10 +16,26 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int uid;
 
+    @Column(nullable = false)
     private String username;
+
+    @Column(nullable = true)
     private String email;
+
+    @Column(nullable = false)
     private String password;
+
+    @Column(name = "balance_usd")
+    private Double balanceUsd = 0.00;
+
+    @Column(name = "is_disabled")
+    private boolean isDisabled = false;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
 
     public int getUid() { return uid; }
     public void setUid(int uid) { this.uid = uid; }
@@ -32,6 +49,15 @@ public class User {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
+    public Double getBalanceUsd() { return balanceUsd; }
+    public void setBalanceUsd(Double balanceUsd) { this.balanceUsd = balanceUsd; }
+
+    public boolean isDisabled() { return isDisabled; }
+    public void setDisabled(boolean disabled) { isDisabled = disabled; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getLastLoginAt() { return lastLoginAt; }
+    public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
 }
