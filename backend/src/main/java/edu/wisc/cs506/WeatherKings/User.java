@@ -25,6 +25,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     @Column(name = "balance_usd")
     private Double balanceUsd = 0.00;
 
@@ -48,6 +51,9 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
     public Double getBalanceUsd() { return balanceUsd; }
     public void setBalanceUsd(Double balanceUsd) { this.balanceUsd = balanceUsd; }
