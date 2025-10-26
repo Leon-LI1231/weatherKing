@@ -24,7 +24,7 @@ function CreateAccount({ onNavigateToLogin }) {
     // If not, creates account and redirects to login page
     const handleCreateAccount = async () => {
         try {
-            const response = await fetch('http://localhost:8080/api/create-account', {
+            const response = await fetch('http://localhost:8080/api/register', {
                 method: 'POST',
                 headers: {  'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
