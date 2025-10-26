@@ -1,6 +1,6 @@
-package edu.wisc.cs506.WeatherKings.weather.controller;
+package edu.wisc.cs506.WeatherKings;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.Test;

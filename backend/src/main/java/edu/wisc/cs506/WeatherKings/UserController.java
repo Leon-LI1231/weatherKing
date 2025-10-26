@@ -15,10 +15,12 @@ public class UserController {
 
     private final UserService userService;
 
+    // Inject UserService through constructor
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
+    // Handle user registration
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         userService.createUser(user);
@@ -26,6 +28,7 @@ public class UserController {
                 .body(Map.of("message", "User registered successfully."));
     }
 
+    // Handle user login
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
         boolean valid = userService.validateUser(request.get("username"), request.get("password"));

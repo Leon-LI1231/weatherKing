@@ -12,34 +12,45 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "users")
 public class User {
+
+    // Primary key
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int uid;
 
+    // Username must be unique and not null
     @Column(nullable = false)
     private String username;
 
+    // Optional email field
     @Column(nullable = true)
     private String email;
 
+    // Hashed password (stored securely)
     @Column(nullable = false)
     private String password;
 
+    // Optional phone number
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    // Default balance
     @Column(name = "balance_usd")
     private Double balanceUsd = 0.00;
 
+    // Account status flag
     @Column(name = "is_disabled")
     private boolean isDisabled = false;
 
+    // Timestamp when account is created
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    // Timestamp for last login
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
+    // Getters and setters
     public int getUid() { return uid; }
     public void setUid(int uid) { this.uid = uid; }
 
@@ -67,3 +78,7 @@ public class User {
     public LocalDateTime getLastLoginAt() { return lastLoginAt; }
     public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
 }
+
+
+
+

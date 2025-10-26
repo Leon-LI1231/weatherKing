@@ -1,4 +1,4 @@
-package edu.wisc.cs506.WeatherKings.weather.service;
+package edu.wisc.cs506.WeatherKings;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import edu.wisc.cs506.WeatherKings.weather.dto.WeatherForecastResponse;
 import edu.wisc.cs506.WeatherKings.weather.dto.WeatherForecastResponse.Period;
+import edu.wisc.cs506.WeatherKings.weather.service.WeatherApiService;
 
 /**
  * Integration tests for WeatherApiService
