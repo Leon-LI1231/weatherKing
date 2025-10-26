@@ -1,31 +1,33 @@
 package edu.wisc.cs506.WeatherKings;
 
-import java.util.Optional;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public String createUser(User user) {
         if (userRepository.existsByUsername(user.getUsername())) {
             return "Username already exists";
         }
 
+        // encode password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         userRepository.save(user);
         return "Account created successfully!";
     }
 
     public boolean validateUser(String username, String rawPassword) {
-        Optional<User> existing = userRepository.findByUsername(username);
-        return existing.isPresent() && passwordEncoder.matches(rawPassword, existing.get().getPassword());
+        return userRepository.findByUsername(username)
+                .map(existing -> passwordEncoder.matches(rawPassword, existing.getPassword()))
+                .orElse(false);
     }
 }
