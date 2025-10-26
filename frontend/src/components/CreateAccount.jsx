@@ -16,6 +16,7 @@ import React from 'react';
 function CreateAccount({ onNavigateToLogin }) {
     // State variables for username and password
     const [username, setUsername] = React.useState('');
+    const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [message, setMessage] = React.useState('');
 
@@ -27,7 +28,7 @@ function CreateAccount({ onNavigateToLogin }) {
             const response = await fetch('http://localhost:8080/api/register', {
                 method: 'POST',
                 headers: {  'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ username, email, password }),
             });
             const text = await response.text();
             setMessage(text);
@@ -66,6 +67,15 @@ function CreateAccount({ onNavigateToLogin }) {
                     style={{ padding: '10px', fontSize: '16px', width: '200px' }}
                 />
             </div> {/* Input field for username */}
+            <div style={{ marginBottom: '10px' }}>
+                <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    style={{ padding: '10px', fontSize: '16px', width: '200px' }}
+                />
+            </div> {/* Input field for email */}
             <div style={{ marginBottom: '10px' }}>
                 <input
                     type="password"
