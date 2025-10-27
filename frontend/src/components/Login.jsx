@@ -1,5 +1,6 @@
 //Login Component
 import React from 'react';
+import logo from '../assets/logo.png';
 
 /**
  * =======================================================
@@ -51,28 +52,84 @@ function Login({ onNavigateToCreateAccount, onSuccessfulLogin }) {
     };
     return (
         <div style={{ textAlign: 'center', marginTop: '50px' }}>
+            {/* WeatherKings Branding */}
+            <h1 style={{ 
+                fontSize: '2.5rem', 
+                fontWeight: 'bold', 
+                color: '#2c3e50', 
+                marginBottom: '20px' 
+            }}>
+                WeatherKings
+            </h1>
+            <img 
+                src={logo} 
+                alt="WeatherKings Logo" 
+                style={{ 
+                    maxWidth: '200px', 
+                    height: 'auto', 
+                    marginBottom: '30px' 
+                }} 
+            />
+            
             <h2>Login</h2> {/* Heading for the login page */}
-            <div style={{ marginBottom: '10px' }}>
+            <div style={{ marginBottom: '15px' }}>
                 <input
                     type="text"
                     placeholder="Username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
+                    style={{
+                        padding: '12px 16px',
+                        fontSize: '16px',
+                        width: '250px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        outline: 'none'
+                    }}
                 />
             </div>
-            <div style={{ marginBottom: '10px' }}>
+            <div style={{ marginBottom: '20px' }}>
                 <input
                     type="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    style={{
+                        padding: '12px 16px',
+                        fontSize: '16px',
+                        width: '250px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        outline: 'none'
+                    }}
                 />
             </div>
-            <div style={{ marginBottom: '10px' }}>
-                <button onClick={handleLogin}>Login</button>
-            </div>
-            <div>
-                <button onClick={navigateToCreateAccount}>Create Account</button>
+            <div style={{ 
+                display: 'flex', 
+                gap: '15px', 
+                justifyContent: 'center', 
+                marginBottom: '10px' 
+            }}>
+                <button 
+                    onClick={handleLogin}
+                    style={{
+                        padding: '10px 20px',
+                        fontSize: '16px',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Login
+                </button>
+                <button 
+                    onClick={navigateToCreateAccount}
+                    style={{
+                        padding: '10px 20px',
+                        fontSize: '16px',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Create Account
+                </button>
             </div>
             {message && <p>{message}</p>}
         </div>
