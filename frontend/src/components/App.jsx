@@ -1,10 +1,10 @@
-// src/App.jsx
 import React, { useState } from "react";
 import Login from "./Login";
 import CreateAccount from "./CreateAccount";
 import LandingPage from "./LandingPage";
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import UserInfoHeader from "./UserInfoHeader";
 
 /**
  * =======================================================
@@ -36,8 +36,13 @@ function App() {
   switch (currentPage) {
     case "createAccount":
       return <CreateAccount onNavigateToLogin={navigateToLogin} />;
-    case "landing":
-      return <LandingPage user={user} onLogout={logout} />;
+      case "landing":
+        return (
+          <>
+            <UserInfoHeader username={user?.username} balance={152.37} />
+            <LandingPage user={user} onLogout={logout} />
+          </>
+        );
     case "login":
     default:
       return (

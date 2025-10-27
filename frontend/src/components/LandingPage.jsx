@@ -3,6 +3,8 @@ import { Container, Row, Col, Button, Badge } from "react-bootstrap";
 import CitySelector from "./CitySelector";
 import BetListTable from "./BetListTable";
 import "bootstrap/dist/css/bootstrap.min.css";
+import UserInfoHeader from "./UserInfoHeader";
+import BetFilters from "./BetFilters";
 
 /**
  * =======================================================
@@ -32,6 +34,12 @@ function LandingPage({ user, onLogout }) {
 
   // Bets fetched or mocked
   const [betsByCity, setBetsByCity] = useState({});
+
+  // For filter
+  const [search, setSearch] = useState("");
+  const [selectedType, setSelectedType] = useState("All");
+  const [minFee, setMinFee] = useState("Free");
+  const [maxFee, setMaxFee] = useState("100");
 
   // TODO: Replace with API call to fetch user balance
   useEffect(() => {
@@ -95,22 +103,24 @@ function LandingPage({ user, onLogout }) {
     setBetsByCity(mockData);
   }, []);
 
+  const filteredBets = (betsByCity[selectedCity] || [])
+    .filter((bet) =>
+      bet.title.toLowerCase().includes(search.toLowerCase())
+    )
+    .filter((bet) =>
+      selectedType === "All" ? true : bet.bet_type.toUpperCase() === selectedType
+    )
+    .filter((bet) => {
+      const min = minFee === "Free" ? 0 : parseFloat(minFee);
+      const max = maxFee === "Free" ? 0 : parseFloat(maxFee);
+      return bet.entry_fee >= min && bet.entry_fee <= max;
+    });
+
+  
+
   return (
-    <Container style={{ marginTop: "40px", textAlign: "center" }}>
-      {/* ===== User Info Section ===== */}
-      <Row className="mb-4">
-        <Col>
-          <h2>Welcome{user ? `, ${user.username}` : ""}!</h2>
-          <p>
-            <Badge bg="info" text="dark" style={{ fontSize: "1rem" }}>
-               Balance: ${userBalance.toFixed(2)}
-            </Badge>
-          </p>
-          <Button variant="outline-danger" onClick={onLogout}>
-            Logout
-          </Button>
-        </Col>
-      </Row>
+    <Container style={{ marginTop: "140px", textAlign: "center" }}>
+      
 
       {/* ===== City Selector ===== */}
       <Row className="mb-4">
@@ -127,19 +137,34 @@ function LandingPage({ user, onLogout }) {
         </Col>
       </Row>
 
-      {/* ===== Bets Table ===== */}
+      {/* ===== Bets Table and Filter ===== */}
       {selectedCity ? (
         <Row>
-          <Col>
-            <h4 className="mb-3">
+          {/* Filter */}
+          <Col md={3}>
+            <BetFilters
+              search={search}
+              setSearch={setSearch}
+              selectedType={selectedType}
+              setSelectedType={setSelectedType}
+              minFee={minFee}
+              setMinFee={setMinFee}
+              maxFee={maxFee}
+              setMaxFee={setMaxFee}
+            />
+          </Col>
+
+          {/* Bets Table */}
+          <Col md={9}>
+            <h4 className="mb-3 text-center">
               Bets in {selectedCity.charAt(0).toUpperCase() + selectedCity.slice(1)}
             </h4>
-            <BetListTable bets={betsByCity[selectedCity] || []} />
+            <BetListTable bets={filteredBets} />
           </Col>
         </Row>
       ) : (
         <Row>
-          <Col>
+          <Col className="text-center">
             <p className="text-muted">Select a city to view available bets.</p>
           </Col>
         </Row>
