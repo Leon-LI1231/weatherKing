@@ -1,0 +1,13 @@
+stages: [lint]
+
+frontend:lint:
+  stage: lint
+  image: node:20-alpine
+  script:
+    - cd frontend
+    # 用独立的 ESLint 8 运行器（不依赖 package.json 的 scripts）
+    - npx -y eslint@8.57.0 "src/**/*.{js,jsx}" --max-warnings=0
+  rules:
+    # 任何分支/MR 都跑；需要只在 MR 跑可改为 merge_request_event
+    - if: '$CI_COMMIT_BRANCH'
+
