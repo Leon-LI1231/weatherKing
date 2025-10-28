@@ -46,13 +46,19 @@ DROP TABLE IF EXISTS `bets`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `bets` (
   `bet_id` int NOT NULL AUTO_INCREMENT,
-  `bet_type` enum('a','b','c') DEFAULT NULL,
-  `set_line` decimal(12,1) DEFAULT NULL,
+  `city_name` varchar(50) NOT NULL, -- e.g., 'Madison, WI'
+  `bet_date` date NOT NULL,          -- Date the weather event applies to
+  `bet_description` varchar(255) NOT NULL, -- e.g., 'Over 45°F Max Temperature'
+  `bet_type` varchar(50) NOT NULL,    -- e.g., 'MAX_TEMP_OVER_UNDER', 'RAIN_YES_NO'
+  `set_line` decimal(12,1) DEFAULT NULL, -- The target value (e.g., 45.0 for temperature)
+  `moneyline_odds` decimal(12,2) DEFAULT NULL, -- NEW: American Odds for the bet line (+100, -110, etc)
+  `outcome_value` decimal(12,2) DEFAULT NULL, -- The actual result (e.g., 47.0 when resolved)
   `total_amount_bet` decimal(12,2) NOT NULL DEFAULT '0.00',
-  `bet_hit` tinyint(1) NOT NULL DEFAULT '0',
+  `bet_hit` tinyint(1) DEFAULT NULL COMMENT '1=Hit (Resolved Win), 0=Miss (Resolved Loss), NULL=Pending',
   `bet_start` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `bet_close` datetime DEFAULT NULL,
-  PRIMARY KEY (`bet_id`)
+  PRIMARY KEY (`bet_id`),
+  UNIQUE KEY `unique_bet_per_day` (`city_name`, `bet_date`, `bet_type`) -- Prevents duplicate bet lines
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
