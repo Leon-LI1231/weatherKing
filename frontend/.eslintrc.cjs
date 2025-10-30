@@ -17,22 +17,17 @@ module.exports = {
   ignorePatterns: ["node_modules/", "build/", "dist/", ".next/", "out/"],
 
   rules: {
-    "react/react-in-jsx-scope": "off",
-    // 先临时关闭，等你们决定是否用 PropTypes 或 TS 再打开
+    "react/react-in-jsx-scope": "off", // Disable React import requirement for JSX (CRA handles it)
+    // Temporarily disable PropTypes rule until deciding to use PropTypes or TypeScript
     "react/prop-types": "off"
   },
 
-  // 对测试文件启用 Jest 环境，修复 no-undef
+  // Enable Jest environment for test files to fix "no-undef" errors
   overrides: [
     {
       files: ["src/tests/**/*.{js,jsx}"],
       env: { jest: true }
-      // 如仍有个别 no-undef，可再加：
-      // , rules: { "no-undef": "off" }
     }
   ]
 };
-
-
-
 
