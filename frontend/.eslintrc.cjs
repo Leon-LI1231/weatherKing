@@ -25,7 +25,12 @@ module.exports = {
   // Enable Jest environment for test files to fix "no-undef" errors，This prevents ESLint from flagging Jest globals (e.g., describe, test, expect) as undefined.
   overrides: [
     {
-      files: ["src/tests/**/*.{js,jsx}"],
+      files: [
+        "src/tests/**/*.{js,jsx}",
+        "src/**/*.test.{js,jsx}",
+        "src/**/*.spec.{js,jsx}",
+        "src/setupTests.js"    
+      ],
       env: { jest: true }
     }
   ]
