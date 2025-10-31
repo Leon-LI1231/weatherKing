@@ -12,19 +12,25 @@ import Login from '../components/Login';
  * Test Cases:
  * -----------
  * 
- * 1. Form Rendering Tests:
- *    ✓ form elements are rendered correctly
+ * 1. Branding Tests:
+ *    ✓ WeatherKings title and logo are rendered correctly
  * 
- * 2. Input Interaction Tests:
- *    ✓ input fields accept user input
+ * 2. Form Rendering Tests:
+ *    ✓ form elements are rendered correctly with enhanced styling
  * 
- * 3. Form Submission Tests:
+ * 3. Input Interaction Tests:
+ *    ✓ input fields accept user input and have proper styling
+ * 
+ * 4. Form Submission Tests:
  *    ✓ successful login redirects to dashboard
  *    ✓ login with incorrect credentials displays error message
  *    ✓ login with empty fields is prevented
  * 
- * 4. Navigation Tests:
+ * 5. Navigation Tests:
  *    ✓ clicking "Create Account" redirects to CreateAccount component
+ * 
+ * 6. Layout Tests:
+ *    ✓ buttons are arranged side by side properly
  * 
  *  Run all tests: npm test
  *  Run Login.test.jsx only: npm test -- Login.test.jsx
@@ -34,9 +40,13 @@ import Login from '../components/Login';
 
 // Mock fetch globally
 global.fetch = jest.fn();
+
 // Mock window.location.href
 delete window.location;
 window.location = { href: '' };
+
+// Mock the logo import
+jest.mock('../assets/logo.png', () => 'test-logo.png');
 
 describe('Login Component Tests', () => {
     let mockOnNavigateToCreateAccount, mockOnSuccessfulLogin;
@@ -50,30 +60,67 @@ describe('Login Component Tests', () => {
         mockOnNavigateToCreateAccount = jest.fn();
         mockOnSuccessfulLogin = jest.fn();
     });
-    test('form elements are rendered correctly', () => {
+    // Branding Tests
+    test('WeatherKings title and logo are rendered correctly', () => {
         render(<Login onNavigateToCreateAccount={mockOnNavigateToCreateAccount} onSuccessfulLogin={mockOnSuccessfulLogin} />);
-        // Check for heading
-        expect(screen.getByRole('heading', { name: /Login/i })).toBeInTheDocument();
-        // Check for username input
-        expect(screen.getByPlaceholderText('Username')).toBeInTheDocument();
-        // Check for password input
-        expect(screen.getByPlaceholderText('Password')).toBeInTheDocument();
+        
+        // Check for WeatherKings title
+        expect(screen.getByRole('heading', { name: /WeatherKings/i })).toBeInTheDocument();
+        
+        // Check for logo image
+        const logoImage = screen.getByAltText('WeatherKings Logo');
+        expect(logoImage).toBeInTheDocument();
+        expect(logoImage).toHaveAttribute('src', 'test-logo.png');
+    });
+
+    test('form elements are rendered correctly with enhanced styling', () => {
+        render(<Login onNavigateToCreateAccount={mockOnNavigateToCreateAccount} onSuccessfulLogin={mockOnSuccessfulLogin} />);
+        
+        // Check for login heading (h2)
+        expect(screen.getByRole('heading', { name: /^Login$/i })).toBeInTheDocument();
+        
+        // Check for username input with enhanced styling
+        const usernameInput = screen.getByPlaceholderText('Username');
+        expect(usernameInput).toBeInTheDocument();
+        expect(usernameInput).toHaveStyle({ width: '250px' });
+        
+        // Check for password input with enhanced styling
+        const passwordInput = screen.getByPlaceholderText('Password');
+        expect(passwordInput).toBeInTheDocument();
+        expect(passwordInput).toHaveStyle({ width: '250px' });
+        
         // Check for login button
         expect(screen.getByRole('button', { name: /Login/i })).toBeInTheDocument();
+        
         // Check for create account button
         expect(screen.getByRole('button', { name: /Create Account/i })).toBeInTheDocument();
     });
 
-    test('input fields accept user input', () => {
+    test('input fields accept user input and have proper styling', () => {
         render(<Login onNavigateToCreateAccount={mockOnNavigateToCreateAccount} onSuccessfulLogin={mockOnSuccessfulLogin} />);
+        
         const usernameInput = screen.getByPlaceholderText('Username');
         const passwordInput = screen.getByPlaceholderText('Password');
+        
         // Simulate user typing in username
         fireEvent.change(usernameInput, { target: { value: 'testuser' } });
         expect(usernameInput.value).toBe('testuser');
+        
         // Simulate user typing in password
         fireEvent.change(passwordInput, { target: { value: 'password123' } });
         expect(passwordInput.value).toBe('password123');
+        
+        // Check enhanced input styling
+        expect(usernameInput).toHaveStyle({
+            padding: '12px 16px',
+            fontSize: '16px',
+            width: '250px'
+        });
+        expect(passwordInput).toHaveStyle({
+            padding: '12px 16px',
+            fontSize: '16px', 
+            width: '250px'
+        });
     });
 
     test('successful login redirects to dashboard', async () => {
@@ -131,5 +178,34 @@ describe('Login Component Tests', () => {
         fireEvent.click(createAccountButton);
         // Check for navigation callback
         expect(mockOnNavigateToCreateAccount).toHaveBeenCalled();
+    });
+
+    // Layout Tests
+    test('buttons are arranged side by side properly', () => {
+        render(<Login onNavigateToCreateAccount={mockOnNavigateToCreateAccount} onSuccessfulLogin={mockOnSuccessfulLogin} />);
+        
+        const loginButton = screen.getByRole('button', { name: /Login/i });
+        const createAccountButton = screen.getByRole('button', { name: /Create Account/i });
+        
+        // Check that both buttons exist
+        expect(loginButton).toBeInTheDocument();
+        expect(createAccountButton).toBeInTheDocument();
+        
+        // Check that buttons have proper styling for side-by-side layout
+        expect(loginButton).toHaveStyle({
+            padding: '10px 20px',
+            fontSize: '16px'
+        });
+        expect(createAccountButton).toHaveStyle({
+            padding: '10px 20px',
+            fontSize: '16px'
+        });
+        
+        // Check that the button container has flexbox styling
+        const buttonContainer = loginButton.parentElement;
+        expect(buttonContainer).toHaveStyle({
+            display: 'flex',
+            justifyContent: 'center'
+        });
     });
 });
