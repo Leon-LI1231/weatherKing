@@ -2,12 +2,19 @@
 # Runs linting, testing, and building for the frontend/ directory only
 # Requires a GitLab runner tagged "dind" (UW–Madison runner)
 
+#define the three stages for the ci pipeline
 stages:
   - lint
   - unit_test
   - build
 
-cache:                              # Speeds up installs by caching dependencies
+# This section speeds up the CI pipeline by caching dependencies.
+# - Caches the frontend/node_modules directory so npm install runs faster.
+# - The cache key combines the project and branch name, giving each branch its own cache.
+# - policy: pull-push means it first pulls an existing cache (if any),
+#   then updates it after the job completes.
+# This greatly reduces repeated downloads and improves overall pipeline efficiency.
+cache:                              
   key: ${CI_PROJECT_PATH_SLUG}-${CI_COMMIT_REF_SLUG}
   paths:
     - frontend/node_modules/
@@ -16,10 +23,14 @@ cache:                              # Speeds up installs by caching dependencies
 ######################
 # 1) Lint
 ######################
+# This stage performs code-quality and style checks on the frontend.
+# It runs ESLint to detect syntax or logic issues and Prettier to verify formatting consistency.
+# The .eslintcache file is stored for faster linting next time.
+# The job only runs when files under frontend/ change.
 lint_frontend:
   stage: lint                       # Lint stage
   image: node:20                    # Use Node 20 image
-  tags: [dind]
+  tags: [dind]                      #use the runner with tags dind, uwmadison gitlab runner
   before_script:
     - cd frontend
     - npm ci                        # Clean install dependencies
@@ -37,6 +48,10 @@ lint_frontend:
 ######################
 # 2) Unit Tests
 ######################
+# This stage runs Jest unit tests for the frontend.
+# It installs dependencies, runs tests in CI mode, and generates a Cobertura coverage report.
+# GitLab parses the report to display total test coverage.
+# The job only runs when frontend code changes occur.
 unit_test_frontend:
   stage: unit_test                  # Unit test stage
   image: node:20
@@ -57,9 +72,16 @@ unit_test_frontend:
   rules:
     - changes: [frontend/**]
 
+
 ######################
 # 3) Build (main only)
 ######################
+# This stage verifies that the frontend can successfully compile and build.
+# It runs `npm run build` inside the frontend/ directory using Node 20,
+# ensuring there are no missing dependencies or configuration errors.
+# The build output (.next/ or dist/) is saved as artifacts for one week.
+# This job only runs on the main branch when frontend code changes occur.
+# This doesnt test deployment since we haven't started deployment, just integrity
 build_frontend:
   stage: build                      # Build stage
   image: node:20
