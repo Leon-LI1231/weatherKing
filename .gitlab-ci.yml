@@ -45,6 +45,31 @@ lint_frontend:
   rules:
     - changes: [frontend/**]        # Run only if frontend code changes
 
+lint_backend:
+  stage: lint
+  image: eclipse-temurin:21-jdk
+  tags: [dind]                 # keep if your runner requires this tag
+  before_script:
+    - cd backend
+    - dos2unix ./gradlew || echo "dos2unix not installed, skipping"
+    - chmod +x ./gradlew
+  script:
+    - ./gradlew checkstyleMain
+  artifacts:
+    when: always
+    paths:
+      - backend/build/reports/checkstyle/
+    expire_in: 1 week
+  cache:
+    key: ${CI_PROJECT_PATH_SLUG}-${CI_COMMIT_REF_SLUG}-gradle
+    paths:
+      - backend/.gradle/caches/
+      - backend/.gradle/wrapper/
+    policy: pull-push
+  rules:
+    - changes: [backend/**]     # only run if backend files changed
+
+
 ######################
 # 2) Unit Tests
 ######################
