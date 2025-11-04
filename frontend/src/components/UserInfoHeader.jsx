@@ -26,7 +26,7 @@ import Drawer from "./Drawer";
  */
 
 
-function UserInfoHeader({ username, balance, currentPage, onLogout, onNavigateToCity, onNavigateToLanding }) {
+function UserInfoHeader({ username, balance, currentPage, onLogout, onNavigateToCity, onNavigateToLanding, onNavigateToUser }) {
   // Drawer state
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -45,6 +45,9 @@ function UserInfoHeader({ username, balance, currentPage, onLogout, onNavigateTo
       } else if (['Madison', 'Middleton', 'Chicago'].includes(page)) {
         console.log("Navigating to city:", page);
         onNavigateToCity(page); // Navigate to dedicated city page
+      } else if (page === 'user') {
+        console.log("Navigating to user...")
+        onNavigateToUser && onNavigateToUser();
       }
     } catch (error) {
       console.error("Error in drawer navigation:", error);
