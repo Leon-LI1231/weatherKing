@@ -6,6 +6,7 @@ import CityPage from "./CityPage";
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import UserInfoHeader from "./UserInfoHeader";
+import UserPage from "./UserPage";
 
 /**
  * =======================================================
@@ -38,6 +39,7 @@ function App() {
       console.error("Error navigating to city page:", error);
     }
   };
+  const navigateToUserPage = () => setCurrentPage("user");
   const logout = () => {
     setUser(null);
     setSelectedCity(null);
@@ -58,6 +60,7 @@ function App() {
             onLogout={logout}
             onNavigateToCity={navigateToCityPage}
             onNavigateToLanding={() => navigateToLandingPage(user)}
+            onNavigateToUser={navigateToUserPage}
           />
           <LandingPage 
             user={user} 
@@ -82,6 +85,7 @@ function App() {
             onLogout={logout}
             onNavigateToCity={navigateToCityPage}
             onNavigateToLanding={() => navigateToLandingPage(user)}
+            onNavigateToUser={navigateToUserPage}
           />
           <CityPage
             cityName={selectedCity}
@@ -91,6 +95,21 @@ function App() {
           />
         </>
       );
+      case "user":
+        return (
+          <>
+            <UserInfoHeader
+              username={user?.username}
+              balance={152.37}
+              currentPage="user"
+              onLogout={logout}
+              onNavigateToCity={navigateToCityPage}
+              onNavigateToLanding={() => navigateToLandingPage(user)}
+            />
+            <UserPage user={user} />
+          </>
+        );
+    
     case "login":
     default:
       return (
