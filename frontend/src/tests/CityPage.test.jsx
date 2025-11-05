@@ -35,7 +35,13 @@ import CityPage from '../components/CityPage';
  *   ✓ filter states are managed correctly
  *   ✓ city data is loaded properly
  * 
- * 6. Accessibility Tests:
+ * 6. Dynamic Bet Types Tests:
+ *   ✓ generates correct bet types for each city
+ *   ✓ bet type filtering works with dynamic types
+ *   ✓ resets selected type when switching cities
+ *   ✓ handles empty cities gracefully
+ * 
+ * 7. Accessibility Tests:
  *   ✓ all interactive elements are keyboard accessible
  *   ✓ proper heading structure
  * 
@@ -214,5 +220,89 @@ describe('CityPage Component Tests', () => {
     
     // Should render without crashing
     expect(screen.getByText('Madison Bets')).toBeInTheDocument();
+  });
+
+  // Dynamic bet types functionality tests
+  test('generates dynamic bet types for Madison', () => {
+    render(<CityPage {...mockProps} />);
+    
+    // Madison has weather, sports, and politics bet types
+    expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'weather' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'sports' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'politics' })).toBeInTheDocument();
+    
+    // Should not show local type since Madison doesn't have local bets
+    expect(screen.queryByRole('button', { name: 'local' })).not.toBeInTheDocument();
+  });
+
+  test('generates dynamic bet types for Middleton', () => {
+    const middletonProps = { ...mockProps, cityName: 'Middleton' };
+    render(<CityPage {...middletonProps} />);
+    
+    // Middleton has local and sports bet types
+    expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'local' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'sports' })).toBeInTheDocument();
+    
+    // Should not show weather or politics types
+    expect(screen.queryByRole('button', { name: 'weather' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'politics' })).not.toBeInTheDocument();
+  });
+
+  test('generates dynamic bet types for Chicago', () => {
+    const chicagoProps = { ...mockProps, cityName: 'Chicago' };
+    render(<CityPage {...chicagoProps} />);
+    
+    // Chicago has sports, weather, and local bet types
+    expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'sports' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'weather' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'local' })).toBeInTheDocument();
+    
+    // Should not show politics type
+    expect(screen.queryByRole('button', { name: 'politics' })).not.toBeInTheDocument();
+  });
+
+  test('bet type filtering works with dynamic types', () => {
+    render(<CityPage {...mockProps} />);
+    
+    // Click on sports filter
+    const sportsButton = screen.getByRole('button', { name: 'sports' });
+    fireEvent.click(sportsButton);
+    
+    // Should show sports bet but not weather or politics bets
+    expect(screen.getByText('UW Madison Basketball Game')).toBeInTheDocument();
+    expect(screen.queryByText('Madison Weather Tomorrow')).not.toBeInTheDocument();
+    expect(screen.queryByText('Capitol Construction')).not.toBeInTheDocument();
+  });
+
+  test('resets selected type when switching cities if type not available', async () => {
+    const { rerender } = render(<CityPage {...mockProps} />);
+    
+    // Click on politics filter (available in Madison)
+    const politicsButton = screen.getByRole('button', { name: 'politics' });
+    fireEvent.click(politicsButton);
+    
+    // Switch to Middleton (which doesn't have politics bets)
+    const middletonProps = { ...mockProps, cityName: 'Middleton' };
+    rerender(<CityPage {...middletonProps} />);
+    
+    // Should reset to "All" since politics is not available in Middleton
+    // We can verify this by checking that all Middleton bets are shown
+    expect(screen.getByText('Middleton Farmers Market')).toBeInTheDocument();
+    expect(screen.getByText('Middleton High School Football')).toBeInTheDocument();
+  });
+
+  test('empty city shows only "All" bet type', () => {
+    const emptyCityProps = { ...mockProps, cityName: 'EmptyCity' };
+    render(<CityPage {...emptyCityProps} />);
+    
+    // Should only show "All" button
+    expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'weather' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'sports' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'politics' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'local' })).not.toBeInTheDocument();
   });
 });

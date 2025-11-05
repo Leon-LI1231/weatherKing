@@ -10,7 +10,7 @@ import BetFilters from '../components/BetFilters';
  * =======================================================
  * 
  * Comprehensive test suite covering all BetFilters component functionality.
- * Tests: 13/13 passing (100% coverage)
+ * Tests: 16/16 passing (100% coverage)
  * 
  * Test Categories:
  * ---------------
@@ -44,12 +44,13 @@ import BetFilters from '../components/BetFilters';
  * Component Coverage:
  * ------------------
  * • Search input functionality (text entry, clearing, special chars)
- * • Contest type buttons (All, A, B, C, D, E) with visual states
+ * • Dynamic contest type buttons (All + bet types from available data) with visual states
  * • Min/Max fee dropdowns (Free, 1, 2, 3, 5, 10, 20, 40, 60, 100)
- * • Props validation (search, setSearch, selectedType, setSelectedType, minFee, setMinFee, maxFee, setMaxFee)
+ * • Props validation (search, setSearch, selectedType, setSelectedType, minFee, setMinFee, maxFee, setMaxFee, availableBetTypes)
  * • Component structure and styling
  * • Keyboard accessibility
  * • Multiple simultaneous interactions
+ * • Dynamic bet types handling
  *
  * Run Commands:
  * ------------
@@ -74,7 +75,8 @@ describe('BetFilters Component Tests', () => {
     minFee: 'Free',
     setMinFee: mockSetMinFee,
     maxFee: '100',
-    setMaxFee: mockSetMaxFee
+    setMaxFee: mockSetMaxFee,
+    availableBetTypes: ['All', 'weather', 'sports', 'politics', 'local']
   };
 
   beforeEach(() => {
@@ -91,20 +93,19 @@ describe('BetFilters Component Tests', () => {
     
     // Check that all contest type buttons are present
     expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'A' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'B' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'C' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'D' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'E' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'weather' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'sports' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'politics' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'local' })).toBeInTheDocument();
   });
 
   // Interaction Tests
   test('clicking on a filter button updates the active filter', () => {
     render(<BetFilters {...defaultProps} />);
     
-    const typeAButton = screen.getByRole('button', { name: 'A' });
-    fireEvent.click(typeAButton);
-    expect(mockSetSelectedType).toHaveBeenCalledWith('A');
+    const sportsButton = screen.getByRole('button', { name: 'sports' });
+    fireEvent.click(sportsButton);
+    expect(mockSetSelectedType).toHaveBeenCalledWith('sports');
   });
 
   // Integration Tests
@@ -117,8 +118,8 @@ describe('BetFilters Component Tests', () => {
     expect(mockSetSearch).toHaveBeenCalledWith('test search');
     
     // Test type selection
-    fireEvent.click(screen.getByRole('button', { name: 'B' }));
-    expect(mockSetSelectedType).toHaveBeenCalledWith('B');
+    fireEvent.click(screen.getByRole('button', { name: 'weather' }));
+    expect(mockSetSelectedType).toHaveBeenCalledWith('weather');
   });
 
   // Accessibility Tests
@@ -181,13 +182,13 @@ describe('BetFilters Component Tests', () => {
   test('selected contest type button has correct styling', () => {
     const propsWithSelection = {
       ...defaultProps,
-      selectedType: 'A'
+      selectedType: 'sports'
     };
     
     render(<BetFilters {...propsWithSelection} />);
     
-    const selectedButton = screen.getByRole('button', { name: 'A' });
-    const unselectedButton = screen.getByRole('button', { name: 'B' });
+    const selectedButton = screen.getByRole('button', { name: 'sports' });
+    const unselectedButton = screen.getByRole('button', { name: 'weather' });
     
     // Selected button should have warning variant class
     expect(selectedButton).toHaveClass('btn-warning');
@@ -221,18 +222,19 @@ describe('BetFilters Component Tests', () => {
     const customProps = {
       search: 'initial search',
       setSearch: mockSetSearch,
-      selectedType: 'C',
+      selectedType: 'weather',
       setSelectedType: mockSetSelectedType,
       minFee: '10',
       setMinFee: mockSetMinFee,
       maxFee: '50',
-      setMaxFee: mockSetMaxFee
+      setMaxFee: mockSetMaxFee,
+      availableBetTypes: ['All', 'weather', 'sports', 'politics', 'local']
     };
     
     render(<BetFilters {...customProps} />);
     
     expect(screen.getByDisplayValue('initial search')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'C' })).toHaveClass('btn-warning');
+    expect(screen.getByRole('button', { name: 'weather' })).toHaveClass('btn-warning');
     
     // For now, let's just test that the component renders without checking exact values
     // since the select values might be controlled differently
@@ -249,7 +251,7 @@ describe('BetFilters Component Tests', () => {
     fireEvent.change(searchInput, { target: { value: 'weather' } });
     
     // Change type
-    fireEvent.click(screen.getByRole('button', { name: 'D' }));
+    fireEvent.click(screen.getByRole('button', { name: 'sports' }));
     
     // Change fees
     const selects = screen.getAllByRole('combobox');
@@ -258,7 +260,7 @@ describe('BetFilters Component Tests', () => {
     
     // Verify all functions were called
     expect(mockSetSearch).toHaveBeenCalledWith('weather');
-    expect(mockSetSelectedType).toHaveBeenCalledWith('D');
+    expect(mockSetSelectedType).toHaveBeenCalledWith('sports');
     expect(mockSetMinFee).toHaveBeenCalledWith('5');
     expect(mockSetMaxFee).toHaveBeenCalledWith('20');
   });
@@ -277,5 +279,56 @@ describe('BetFilters Component Tests', () => {
     // Check that there are exactly 2 select dropdowns
     const selects = screen.getAllByRole('combobox');
     expect(selects).toHaveLength(2);
+  });
+
+  // Dynamic bet types tests
+  test('renders dynamic bet types correctly', () => {
+    const customProps = {
+      ...defaultProps,
+      availableBetTypes: ['All', 'weather', 'sports']
+    };
+    
+    render(<BetFilters {...customProps} />);
+    
+    // Should only show the available types
+    expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'weather' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'sports' })).toBeInTheDocument();
+    
+    // Should not show types that aren't available
+    expect(screen.queryByRole('button', { name: 'politics' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'local' })).not.toBeInTheDocument();
+  });
+
+  test('handles empty bet types gracefully', () => {
+    const propsWithEmptyTypes = {
+      ...defaultProps,
+      availableBetTypes: ['All']
+    };
+    
+    render(<BetFilters {...propsWithEmptyTypes} />);
+    
+    // Should only show All button
+    expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'weather' })).not.toBeInTheDocument();
+  });
+
+  test('handles missing availableBetTypes prop gracefully', () => {
+    const propsWithoutBetTypes = {
+      search: '',
+      setSearch: mockSetSearch,
+      selectedType: 'All',
+      setSelectedType: mockSetSelectedType,
+      minFee: 'Free',
+      setMinFee: mockSetMinFee,
+      maxFee: '100',
+      setMaxFee: mockSetMaxFee
+      // No availableBetTypes prop
+    };
+    
+    render(<BetFilters {...propsWithoutBetTypes} />);
+    
+    // Should render with just "All" button as fallback
+    expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
   });
 });

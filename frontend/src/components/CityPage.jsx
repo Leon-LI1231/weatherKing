@@ -34,6 +34,9 @@ function CityPage({ cityName, user, onNavigateBack, onLogout }) {
   // Bets for this city
   const [bets, setBets] = useState([]);
 
+  // Dynamic bet types based on available bets
+  const availableBetTypes = ['All', ...new Set(bets.map(bet => bet.bet_type))];
+
   // Mock data for bets - TODO: Replace with API call
   useEffect(() => {
     const mockBetsByCity = {
@@ -128,13 +131,20 @@ function CityPage({ cityName, user, onNavigateBack, onLogout }) {
     setBets(mockBetsByCity[cityName.toLowerCase()] || []);
   }, [cityName]);
 
+  // Reset selected type if it's not available in current bet types
+  useEffect(() => {
+    if (selectedType !== "All" && !availableBetTypes.includes(selectedType)) {
+      setSelectedType("All");
+    }
+  }, [availableBetTypes, selectedType, setSelectedType]);
+
   // Filter bets based on search and filters
   const filteredBets = bets
     .filter((bet) =>
       bet.title.toLowerCase().includes(search.toLowerCase())
     )
     .filter((bet) =>
-      selectedType === "All" ? true : bet.bet_type.toUpperCase() === selectedType
+      selectedType === "All" ? true : bet.bet_type === selectedType
     )
     .filter((bet) => {
       const min = minFee === "Free" ? 0 : parseFloat(minFee);
@@ -183,6 +193,7 @@ function CityPage({ cityName, user, onNavigateBack, onLogout }) {
               setMinFee={setMinFee}
               maxFee={maxFee}
               setMaxFee={setMaxFee}
+              availableBetTypes={availableBetTypes}
             />
           </Col>
 
