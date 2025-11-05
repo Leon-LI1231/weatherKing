@@ -9,7 +9,7 @@ import { Form, Button } from "react-bootstrap";
  * This component provides search and filtering controls for the list of bets.
  * It allows users to:
  *   - Search bets by contest title
- *   - Filter by contest type (A, B, C, D, E)
+ *   - Filter by contest type (dynamically based on available types)
  *   - Filter by entry fee range (Free, 1, 2, 3, 5, 10, 20, 40, 60, 100)
  *
  * All filters are handled client-side for responsiveness and simplicity.
@@ -24,11 +24,12 @@ import { Form, Button } from "react-bootstrap";
  *   - setMinFee: function to update minimum fee
  *   - maxFee: maximum entry fee filter
  *   - setMaxFee: function to update maximum fee
+ *   - availableBetTypes: array of available bet types for this city
  */
 
 
-function BetFilters({ search, setSearch, selectedType, setSelectedType, minFee, setMinFee, maxFee, setMaxFee }) {
-  const betTypes = ["All", "A", "B", "C", "D", "E"];
+function BetFilters({ search, setSearch, selectedType, setSelectedType, minFee, setMinFee, maxFee, setMaxFee, availableBetTypes }) {
+  const betTypes = availableBetTypes || ["All"];
   const entryFees = ["Free", 1, 2, 3, 5, 10, 20, 40, 60, 100];
 
   return (
