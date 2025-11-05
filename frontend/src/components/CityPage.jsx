@@ -25,11 +25,33 @@ import "bootstrap/dist/css/bootstrap.min.css";
  */
 
 function CityPage({ cityName, user, onNavigateBack, onLogout }) {
-  // Filter states
-  const [search, setSearch] = useState("");
-  const [selectedType, setSelectedType] = useState("All");
-  const [minFee, setMinFee] = useState("Free");
-  const [maxFee, setMaxFee] = useState("100");
+  // Helper functions for filter state persistence
+  const getStoredFilters = (city) => {
+    try {
+      const key = `betAppFilters_${city.toLowerCase()}`;
+      const storedFilters = localStorage.getItem(key);
+      return storedFilters ? JSON.parse(storedFilters) : null;
+    } catch (error) {
+      console.error('Error parsing stored filters:', error);
+      return null;
+    }
+  };
+
+  const saveFiltersToStorage = (city, filters) => {
+    try {
+      const key = `betAppFilters_${city.toLowerCase()}`;
+      localStorage.setItem(key, JSON.stringify(filters));
+    } catch (error) {
+      console.error('Error saving filters to localStorage:', error);
+    }
+  };
+
+  // Initialize filter states from localStorage or defaults
+  const storedFilters = getStoredFilters(cityName);
+  const [search, setSearch] = useState(storedFilters?.search || "");
+  const [selectedType, setSelectedType] = useState(storedFilters?.selectedType || "All");
+  const [minFee, setMinFee] = useState(storedFilters?.minFee || "Free");
+  const [maxFee, setMaxFee] = useState(storedFilters?.maxFee || "100");
 
   // Bets for this city
   const [bets, setBets] = useState([]);
@@ -137,6 +159,35 @@ function CityPage({ cityName, user, onNavigateBack, onLogout }) {
       setSelectedType("All");
     }
   }, [availableBetTypes, selectedType, setSelectedType]);
+
+  // Save filter states to localStorage when they change
+  useEffect(() => {
+    const filters = {
+      search,
+      selectedType,
+      minFee,
+      maxFee,
+      timestamp: new Date().toISOString()
+    };
+    saveFiltersToStorage(cityName, filters);
+  }, [search, selectedType, minFee, maxFee, cityName]);
+
+  // Reset filters when city changes, but try to restore from storage first
+  useEffect(() => {
+    const storedFilters = getStoredFilters(cityName);
+    if (storedFilters) {
+      setSearch(storedFilters.search || "");
+      setSelectedType(storedFilters.selectedType || "All");
+      setMinFee(storedFilters.minFee || "Free");
+      setMaxFee(storedFilters.maxFee || "100");
+    } else {
+      // Reset to defaults if no stored filters
+      setSearch("");
+      setSelectedType("All");
+      setMinFee("Free");
+      setMaxFee("100");
+    }
+  }, [cityName]);
 
   // Filter bets based on search and filters
   const filteredBets = bets

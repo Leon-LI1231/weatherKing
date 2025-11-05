@@ -41,7 +41,15 @@ import CityPage from '../components/CityPage';
  *   ✓ resets selected type when switching cities
  *   ✓ handles empty cities gracefully
  * 
- * 7. Accessibility Tests:
+ * 7. Filter State Persistence Tests:
+ *   ✓ saves filter state to localStorage when filters change
+ *   ✓ restores filter state from localStorage on mount
+ *   ✓ resets filters when switching to different city
+ *   ✓ handles malformed filter localStorage data gracefully
+ *   ✓ maintains separate filter states for different cities
+ *   ✓ preserves filter state through multiple filter changes
+ * 
+ * 8. Accessibility Tests:
  *   ✓ all interactive elements are keyboard accessible
  *   ✓ proper heading structure
  * 
@@ -61,6 +69,26 @@ describe('CityPage Component Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    
+    // Mock console.error to suppress expected error messages during tests
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+    // Clear localStorage before each test
+    localStorage.clear();
+    
+    // Mock localStorage
+    const localStorageMock = {
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+      clear: jest.fn()
+    };
+    Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+  });
+
+  afterEach(() => {
+    // Restore console.error after each test
+    console.error.mockRestore();
   });
 
   // Rendering Tests
@@ -304,5 +332,139 @@ describe('CityPage Component Tests', () => {
     expect(screen.queryByRole('button', { name: 'sports' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'politics' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'local' })).not.toBeInTheDocument();
+  });
+
+  // Filter State Persistence Tests
+  test('saves filter state to localStorage when filters change', () => {
+    render(<CityPage {...mockProps} />);
+    
+    // Change search filter
+    const searchInput = screen.getByDisplayValue('');
+    fireEvent.change(searchInput, { target: { value: 'weather' } });
+    
+    // Check that localStorage.setItem was called with filter data
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      'betAppFilters_madison',
+      expect.stringContaining('"search":"weather"')
+    );
+  });
+
+  test('restores filter state from localStorage on mount', () => {
+    // Mock stored filter state
+    const storedFilters = {
+      search: 'basketball',
+      selectedType: 'sports',
+      minFee: '5',
+      maxFee: '20',
+      timestamp: new Date().toISOString()
+    };
+    
+    localStorage.getItem.mockReturnValue(JSON.stringify(storedFilters));
+    
+    render(<CityPage {...mockProps} />);
+    
+    // Should restore the search value
+    expect(screen.getByDisplayValue('basketball')).toBeInTheDocument();
+    
+    // Should restore the selected type (sports button should be active)
+    expect(screen.getByRole('button', { name: 'sports' })).toHaveClass('btn-warning');
+  });
+
+  test('resets filters when switching to different city', () => {
+    // Mock stored filters for Madison
+    const madisonFilters = {
+      search: 'weather',
+      selectedType: 'weather',
+      minFee: '5',
+      maxFee: '20',
+      timestamp: new Date().toISOString()
+    };
+    
+    localStorage.getItem.mockReturnValue(JSON.stringify(madisonFilters));
+    
+    const { rerender } = render(<CityPage {...mockProps} />);
+    
+    // Should restore Madison filters
+    expect(screen.getByDisplayValue('weather')).toBeInTheDocument();
+    
+    // Mock no stored filters for Chicago
+    localStorage.getItem.mockReturnValue(null);
+    
+    // Switch to Chicago
+    const chicagoProps = { ...mockProps, cityName: 'Chicago' };
+    rerender(<CityPage {...chicagoProps} />);
+    
+    // Should reset to default values
+    expect(screen.getByDisplayValue('')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'All' })).toHaveClass('btn-warning');
+  });
+
+  test('handles malformed filter localStorage data gracefully', () => {
+    // Mock console.error to suppress expected error messages
+    const originalConsoleError = console.error;
+    console.error = jest.fn();
+    
+    // Mock malformed JSON
+    localStorage.getItem.mockReturnValue('invalid json data');
+    
+    render(<CityPage {...mockProps} />);
+    
+    // Should use default filter values
+    expect(screen.getByDisplayValue('')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'All' })).toHaveClass('btn-warning');
+    
+    // Verify that error was logged (but we suppressed it from console)
+    expect(console.error).toHaveBeenCalledWith('Error parsing stored filters:', expect.any(SyntaxError));
+    
+    // Restore original console.error
+    console.error = originalConsoleError;
+  });
+
+  test('maintains separate filter states for different cities', () => {
+    const { rerender } = render(<CityPage {...mockProps} />);
+    
+    // Change filters for Madison
+    const searchInput = screen.getByDisplayValue('');
+    fireEvent.change(searchInput, { target: { value: 'madison weather' } });
+    
+    // Should save Madison filters
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      'betAppFilters_madison',
+      expect.stringContaining('"search":"madison weather"')
+    );
+    
+    // Switch to Chicago
+    const chicagoProps = { ...mockProps, cityName: 'Chicago' };
+    rerender(<CityPage {...chicagoProps} />);
+    
+    // Should save Chicago filters separately
+    const chicagoSearchInput = screen.getByDisplayValue('');
+    fireEvent.change(chicagoSearchInput, { target: { value: 'chicago bulls' } });
+    
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      'betAppFilters_chicago',
+      expect.stringContaining('"search":"chicago bulls"')
+    );
+  });
+
+  test('preserves filter state through multiple filter changes', () => {
+    render(<CityPage {...mockProps} />);
+    
+    // Change multiple filters
+    const searchInput = screen.getByDisplayValue('');
+    fireEvent.change(searchInput, { target: { value: 'test search' } });
+    
+    const sportsButton = screen.getByRole('button', { name: 'sports' });
+    fireEvent.click(sportsButton);
+    
+    // Should save updated state with all changes
+    expect(localStorage.setItem).toHaveBeenLastCalledWith(
+      'betAppFilters_madison',
+      expect.stringContaining('"search":"test search"')
+    );
+    expect(localStorage.setItem).toHaveBeenLastCalledWith(
+      'betAppFilters_madison',
+      expect.stringContaining('"selectedType":"sports"')
+    );
   });
 });
