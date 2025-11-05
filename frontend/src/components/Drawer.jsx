@@ -37,11 +37,11 @@ function Drawer({ show, onClose, currentPage, onNavigate }) {
           <Nav.Link eventKey="Madison" onClick={() => onNavigate && onNavigate('Madison')}>
             Madison
           </Nav.Link>
-          <Nav.Link eventKey="Middleton" onClick={() => onNavigate && onNavigate('Middleton')}>
-            Middleton
+          <Nav.Link eventKey="Los Angeles" onClick={() => onNavigate && onNavigate('Los Angeles')}>
+            Los Angeles
           </Nav.Link>
-          <Nav.Link eventKey="Chicago" onClick={() => onNavigate && onNavigate('Chicago')}>
-            Chicago
+          <Nav.Link eventKey="New York City" onClick={() => onNavigate && onNavigate('New York City')}>
+            New York City
           </Nav.Link>
           <Nav.Link 
             eventKey="logout" 

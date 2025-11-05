@@ -29,6 +29,7 @@ import { Form, Button } from "react-bootstrap";
 
 
 function BetFilters({ search, setSearch, selectedType, setSelectedType, minFee, setMinFee, maxFee, setMaxFee, availableBetTypes }) {
+
   const betTypes = availableBetTypes || ["All"];
   const entryFees = ["Free", 1, 2, 3, 5, 10, 20, 40, 60, 100];
 

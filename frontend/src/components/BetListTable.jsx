@@ -37,32 +37,29 @@ function BetListTable({ bets }) {
           }}
         >
           <tr>
-            <th>Contest</th>
+            <th>Description</th>
             <th>Type</th>
-            <th>Entry Fee</th>
-            <th>Total Pool</th>
-            <th>Entries</th>
+            <th>Line</th>
+            <th>Odds</th>
+            <th>Total Bet</th>
             <th>Start</th>
-            <th></th>
+            <th>Close</th>
+            <th>Action</th>
           </tr>
         </thead>
+
         <tbody>
           {bets.map((bet) => (
-            <tr key={bet.id}>
+            <tr key={bet.betId}>
+              <td>{bet.betDescription}</td>
               <td>
-                <strong>{bet.title}</strong>
-                <br />
-                <small className="text-muted">{bet.description}</small>
+                <Badge bg="secondary">{bet.betType}</Badge>
               </td>
-              <td>
-                <Badge bg="secondary">{bet.bet_type.toUpperCase()}</Badge>
-              </td>
-              <td>${bet.entry_fee.toFixed(2)}</td>
-              <td className="text-success fw-bold">
-                ${bet.total_amount_bet.toLocaleString()}
-              </td>
-              <td>{bet.entries}</td>
-              <td>{bet.bet_start}</td>
+              <td>{bet.setLine ?? "—"}</td>
+              <td>{bet.moneylineOdds ?? "—"}</td>
+              <td>${bet.totalAmountBet?.toLocaleString() ?? 0}</td>
+              <td>{new Date(bet.betStart).toLocaleString()}</td>
+              <td>{new Date(bet.betClose).toLocaleString()}</td>
               <td>
                 <Button variant="success" size="sm">
                   ENTER
