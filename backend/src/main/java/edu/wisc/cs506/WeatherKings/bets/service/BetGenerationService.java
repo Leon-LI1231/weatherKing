@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode; // Added for math precision
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -17,7 +18,7 @@ import java.util.List;
 
 /**
  * Service responsible for fetching weather data and generating new bet lines for the next day.
- * This version uses the clean, correct database schema fields.
+ * This version uses the clean, correct database schema fields and a statistical model for odds.
  */
 @Service
 public class BetGenerationService {
@@ -29,8 +30,12 @@ public class BetGenerationService {
         new CityLocation("New York City, NY", 40.7128, -74.0060)
     );
     
-    // Simple fixed American Odds for every bet (+100)
-    private static final BigDecimal FIXED_ODDS = new BigDecimal("100.00");
+    // --- Odds and Model Constants ---
+    // Simple 1:1 American Odds for moneyline bets (+100)
+    private static final BigDecimal MONEYLINE_ODDS = new BigDecimal("100.00");
+    
+    // Standard Deviation (Sigma) for NWS Temperature Forecast Error in degrees F
+    private static final double FORECAST_STD_DEV = 3.0; 
     
     // Bet Type Codes
     private static final String TYPE_MAX_TEMP = "MAX_TEMP_OVER_UNDER";
@@ -116,19 +121,28 @@ public class BetGenerationService {
         // Bet lines close 2 hours before the target day starts (e.g., 22:00 the day before)
         LocalDateTime betCloseTime = LocalDateTime.of(betDate, LocalTime.MIDNIGHT).minusHours(2);
 
-        // 1. Max Temperature Over/Under Bet
+        // 1. Max Temperature Over/Under Bet (USING STATISTICAL MODEL)
         if (temperature != null) {
+            int forecastTemp = temperature.intValue();
             // Set line to nearest 5 degrees (e.g., 52F -> 55.0, 48F -> 50.0)
-            int setLine = (int) (Math.round((double) temperature / 5) * 5);
+            int setLineInt = (int) (Math.round((double) forecastTemp / 5) * 5);
+            
+            // Calculate probability of max temp being UNDER the set line
+            double underProbability = calculateUnderProbability(setLineInt, forecastTemp, FORECAST_STD_DEV);
+
+            // Convert probability to American Odds
+            BigDecimal underOdds = probabilityToAmericanOdds(underProbability);
 
             Bet tempBet = new Bet();
             tempBet.setCityName(cityName);
             tempBet.setBetDate(betDate);
             tempBet.setBetType(TYPE_MAX_TEMP); 
-            tempBet.setSetLine(new BigDecimal(setLine).setScale(1)); 
-            tempBet.setMoneylineOdds(FIXED_ODDS); // Set the odds
+            tempBet.setSetLine(new BigDecimal(setLineInt).setScale(1)); 
+            tempBet.setMoneylineOdds(underOdds); 
             tempBet.setBetClose(betCloseTime); 
-            tempBet.setBetDescription(String.format("%s: Max Temperature Over/Under %.1f°F", cityName, tempBet.getSetLine().doubleValue()));
+            // Description specifies that the odds are for the UNDER outcome
+            tempBet.setBetDescription(String.format("%s: Max Temperature Over/Under %.1f°F (Odds for UNDER)", 
+                                                   cityName, tempBet.getSetLine().doubleValue()));
             bets.add(tempBet);
         }
 
@@ -143,7 +157,7 @@ public class BetGenerationService {
             rainBet.setBetDate(betDate);
             rainBet.setBetType(TYPE_RAIN_YES_NO); 
             rainBet.setSetLine(new BigDecimal(rainProb).setScale(1)); // Store probability as line
-            rainBet.setMoneylineOdds(FIXED_ODDS); // Set the odds
+            rainBet.setMoneylineOdds(MONEYLINE_ODDS); // Uses fixed +100 odds
             rainBet.setBetClose(betCloseTime);
             rainBet.setBetDescription(description);
             bets.add(rainBet);
@@ -162,12 +176,73 @@ public class BetGenerationService {
             conditionBet.setBetDate(betDate);
             conditionBet.setBetType(TYPE_CONDITION); 
             conditionBet.setSetLine(null); // No numerical line for this type
-            conditionBet.setMoneylineOdds(FIXED_ODDS); // Set the odds
+            conditionBet.setMoneylineOdds(MONEYLINE_ODDS); // Uses fixed +100 odds
             conditionBet.setBetClose(betCloseTime);
             conditionBet.setBetDescription(description);
             bets.add(conditionBet);
         }
 
         return bets;
+    }
+    
+    // --------------------------------------------------------------------------
+    // STATISTICAL ODDS CALCULATION UTILITIES
+    // --------------------------------------------------------------------------
+
+    /**
+     * Calculates the probability of the actual temperature being BELOW the set line, 
+     * assuming a Normal Distribution centered on the forecast temperature.
+     */
+    private double calculateUnderProbability(double setLine, double mean, double stdDev) {
+        // 1. Calculate the Z-score
+        double zScore = (setLine - mean) / stdDev;
+        
+        // 2. Use the Z-score to find the Cumulative Distribution Function (CDF) value.
+        return Phi(zScore);
+    }
+    
+    /**
+     * Approximates the standard Normal Cumulative Distribution Function (CDF).
+     */
+    private double Phi(double z) {
+        if (z < -8.0) return 0.0;
+        if (z > 8.0) return 1.0;
+
+        double[] p = {0.2428, 0.5097, 0.3802, 0.0039, -0.2222, -0.0632, 0.0759, 0.0335};
+        double[] q = {1.0, 1.4885, 0.8173, 0.0886, -0.0544, -0.0076, 0.0048, 0.0003};
+
+        double t = 1.0 / (1.0 + 0.2316419 * Math.abs(z));
+        double density = (1.0 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * z * z);
+        double poly = (p[7] * t + p[6]) * t + p[5];
+        poly = (poly * t + p[4]) * t + p[3];
+        poly = (poly * t + p[2]) * t + p[1];
+        poly = (poly * t + p[0]);
+        
+        double cdf = 1.0 - density * poly;
+
+        if (z < 0.0) {
+            return 1.0 - cdf;
+        } else {
+            return cdf;
+        }
+    }
+
+    /**
+     * Converts a probability (0.0 to 1.0) into American Moneyline Odds, including a house vig.
+     */
+    private BigDecimal probabilityToAmericanOdds(double probability) {
+        
+        // Apply a simple VIG adjustment
+        double viggedProbability = Math.max(0.01, Math.min(0.99, probability * 1.02 - 0.01));
+
+        if (viggedProbability <= 0.50) {
+            // Underdog (Positive Odds)
+            double odds = (100.0 / viggedProbability) - 100.0;
+            return new BigDecimal(odds).setScale(2, RoundingMode.HALF_UP);
+        } else {
+            // Favorite (Negative Odds)
+            double odds = -100.0 * (viggedProbability / (1.0 - viggedProbability));
+            return new BigDecimal(odds).setScale(2, RoundingMode.HALF_UP);
+        }
     }
 }
