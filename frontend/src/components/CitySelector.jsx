@@ -24,16 +24,16 @@ function CitySelector({ selectedCity, onCityChange }) {
       description: 'Capital city with university bets and local events'
     },
     {
-      id: 'Middleton',
-      name: 'Middleton',
+      id: 'Los Angeles',
+      name: 'Los Angeles',
       icon: '🏘️',
-      description: 'Community events and local school sports'
+      description: 'la la land'
     },
     {
-      id: 'Chicago',
-      name: 'Chicago',
+      id: 'New York City',
+      name: 'New York City',
       icon: '🏙️',
-      description: 'Major sports teams and city-wide events'
+      description: 'Christmas city'
     }
   ];
 

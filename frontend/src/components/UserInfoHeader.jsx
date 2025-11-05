@@ -42,7 +42,7 @@ function UserInfoHeader({ username, balance, currentPage, onLogout, onNavigateTo
       } else if (page === 'landing') {
         console.log("Navigating to landing...");
         onNavigateToLanding && onNavigateToLanding();
-      } else if (['Madison', 'Middleton', 'Chicago'].includes(page)) {
+      } else if (['Madison', 'Los Angeles', 'New York City'].includes(page)) {
         console.log("Navigating to city:", page);
         onNavigateToCity(page); // Navigate to dedicated city page
       } else if (page === 'user') {
