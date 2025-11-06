@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Login from "./Login";
 import CreateAccount from "./CreateAccount";
 import LandingPage from "./LandingPage";
@@ -50,6 +50,45 @@ function App() {
   const [selectedCity, setSelectedCity] = useState(storedState?.selectedCity || null);
   const [isRestoringState, setIsRestoringState] = useState(!!storedState);
 
+  // Function to refresh user data from backend and update localStorage
+  const refreshUserData = useCallback(async (username) => {
+    if (!username) {
+      console.warn('⚠️ No username provided to refreshUserData');
+      return null;
+    }
+    
+    try {
+      console.log('🔄 Refreshing user data from backend for:', username);
+      const response = await fetch(`http://localhost:8080/api/user/${username}`);
+      if (response.ok) {
+        const updatedUserData = await response.json();
+        console.log('✅ Successfully refreshed user data:', updatedUserData);
+        console.log('💰 Updated Balance:', updatedUserData.balanceUsd);
+        
+        // Update user state
+        setUser(updatedUserData);
+        
+        // Explicitly save to localStorage
+        const updatedState = {
+          currentPage,
+          user: updatedUserData,
+          selectedCity,
+          timestamp: new Date().toISOString()
+        };
+        saveStateToStorage(updatedState);
+        console.log('✅ Refreshed user data saved to localStorage');
+        
+        return updatedUserData;
+      } else {
+        console.error('❌ Failed to refresh user data:', response.statusText);
+        return null;
+      }
+    } catch (error) {
+      console.error('❌ Error refreshing user data:', error);
+      return null;
+    }
+  }, [currentPage, selectedCity]);
+
   // Save state to localStorage whenever state changes
   useEffect(() => {
     const stateToSave = {
@@ -60,6 +99,48 @@ function App() {
     };
     saveStateToStorage(stateToSave);
   }, [currentPage, user, selectedCity]);
+
+  // Log user data changes to console
+  useEffect(() => {
+    if (user) {
+      console.log('👤 USER STATE UPDATED:', user);
+      console.log('📊 User Info Summary:', {
+        username: user.username,
+        email: user.email || 'No email',
+        balance: user.balanceUsd !== undefined ? `$${user.balanceUsd.toFixed(2)}` : 'No balance data',
+        uid: user.uid || 'No UID',
+        createdAt: user.createdAt || 'No creation date'
+      });
+      console.log('💰 Available Balance: $' + (user.balanceUsd || 0).toFixed(2));
+    } else {
+      console.log('👤 USER STATE CLEARED (logged out)');
+    }
+  }, [user]);
+
+  // Periodically refresh user data to keep balance current (every 5 minutes)
+  useEffect(() => {
+    if (user && user.username) {
+      const interval = setInterval(() => {
+        console.log('⏰ Periodic user data refresh triggered');
+        refreshUserData(user.username);
+      }, 5 * 60 * 1000); // 5 minutes
+
+        return () => clearInterval(interval);
+    }
+  }, [user, refreshUserData]);
+
+  // Refresh user data when window regains focus (user returns to tab)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (user && user.username) {
+        console.log('👀 Window focus detected - refreshing user data');
+        refreshUserData(user.username);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user, refreshUserData]);
 
   // Validate and cleanup restored state on mount
   useEffect(() => {
@@ -126,9 +207,62 @@ function App() {
   // Navigation functions
   const navigateToLogin = () => setCurrentPage("login");
   const navigateToCreateAccount = () => setCurrentPage("createAccount");
-  const navigateToLandingPage = (userData) => {
-     setUser(userData);
-     setCurrentPage("landing");
+
+  const navigateToLandingPage = async (userData) => {
+    console.log('🔍 NavigateToLandingPage called with userData:', userData);
+    try {
+      // If userData contains just username (from login), fetch full user info
+      if (userData && userData.username && !userData.balanceUsd) {
+        console.log('📡 Fetching full user data from backend for username:', userData.username);
+        const response = await fetch(`http://localhost:8080/api/user/${userData.username}`);
+        if (response.ok) {
+          const fullUserData = await response.json();
+          console.log('✅ Successfully fetched user data from backend:', fullUserData);
+          console.log('💰 User Balance:', fullUserData.balanceUsd);
+          console.log('👤 User Details:', {
+            username: fullUserData.username,
+            email: fullUserData.email,
+            uid: fullUserData.uid,
+            balance: fullUserData.balanceUsd,
+            createdAt: fullUserData.createdAt
+          });
+          
+          // Update user state (this will trigger the useEffect to save to localStorage)
+          setUser(fullUserData);
+          
+          // Also explicitly save updated user data to localStorage immediately
+          console.log('💾 Saving updated user data to localStorage');
+          const updatedState = {
+            currentPage: "landing",
+            user: fullUserData,
+            selectedCity,
+            timestamp: new Date().toISOString()
+          };
+          saveStateToStorage(updatedState);
+          console.log('✅ User data successfully saved to localStorage');
+        } else {
+          console.error('❌ Failed to fetch user data:', response.statusText);
+          console.error('❌ Response status:', response.status);
+          // Fallback: use provided userData
+          console.log('⚠️ Using fallback userData:', userData);
+          setUser(userData);
+        }
+      } else {
+        // Use provided userData if it already contains full user info
+        console.log('✅ Using provided userData (already contains full info):', userData);
+        if (userData && userData.balanceUsd !== undefined) {
+          console.log('💰 User Balance:', userData.balanceUsd);
+        }
+        setUser(userData);
+      }
+      setCurrentPage("landing");
+    } catch (error) {
+      console.error('❌ Error fetching user data:', error);
+      // Fallback: use provided userData
+      console.log('⚠️ Using fallback userData due to error:', userData);
+      setUser(userData);
+      setCurrentPage("landing");
+    }
   };
   const navigateToCityPage = (cityName) => {
     console.log("Navigating to city:", cityName);
@@ -139,11 +273,20 @@ function App() {
       console.error("Error navigating to city page:", error);
     }
   };
-  const navigateToUserPage = () => setCurrentPage("user");
+  const navigateToUserPage = async () => {
+    // Refresh user data when navigating to user page to ensure balance is current
+    if (user && user.username) {
+      console.log('🔄 Refreshing user data before showing user page');
+      await refreshUserData(user.username);
+    }
+    setCurrentPage("user");
+  };
   const logout = () => {
+    console.log('🚪 Logging out - clearing user data and localStorage');
     setUser(null);
     setSelectedCity(null);
     setCurrentPage("login");
+    
     // Clear all stored app data on logout
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -153,6 +296,10 @@ function App() {
       }
     }
     keysToRemove.forEach(key => localStorage.removeItem(key));
+    
+    // Also explicitly clear the main app state
+    localStorage.removeItem('betAppState');
+    console.log('✅ LocalStorage cleared on logout');
   };
 
   // Render different components based on current page
@@ -164,12 +311,13 @@ function App() {
         <>
           <UserInfoHeader 
             username={user?.username} 
-            balance={152.37}
+            balance={user?.balanceUsd}
             currentPage="landing"
             onLogout={logout}
             onNavigateToCity={navigateToCityPage}
             onNavigateToLanding={() => navigateToLandingPage(user)}
             onNavigateToUser={navigateToUserPage}
+            onRefreshBalance={refreshUserData}
           />
           <LandingPage 
             user={user} 
@@ -189,12 +337,13 @@ function App() {
         <>
           <UserInfoHeader 
             username={user?.username} 
-            balance={152.37}
+            balance={user?.balanceUsd}
             currentPage={selectedCity}
             onLogout={logout}
             onNavigateToCity={navigateToCityPage}
             onNavigateToLanding={() => navigateToLandingPage(user)}
             onNavigateToUser={navigateToUserPage}
+            onRefreshBalance={refreshUserData}
           />
           <CityPage
             cityName={selectedCity}
@@ -209,11 +358,12 @@ function App() {
           <>
             <UserInfoHeader
               username={user?.username}
-              balance={152.37}
+              balance={user?.balanceUsd}
               currentPage="user"
               onLogout={logout}
               onNavigateToCity={navigateToCityPage}
               onNavigateToLanding={() => navigateToLandingPage(user)}
+              onRefreshBalance={refreshUserData}
             />
             <UserPage user={user} />
           </>
@@ -227,7 +377,13 @@ function App() {
           onNavigateToCreateAccount={navigateToCreateAccount}
           onSuccessfulLogin={navigateToLandingPage}
         />
-        <button onClick={() => navigateToLandingPage({ username: "TestUser" })}>
+        <button onClick={() => navigateToLandingPage({ 
+          username: "TestUser", 
+          balanceUsd: 1000.00,
+          email: "testuser@example.com",
+          uid: "test-uid-123",
+          createdAt: new Date().toISOString()
+        })}>
           Temporary button to get to landing page
         </button>
         </div>

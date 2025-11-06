@@ -20,26 +20,74 @@ function CreateAccount({ onNavigateToLogin }) {
     const [password, setPassword] = React.useState('');
     const [message, setMessage] = React.useState('');
 
+    // Handle username change and clear any existing error messages
+    const handleUsernameChange = (e) => {
+        setUsername(e.target.value);
+        // Clear the message when user starts typing a new username
+        if (message === 'Username already exists') {
+            setMessage('');
+        }
+    };
+
+    // Handle email change and clear validation messages
+    const handleEmailChange = (e) => {
+        setEmail(e.target.value);
+        // Clear validation messages when user changes email
+        if (message.includes('email')) {
+            setMessage('');
+        }
+    };
+
+    // Handle password change and clear validation messages
+    const handlePasswordChange = (e) => {
+        setPassword(e.target.value);
+        // Clear validation messages when user changes password
+        if (message.includes('Please enter')) {
+            setMessage('');
+        }
+    };
+
     // Function to handle account creation
     // Checks with backend if username already exists
     // If not, creates account and redirects to login page
     const handleCreateAccount = async () => {
+        // Validate inputs
+        if (!username.trim() || !email.trim() || !password.trim()) {
+            setMessage('Please enter username, email, and password.');
+            return;
+        }
+
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setMessage('Please enter a valid email address.');
+            return;
+        }
+
         try {
             const response = await fetch('http://localhost:8080/api/register', {
                 method: 'POST',
                 headers: {  'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password }),
             });
-            const text = await response.text();
-            setMessage(text);
             
-            // Redirect to login page on successful account creation
-            if (text === 'Account created successfully!') {
-                onNavigateToLogin();
+            if (response.ok) {
+                const data = await response.json();
+                setMessage(data.message);
+                
+                // Redirect to login page on successful account creation
+                if (data.message === 'Account created successfully!') {
+                    setTimeout(() => {
+                        onNavigateToLogin();
+                    }, 1500); // Small delay to show success message
+                }
+            } else {
+                const errorData = await response.json();
+                setMessage(errorData.message || 'Registration failed. Please try again.');
             }
         } catch (error) {
             console.error('Error creating account:', error);
-            setMessage('Failed to create account. Please try again.');
+            setMessage('Unable to connect to server. Please try again.');
         }
     };
 
@@ -48,12 +96,10 @@ function CreateAccount({ onNavigateToLogin }) {
         onNavigateToLogin(); // Navigate back to login page
     };
 
-
-
     // Ensure that the username and password are not empty when trying to create an account
-    const isFormValid = username.trim() !== '' && password.trim() !== '';
+    const isFormValid = username.trim() !== '' && email.trim() !== '' && password.trim() !== '';
 
-    // Ensure that the username is not already taken by checking the message from the backend
+    // Check if the username is already taken based on the backend response
     const isUsernameTaken = message === 'Username already exists';
     return (
         <div style={{ textAlign: 'center', marginTop: '50px' }}>
@@ -63,7 +109,7 @@ function CreateAccount({ onNavigateToLogin }) {
                     type="text"
                     placeholder="Username"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    onChange={handleUsernameChange}
                     style={{ padding: '10px', fontSize: '16px', width: '200px' }}
                 />
             </div> {/* Input field for username */}
@@ -72,7 +118,7 @@ function CreateAccount({ onNavigateToLogin }) {
                     type="email"
                     placeholder="Email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     style={{ padding: '10px', fontSize: '16px', width: '200px' }}
                 />
             </div> {/* Input field for email */}
@@ -81,7 +127,7 @@ function CreateAccount({ onNavigateToLogin }) {
                     type="password"
                     placeholder="Password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange}
                     style={{ padding: '10px', fontSize: '16px', width: '200px' }}
                 />
             </div> {/* Input field for password */} 
@@ -107,7 +153,13 @@ function CreateAccount({ onNavigateToLogin }) {
                 </button>
             </div> {/* Buttons for creating account and canceling */}
             {message && (
-                <p style={{ marginTop: '20px', fontSize: '18px', color: isUsernameTaken ? 'red' : 'green' }}>
+                <p style={{ 
+                    marginTop: '20px', 
+                    fontSize: '18px', 
+                    color: message === 'Username already exists' ? 'red' : 
+                           message === 'Account created successfully!' ? 'green' :
+                           message.includes('Please enter') || message.includes('valid email') ? 'orange' : 'red'
+                }}>
                     {message}
                 </p>
             )} {/* Display message from backend */}

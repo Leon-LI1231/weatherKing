@@ -57,7 +57,7 @@ function UserPage({ user }) {
       {/* Header */}
       <Row className="mb-4">
         <Col>
-          <h2>{user?.username}'s Page</h2>
+          <h2>{user?.username}&apos;s Page</h2>
           <p className="text-muted">Your account info and bet history</p>
         </Col>
       </Row>
@@ -66,7 +66,7 @@ function UserPage({ user }) {
       <Row className="mb-5">
         <Col>
           <h5>Username: <strong>{user?.username}</strong></h5>
-          <h5>Balance: <Badge bg="info" text="dark">${152.37}</Badge></h5>
+          <h5>Balance: <Badge bg="info" text="dark">${user?.balanceUsd !== undefined ? user.balanceUsd.toFixed(2) : '0.00'}</Badge></h5>
         </Col>
       </Row>
 
