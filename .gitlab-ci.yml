@@ -29,7 +29,7 @@ cache:
 # The job only runs when files under frontend/ change.
 lint_frontend:
   stage: lint                       # Lint stage
-  image: node:20                    # Use Node 20 image
+  image: node:18                    # Use Node 18 image
   tags: [dind]                      #use the runner with tags dind, uwmadison gitlab runner
   before_script:
     - cd frontend
@@ -37,11 +37,6 @@ lint_frontend:
   script:
     - npm run lint                  # Run ESLint
     - npm run format:check         
-  artifacts:                        
-    when: always
-    paths:
-      - frontend/.eslintcache
-    expire_in: 1 week
   rules:
     - changes: [frontend/**]        # Run only if frontend code changes
 
@@ -79,7 +74,7 @@ lint_backend:
 # The job only runs when frontend code changes occur.
 unit_test_frontend:
   stage: unit_test                  # Unit test stage
-  image: node:20
+  image: node:18
   tags: [dind]
   before_script:
     - cd frontend
@@ -109,7 +104,7 @@ unit_test_frontend:
 # This doesnt test deployment since we haven't started deployment, just integrity
 build_frontend:
   stage: build                      # Build stage
-  image: node:20
+  image: node:18
   tags: [dind]
   before_script:
     - cd frontend
