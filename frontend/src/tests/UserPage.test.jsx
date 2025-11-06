@@ -3,6 +3,30 @@ import { render, screen, within, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import UserPage from "../components/UserPage";
 
+/**
+ * =======================================================
+ *                    USER PAGE COMPONENT TESTS
+ * =======================================================
+ * Test Cases:
+ * -----------
+ * 1. Page Rendering Tests:
+ *    ✓ page title and subtitle are displayed correctly
+ *
+ * 2. User Info Tests:
+ *    ✓ username and balance are shown properly
+ *
+ * 3. Table Structure Tests:
+ *    ✓ table headers are rendered correctly
+ *
+ * 4. Data Population Tests:
+ *    ✓ mock bet data is populated via useEffect
+ *
+ * Run all tests: npm test
+ * Run UserPage.test.jsx only: npm test -- UserPage.test.jsx
+ * Run specific test: npm test -- --testNamePattern="test name"
+ * =======================================================
+ */
+
 describe("UserPage", () => {
   const user = { username: "leon" };
 
