@@ -59,15 +59,29 @@ function CityPage({ cityName, user, onNavigateBack, onLogout }) {
     }
   };
 
-  const storedFilters = getStoredFilters(cityName);
-  const [search, setSearch] = useState(storedFilters?.search || "");
-  const [selectedType, setSelectedType] = useState(storedFilters?.selectedType || "All");
-  const [minFee, setMinFee] = useState(storedFilters?.minFee || "Free");
-  const [maxFee, setMaxFee] = useState(storedFilters?.maxFee || "100");
+  const [search, setSearch] = useState("");
+  const [selectedType, setSelectedType] = useState("All");
+  const [minFee, setMinFee] = useState("Free");
+  const [maxFee, setMaxFee] = useState("100");
   const [bets, setBets] = useState([]);
+  const [filtersInitialized, setFiltersInitialized] = useState(false);
 
   // dynamic types
   const availableBetTypes = ["All", ...new Set(bets.map((b) => b.betType))];
+
+  // Save filter changes to localStorage
+  useEffect(() => {
+    if (cityName) {
+      const currentFilters = {
+        search,
+        selectedType,
+        minFee,
+        maxFee,
+        timestamp: new Date().toISOString()
+      };
+      saveFiltersToStorage(cityName, currentFilters);
+    }
+  }, [search, selectedType, minFee, maxFee, cityName]);
 
   useEffect(() => {
     const fetchBets = async () => {
@@ -88,8 +102,28 @@ function CityPage({ cityName, user, onNavigateBack, onLogout }) {
       }
     };
 
-    if (cityName) fetchBets();
+    if (cityName) {
+      // Reset filters when city changes and restore from localStorage
+      const storedFilters = getStoredFilters(cityName);
+      setSearch(storedFilters?.search || "");
+      setSelectedType(storedFilters?.selectedType || "All");
+      setMinFee(storedFilters?.minFee || "Free");
+      setMaxFee(storedFilters?.maxFee || "100");
+      setFiltersInitialized(true);
+      
+      fetchBets();
+    }
   }, [cityName]);
+
+  // Reset selected type if it's not available in current city, but only after filters are initialized
+  useEffect(() => {
+    if (filtersInitialized && bets.length > 0) {
+      const availableTypes = ["All", ...new Set(bets.map((b) => b.betType))];
+      if (!availableTypes.includes(selectedType)) {
+        setSelectedType("All");
+      }
+    }
+  }, [bets, selectedType, filtersInitialized]);
 
   // filter bets
   const filteredBets = bets

@@ -88,7 +88,7 @@ jest.mock('../components/BetListTable', () => {
     return (
       <div data-testid="bet-list-table">
         <h3>{selectedCity} Bets</h3>
-        <button onClick={() => onBackToLanding && onBackToLanding()}>Back to Landing Page</button>
+        <button onClick={() => onBackToLanding && onBackToLanding()}>← Back to Landing Page</button>
         {bets && bets.length > 0 ? (
           <div>
             {bets.map((bet, index) => (
@@ -323,7 +323,7 @@ describe('App Component Tests', () => {
     // Mock successful login response
     fetch.mockResolvedValueOnce({
       ok: true,
-      text: async () => 'Login successful!',
+      json: async () => ({ message: 'Login successful.' }),
     });
     render(<App />);
     const usernameInput = screen.getByPlaceholderText('Username');
@@ -425,7 +425,7 @@ describe('App Component Tests', () => {
     // Mock successful account creation
     fetch.mockResolvedValueOnce({
       ok: true,
-      text: async () => 'Account created successfully!',
+      json: async () => ({ message: 'Account created successfully!' }),
     });
     
     render(<App />);
@@ -436,17 +436,19 @@ describe('App Component Tests', () => {
     
     // Fill out create account form (assuming similar structure to Login)
     const usernameInput = screen.getByPlaceholderText('Username');
+    const emailInput = screen.getByPlaceholderText('Email');
     const passwordInput = screen.getByPlaceholderText('Password');
     const submitButton = screen.getByRole('button', { name: /Create Account/i });
     
     fireEvent.change(usernameInput, { target: { value: 'newuser' } });
+    fireEvent.change(emailInput, { target: { value: 'newuser@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'newpass' } });
     fireEvent.click(submitButton);
     
-    // Should navigate back to login page after successful creation
+    // Should navigate back to login page after successful creation (with delay)
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /Login/i })).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
   });
 
   test('app maintains state during navigation', () => {
@@ -489,7 +491,7 @@ describe('App Component Tests', () => {
     
     // Should now be on Madison city page
     expect(screen.getByText('Madison Bets')).toBeInTheDocument();
-    expect(screen.getByText('Back to Landing Page')).toBeInTheDocument();
+    expect(screen.getByText('← Back to Landing Page')).toBeInTheDocument();
   });
 
   test('navigates back to landing page from city page', () => {
@@ -522,7 +524,7 @@ describe('App Component Tests', () => {
     // UserInfoHeader should be present
     expect(screen.getByText('WeatherKings')).toBeInTheDocument();
     expect(screen.getByText('TestUser')).toBeInTheDocument();
-    expect(screen.getByText('$152.37')).toBeInTheDocument();
+    expect(screen.getByText('$1000.00')).toBeInTheDocument();
   });
 
   test('drawer navigation works from landing page', () => {
@@ -544,11 +546,11 @@ describe('App Component Tests', () => {
     const madisonElements = screen.getAllByText('Madison');
     expect(madisonElements.length).toBeGreaterThan(0); // At least one Madison element exists
     
-    const middletonElements = screen.getAllByText('Middleton');
-    expect(middletonElements.length).toBeGreaterThan(0); // At least one Middleton element exists
+    const losAngelesElements = screen.getAllByText('Los Angeles');
+    expect(losAngelesElements.length).toBeGreaterThan(0); // At least one Los Angeles element exists
     
-    const chicagoElements = screen.getAllByText('Chicago');
-    expect(chicagoElements.length).toBeGreaterThan(0); // At least one Chicago element exists
+    const newYorkElements = screen.getAllByText('New York City');
+    expect(newYorkElements.length).toBeGreaterThan(0); // At least one New York City element exists
     
     expect(screen.getByText('Logout')).toBeInTheDocument();
   });
@@ -587,17 +589,17 @@ describe('App Component Tests', () => {
     // Verify we're on Madison page
     expect(screen.getByText('Madison Bets')).toBeInTheDocument();
     
-    // Use drawer to navigate to Chicago
+    // Use drawer to navigate to New York City
     const menuButton = screen.getByText('☰');
     fireEvent.click(menuButton);
     
-    // Use the drawer container to find the specific Chicago link
+    // Use the drawer container to find the specific New York City link
     const drawer = screen.getByTestId('offcanvas');
-    const chicagoLink = drawer.querySelector('[data-event-key="Chicago"]');
-    fireEvent.click(chicagoLink);
+    const newYorkCityLink = drawer.querySelector('[data-event-key="New York City"]');
+    fireEvent.click(newYorkCityLink);
     
-    // Should now be on Chicago page
-    expect(screen.getByText('Chicago Bets')).toBeInTheDocument();
+    // Should now be on New York City page
+    expect(screen.getByText('New York City Bets')).toBeInTheDocument();
   });
 
   test('handles invalid city navigation gracefully', () => {

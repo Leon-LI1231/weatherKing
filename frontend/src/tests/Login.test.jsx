@@ -127,7 +127,7 @@ describe('Login Component Tests', () => {
         // Mock successful API response
         fetch.mockResolvedValueOnce({
             ok: true,
-            text: async () => 'Login successful!',
+            json: async () => ({ message: 'Login successful.' }),
         });
         render(<Login onNavigateToCreateAccount={mockOnNavigateToCreateAccount} onSuccessfulLogin={mockOnSuccessfulLogin} />);
         const usernameInput = screen.getByPlaceholderText('Username');
@@ -146,8 +146,8 @@ describe('Login Component Tests', () => {
     test('login with incorrect credentials displays error message', async () => {
         // Mock failed API response
         fetch.mockResolvedValueOnce({
-            ok: true,
-            text: async () => 'Invalid username or password',
+            ok: false,
+            json: async () => ({ message: 'Invalid username or password' }),
         });
         render(<Login onNavigateToCreateAccount={mockOnNavigateToCreateAccount} onSuccessfulLogin={mockOnSuccessfulLogin} />);
         const usernameInput = screen.getByPlaceholderText('Username');

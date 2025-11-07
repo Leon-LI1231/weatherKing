@@ -12,7 +12,7 @@ import CitySelector from '../components/CitySelector';
  * Test Cases:
  * -----------
  * 1. Rendering Tests:
- *    ✓ renders all city cards (Madison, Middleton, Chicago)
+ *    ✓ renders all city cards (Madison, Los Angeles, New York City)
  *    ✓ displays city names and descriptions correctly
  *    ✓ shows city icons and buttons
  * 
@@ -51,16 +51,16 @@ describe('CitySelector Component Tests', () => {
     expect(screen.getByText('View Madison Bets')).toBeInTheDocument();
     expect(screen.getByText('🏛️')).toBeInTheDocument();
     
-    // Check Middleton card
-    expect(screen.getByText('Middleton')).toBeInTheDocument();
-    expect(screen.getByText('Community events and local school sports')).toBeInTheDocument();
-    expect(screen.getByText('View Middleton Bets')).toBeInTheDocument();
+    // Check Los Angeles card
+    expect(screen.getByText('Los Angeles')).toBeInTheDocument();
+    expect(screen.getByText('la la land')).toBeInTheDocument();
+    expect(screen.getByText('View Los Angeles Bets')).toBeInTheDocument();
     expect(screen.getByText('🏘️')).toBeInTheDocument();
     
-    // Check Chicago card
-    expect(screen.getByText('Chicago')).toBeInTheDocument();
-    expect(screen.getByText('Major sports teams and city-wide events')).toBeInTheDocument();
-    expect(screen.getByText('View Chicago Bets')).toBeInTheDocument();
+    // Check New York City card
+    expect(screen.getByText('New York City')).toBeInTheDocument();
+    expect(screen.getByText('Christmas city')).toBeInTheDocument();
+    expect(screen.getByText('View New York City Bets')).toBeInTheDocument();
     expect(screen.getByText('🏙️')).toBeInTheDocument();
   });
 
@@ -69,12 +69,12 @@ describe('CitySelector Component Tests', () => {
     
     // Should have 3 city cards
     const madisonCard = screen.getByText('Madison').closest('.card');
-    const middletonCard = screen.getByText('Middleton').closest('.card');
-    const chicagoCard = screen.getByText('Chicago').closest('.card');
+    const losAngelesCard = screen.getByText('Los Angeles').closest('.card');
+    const newYorkCityCard = screen.getByText('New York City').closest('.card');
     
     expect(madisonCard).toBeInTheDocument();
-    expect(middletonCard).toBeInTheDocument();
-    expect(chicagoCard).toBeInTheDocument();
+    expect(losAngelesCard).toBeInTheDocument();
+    expect(newYorkCityCard).toBeInTheDocument();
   });
 
   // Interaction Tests
@@ -88,23 +88,23 @@ describe('CitySelector Component Tests', () => {
     expect(mockOnCityChange).toHaveBeenCalledTimes(1);
   });
 
-  test('clicking Middleton card calls onCityChange with Middleton', () => {
+  test('clicking Los Angeles card calls onCityChange with Los Angeles', () => {
     render(<CitySelector selectedCity={null} onCityChange={mockOnCityChange} />);
     
-    const middletonCard = screen.getByText('Middleton').closest('.card');
-    fireEvent.click(middletonCard);
+    const losAngelesCard = screen.getByText('Los Angeles').closest('.card');
+    fireEvent.click(losAngelesCard);
     
-    expect(mockOnCityChange).toHaveBeenCalledWith('Middleton');
+    expect(mockOnCityChange).toHaveBeenCalledWith('Los Angeles');
     expect(mockOnCityChange).toHaveBeenCalledTimes(1);
   });
 
-  test('clicking Chicago card calls onCityChange with Chicago', () => {
+  test('clicking New York City card calls onCityChange with New York City', () => {
     render(<CitySelector selectedCity={null} onCityChange={mockOnCityChange} />);
     
-    const chicagoCard = screen.getByText('Chicago').closest('.card');
-    fireEvent.click(chicagoCard);
+    const newYorkCityCard = screen.getByText('New York City').closest('.card');
+    fireEvent.click(newYorkCityCard);
     
-    expect(mockOnCityChange).toHaveBeenCalledWith('Chicago');
+    expect(mockOnCityChange).toHaveBeenCalledWith('New York City');
     expect(mockOnCityChange).toHaveBeenCalledTimes(1);
   });
 
@@ -128,11 +128,11 @@ describe('CitySelector Component Tests', () => {
   test('non-selected cities have outline button variant', () => {
     render(<CitySelector selectedCity="Madison" onCityChange={mockOnCityChange} />);
     
-    const middletonButton = screen.getByText('View Middleton Bets');
-    const chicagoButton = screen.getByText('View Chicago Bets');
+    const losAngelesButton = screen.getByText('View Los Angeles Bets');
+    const newYorkCityButton = screen.getByText('View New York City Bets');
     
-    expect(middletonButton).toHaveClass('btn-outline-primary');
-    expect(chicagoButton).toHaveClass('btn-outline-primary');
+    expect(losAngelesButton).toHaveClass('btn-outline-primary');
+    expect(newYorkCityButton).toHaveClass('btn-outline-primary');
   });
 
   test('selected city card has primary border', () => {
@@ -166,8 +166,8 @@ describe('CitySelector Component Tests', () => {
     
     // All buttons should be outline variant
     expect(screen.getByText('View Madison Bets')).toHaveClass('btn-outline-primary');
-    expect(screen.getByText('View Middleton Bets')).toHaveClass('btn-outline-primary');
-    expect(screen.getByText('View Chicago Bets')).toHaveClass('btn-outline-primary');
+    expect(screen.getByText('View Los Angeles Bets')).toHaveClass('btn-outline-primary');
+    expect(screen.getByText('View New York City Bets')).toHaveClass('btn-outline-primary');
   });
 
   test('handles undefined selectedCity', () => {
@@ -175,7 +175,7 @@ describe('CitySelector Component Tests', () => {
     
     // Should render without crashing
     expect(screen.getByText('Madison')).toBeInTheDocument();
-    expect(screen.getByText('Middleton')).toBeInTheDocument();
-    expect(screen.getByText('Chicago')).toBeInTheDocument();
+    expect(screen.getByText('Los Angeles')).toBeInTheDocument();
+    expect(screen.getByText('New York City')).toBeInTheDocument();
   });
 }); 

@@ -64,8 +64,8 @@ describe('LandingPage Component Tests', () => {
     
     // Check that CitySelector is rendered with city options
     expect(screen.getByText('Madison')).toBeInTheDocument();
-    expect(screen.getByText('Middleton')).toBeInTheDocument();
-    expect(screen.getByText('Chicago')).toBeInTheDocument();
+    expect(screen.getByText('Los Angeles')).toBeInTheDocument();
+    expect(screen.getByText('New York City')).toBeInTheDocument();
   });
 
   test('shows proper page structure and layout', () => {
@@ -118,13 +118,13 @@ describe('LandingPage Component Tests', () => {
     
     // Check that all city options are available
     expect(screen.getByText('Madison')).toBeInTheDocument();
-    expect(screen.getByText('Middleton')).toBeInTheDocument();
-    expect(screen.getByText('Chicago')).toBeInTheDocument();
+    expect(screen.getByText('Los Angeles')).toBeInTheDocument();
+    expect(screen.getByText('New York City')).toBeInTheDocument();
     
     // Check that city descriptions are shown
     expect(screen.getByText('Capital city with university bets and local events')).toBeInTheDocument();
-    expect(screen.getByText('Community events and local school sports')).toBeInTheDocument();
-    expect(screen.getByText('Major sports teams and city-wide events')).toBeInTheDocument();
+    expect(screen.getByText('la la land')).toBeInTheDocument();
+    expect(screen.getByText('Christmas city')).toBeInTheDocument();
   });
 
   // Props Tests

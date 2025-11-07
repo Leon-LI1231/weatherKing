@@ -28,7 +28,7 @@ import UserPage from "../components/UserPage";
  */
 
 describe("UserPage", () => {
-  const user = { username: "leon" };
+  const user = { username: "leon", balanceUsd: 152.37 };
 
   //Test 1: Check page title and subtitle
   test("renders page title and subtitle", () => {
