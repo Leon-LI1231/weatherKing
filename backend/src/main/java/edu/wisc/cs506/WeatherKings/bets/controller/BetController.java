@@ -1,12 +1,23 @@
 package edu.wisc.cs506.WeatherKings.bets.controller;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import edu.wisc.cs506.WeatherKings.bets.model.Bet;
 import edu.wisc.cs506.WeatherKings.bets.service.BetGenerationService;
 import edu.wisc.cs506.WeatherKings.bets.service.BetService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * REST controller for managing and fetching betting lines.

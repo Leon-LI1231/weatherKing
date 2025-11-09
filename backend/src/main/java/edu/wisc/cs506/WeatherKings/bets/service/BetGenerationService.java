@@ -3,6 +3,7 @@ package edu.wisc.cs506.WeatherKings.bets.service;
 import edu.wisc.cs506.WeatherKings.bets.model.Bet;
 import edu.wisc.cs506.WeatherKings.bets.model.CityLocation;
 import edu.wisc.cs506.WeatherKings.bets.repository.BetRepository;
+import edu.wisc.cs506.WeatherKings.bets.util.DateUtil;
 import edu.wisc.cs506.WeatherKings.weather.dto.WeatherForecastResponse.Period;
 import edu.wisc.cs506.WeatherKings.weather.service.WeatherApiService;
 import org.springframework.stereotype.Service;
@@ -55,8 +56,9 @@ public class BetGenerationService {
      */
     @Transactional
     public List<Bet> generateDailyBets() {
-        // The bet target is for tomorrow
-        LocalDate nextBetDate = LocalDate.now().plus(1, ChronoUnit.DAYS);
+        // Use centralized date calculation to ensure consistency
+        LocalDate nextBetDate = DateUtil.getTomorrowDate();
+        System.err.println("DEBUG: BetGenerationService generating bets for date: " + nextBetDate);
         List<Bet> generatedBets = new java.util.ArrayList<>();
 
         for (CityLocation city : TARGET_CITIES) {
