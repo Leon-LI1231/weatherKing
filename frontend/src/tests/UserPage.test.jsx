@@ -74,4 +74,28 @@ describe("UserPage", () => {
     expect(screen.getAllByText("$1.00").length).toBe(3);
     expect(screen.getAllByText(/Pending/i).length).toBe(3);
   });
+
+  // Test 5: Checks that each bet row has correct number of columns
+test("each bet row contains exactly 6 columns", async () => {
+  render(<UserPage user={user} />);
+  const table = screen.getByRole("table");
+
+  await waitFor(() => {
+    const rows = within(table).getAllByRole("row").slice(1); // skip header
+    rows.forEach((row) => {
+      const cells = within(row).getAllByRole("cell");
+      expect(cells.length).toBe(6);
+    });
+  });
+});
+
+
+
+// Test 6: Verifies sticky header style is applied to table header
+test("table header has sticky style", () => {
+  render(<UserPage user={user} />);
+  const header = screen.getByRole("columnheader", { name: "Contest" });
+  expect(header.closest("thead")).toHaveStyle("position: sticky");
+});
+
 });
