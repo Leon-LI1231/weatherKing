@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CityPage from '../components/CityPage';
 
@@ -67,6 +67,100 @@ describe('CityPage Component Tests', () => {
     onLogout: jest.fn()
   };
 
+  const mockBetsData = [
+    // Madison bets
+    {
+      betId: 1,
+      betDescription: 'Madison Weather Tomorrow',
+      betType: 'weather',
+      cityName: 'Madison',
+      setLine: 5.0,
+      totalPool: 150,
+      description: 'Will it rain in Madison tomorrow?',
+      currentEntries: 30,
+      maxEntries: 500
+    },
+    {
+      betId: 2,
+      betDescription: 'UW Madison Basketball Game',
+      betType: 'sports',
+      cityName: 'Madison',
+      setLine: 10.0,
+      totalPool: 250,
+      description: 'Will UW Madison win their next basketball game?',
+      currentEntries: 25,
+      maxEntries: 300
+    },
+    {
+      betId: 3,
+      betDescription: 'Capitol Construction',
+      betType: 'politics',
+      cityName: 'Madison',
+      setLine: 0,
+      totalPool: 100,
+      description: 'Will the Capitol construction finish on time?',
+      currentEntries: 50,
+      maxEntries: 200
+    },
+    // Middleton bets
+    {
+      betId: 4,
+      betDescription: 'Middleton Farmers Market',
+      betType: 'local',
+      cityName: 'Middleton',
+      setLine: 2.0,
+      totalPool: 80,
+      description: 'How many vendors at the farmers market this week?',
+      currentEntries: 20,
+      maxEntries: 100
+    },
+    {
+      betId: 5,
+      betDescription: 'Middleton High School Football',
+      betType: 'sports',
+      cityName: 'Middleton',
+      setLine: 5.0,
+      totalPool: 120,
+      description: 'Will Middleton HS win their homecoming game?',
+      currentEntries: 24,
+      maxEntries: 150
+    },
+    // Chicago bets
+    {
+      betId: 6,
+      betDescription: 'Chicago Bulls Next Game',
+      betType: 'sports',
+      cityName: 'Chicago',
+      setLine: 20.0,
+      totalPool: 500,
+      description: 'Will the Bulls win their next home game?',
+      currentEntries: 75,
+      maxEntries: 1000
+    },
+    {
+      betId: 7,
+      betDescription: 'Chicago Weather This Week',
+      betType: 'weather',
+      cityName: 'Chicago',
+      setLine: 3.0,
+      totalPool: 200,
+      description: 'Will it snow in Chicago this week?',
+      currentEntries: 40,
+      maxEntries: 300
+    },
+    {
+      betId: 8,
+      betDescription: 'Chicago Marathon Attendance',
+      betType: 'local',
+      cityName: 'Chicago',
+      setLine: 15.0,
+      totalPool: 800,
+      description: 'Will marathon attendance exceed 45,000?',
+      currentEntries: 60,
+      maxEntries: 400
+    }
+  ];
+
   beforeEach(() => {
     jest.clearAllMocks();
     
@@ -84,11 +178,25 @@ describe('CityPage Component Tests', () => {
       clear: jest.fn()
     };
     Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+
+    // Mock fetch API
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve(mockBetsData)
+      })
+    );
   });
 
   afterEach(() => {
     // Restore console.error after each test
     console.error.mockRestore();
+    
+    // Clean up fetch mock
+    if (global.fetch && global.fetch.mockRestore) {
+      global.fetch.mockRestore();
+    }
   });
 
   // Rendering Tests
@@ -98,18 +206,28 @@ describe('CityPage Component Tests', () => {
     expect(screen.getByText('← Back to Landing Page')).toBeInTheDocument();
   });
 
-  test('displays city-specific bets for Madison', () => {
+  test('displays city-specific bets for Madison', async () => {
     render(<CityPage {...mockProps} />);
     
+    // Wait for the async data to load
+    await waitFor(() => {
+      expect(screen.getByText('3 bets available')).toBeInTheDocument();
+    });
+
     // Check for Madison-specific bets
     expect(screen.getByText('Madison Weather Tomorrow')).toBeInTheDocument();
     expect(screen.getByText('UW Madison Basketball Game')).toBeInTheDocument();
     expect(screen.getByText('Capitol Construction')).toBeInTheDocument();
   });
 
-  test('displays city-specific bets for Middleton', () => {
+  test('displays city-specific bets for Middleton', async () => {
     const middletonProps = { ...mockProps, cityName: 'Middleton' };
     render(<CityPage {...middletonProps} />);
+    
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('2 bets available')).toBeInTheDocument();
+    });
     
     // Check for Middleton-specific bets
     expect(screen.getByText('Middleton Bets')).toBeInTheDocument();
@@ -117,9 +235,14 @@ describe('CityPage Component Tests', () => {
     expect(screen.getByText('Middleton High School Football')).toBeInTheDocument();
   });
 
-  test('displays city-specific bets for Chicago', () => {
+  test('displays city-specific bets for Chicago', async () => {
     const chicagoProps = { ...mockProps, cityName: 'Chicago' };
     render(<CityPage {...chicagoProps} />);
+    
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('3 bets available')).toBeInTheDocument();
+    });
     
     // Check for Chicago-specific bets
     expect(screen.getByText('Chicago Bets')).toBeInTheDocument();
@@ -136,16 +259,23 @@ describe('CityPage Component Tests', () => {
     expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument(); // Type filter button
   });
 
-  test('renders bet table with correct headers', () => {
+  test('renders bet table with correct headers', async () => {
     render(<CityPage {...mockProps} />);
     
-    // Check table headers (need to be more specific due to duplicate "Entry Fee" text)
-    expect(screen.getByText('Contest')).toBeInTheDocument();
+    // Wait for data to load so table appears
+    await waitFor(() => {
+      expect(screen.getByText('3 bets available')).toBeInTheDocument();
+    });
+    
+    // Check table headers (actual headers from BetListTable component)
+    expect(screen.getByText('Description')).toBeInTheDocument();
     expect(screen.getByText('Type')).toBeInTheDocument();
-    expect(screen.getAllByText('Entry Fee')).toHaveLength(2); // One in filter, one in table header
-    expect(screen.getByText('Total Pool')).toBeInTheDocument();
-    expect(screen.getByText('Entries')).toBeInTheDocument();
+    expect(screen.getByText('Line')).toBeInTheDocument();
+    expect(screen.getByText('Total Bet')).toBeInTheDocument();
     expect(screen.getByText('Start')).toBeInTheDocument();
+    expect(screen.getByText('Action')).toBeInTheDocument();
+    // Entry Fee appears in filter section
+    expect(screen.getByText('Entry Fee')).toBeInTheDocument();
   });
 
   // Navigation Tests
@@ -159,36 +289,54 @@ describe('CityPage Component Tests', () => {
   });
 
   // Filter Tests
-  test('search filter works correctly', () => {
+  test('search filter works correctly', async () => {
     render(<CityPage {...mockProps} />);
+    
+    // Wait for data to load first
+    await waitFor(() => {
+      expect(screen.getByText('3 bets available')).toBeInTheDocument();
+    });
     
     // Find search input and type in it
     const searchInput = screen.getByDisplayValue('');
     fireEvent.change(searchInput, { target: { value: 'Weather' } });
     
-    // Should show weather-related bet
+    // Wait for filter to be applied and check results
+    await waitFor(() => {
+      expect(screen.getByText('Madison Weather Tomorrow')).toBeInTheDocument();
+    });
+  });
+
+  test('displays correct bet count', async () => {
+    render(<CityPage {...mockProps} />);
+    
+    // Wait for data to load, then check Madison has 3 bets
+    await waitFor(() => {
+      expect(screen.getByText('3 bets available')).toBeInTheDocument();
+    });
+  });
+
+  test('displays bet information correctly', async () => {
+    render(<CityPage {...mockProps} />);
+    
+    // Wait for data to load first
+    await waitFor(() => {
+      expect(screen.getByText('3 bets available')).toBeInTheDocument();
+    });
+    
+    // Check that bet details are displayed - these are the betDescription values
     expect(screen.getByText('Madison Weather Tomorrow')).toBeInTheDocument();
+    expect(screen.getByText('UW Madison Basketball Game')).toBeInTheDocument();
+    expect(screen.getByText('Capitol Construction')).toBeInTheDocument();
   });
 
-  test('displays correct bet count', () => {
+  test('handles bet type filter', async () => {
     render(<CityPage {...mockProps} />);
     
-    // Madison should have 3 bets
-    expect(screen.getByText('3 bets available')).toBeInTheDocument();
-  });
-
-  test('displays bet information correctly', () => {
-    render(<CityPage {...mockProps} />);
-    
-    // Check that bet details are displayed
-    expect(screen.getByText('Will it rain in Madison tomorrow?')).toBeInTheDocument();
-    expect(screen.getByText('$5.00')).toBeInTheDocument(); // Entry fee
-    expect(screen.getByText('$150')).toBeInTheDocument(); // Total pool
-    expect(screen.getByText('30/500')).toBeInTheDocument(); // Entries
-  });
-
-  test('handles bet type filter', () => {
-    render(<CityPage {...mockProps} />);
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('3 bets available')).toBeInTheDocument();
+    });
     
     // Find the bet type button and click it (it's a button, not a select)
     const allButton = screen.getByRole('button', { name: 'All' });
@@ -237,8 +385,8 @@ describe('CityPage Component Tests', () => {
     const unknownCityProps = { ...mockProps, cityName: 'unknowncity' };
     render(<CityPage {...unknownCityProps} />);
     
-    // Should render without crashing
-    expect(screen.getByText('Unknowncity Bets')).toBeInTheDocument();
+    // Should render without crashing - city name is lowercase in output
+    expect(screen.getByText('unknowncity Bets')).toBeInTheDocument();
     expect(screen.getByText('No bets found')).toBeInTheDocument();
   });
 
@@ -251,9 +399,14 @@ describe('CityPage Component Tests', () => {
   });
 
   // Dynamic bet types functionality tests
-  test('generates dynamic bet types for Madison', () => {
+  test('generates dynamic bet types for Madison', async () => {
     render(<CityPage {...mockProps} />);
     
+    // Wait for data to load first
+    await waitFor(() => {
+      expect(screen.getByText('3 bets available')).toBeInTheDocument();
+    });
+
     // Madison has weather, sports, and politics bet types
     expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'weather' })).toBeInTheDocument();
@@ -264,9 +417,14 @@ describe('CityPage Component Tests', () => {
     expect(screen.queryByRole('button', { name: 'local' })).not.toBeInTheDocument();
   });
 
-  test('generates dynamic bet types for Middleton', () => {
+  test('generates dynamic bet types for Middleton', async () => {
     const middletonProps = { ...mockProps, cityName: 'Middleton' };
     render(<CityPage {...middletonProps} />);
+    
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('2 bets available')).toBeInTheDocument();
+    });
     
     // Middleton has local and sports bet types
     expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
@@ -278,9 +436,14 @@ describe('CityPage Component Tests', () => {
     expect(screen.queryByRole('button', { name: 'politics' })).not.toBeInTheDocument();
   });
 
-  test('generates dynamic bet types for Chicago', () => {
+  test('generates dynamic bet types for Chicago', async () => {
     const chicagoProps = { ...mockProps, cityName: 'Chicago' };
     render(<CityPage {...chicagoProps} />);
+    
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('3 bets available')).toBeInTheDocument();
+    });
     
     // Chicago has sports, weather, and local bet types
     expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
@@ -292,12 +455,22 @@ describe('CityPage Component Tests', () => {
     expect(screen.queryByRole('button', { name: 'politics' })).not.toBeInTheDocument();
   });
 
-  test('bet type filtering works with dynamic types', () => {
+  test('bet type filtering works with dynamic types', async () => {
     render(<CityPage {...mockProps} />);
+    
+    // Wait for data to load first
+    await waitFor(() => {
+      expect(screen.getByText('3 bets available')).toBeInTheDocument();
+    });
     
     // Click on sports filter
     const sportsButton = screen.getByRole('button', { name: 'sports' });
     fireEvent.click(sportsButton);
+    
+    // Wait for filtering to take effect
+    await waitFor(() => {
+      expect(screen.getByText('1 bet available')).toBeInTheDocument();
+    });
     
     // Should show sports bet but not weather or politics bets
     expect(screen.getByText('UW Madison Basketball Game')).toBeInTheDocument();
@@ -308,6 +481,11 @@ describe('CityPage Component Tests', () => {
   test('resets selected type when switching cities if type not available', async () => {
     const { rerender } = render(<CityPage {...mockProps} />);
     
+    // Wait for Madison data to load
+    await waitFor(() => {
+      expect(screen.getByText('3 bets available')).toBeInTheDocument();
+    });
+    
     // Click on politics filter (available in Madison)
     const politicsButton = screen.getByRole('button', { name: 'politics' });
     fireEvent.click(politicsButton);
@@ -315,6 +493,11 @@ describe('CityPage Component Tests', () => {
     // Switch to Middleton (which doesn't have politics bets)
     const middletonProps = { ...mockProps, cityName: 'Middleton' };
     rerender(<CityPage {...middletonProps} />);
+    
+    // Wait for Middleton data to load
+    await waitFor(() => {
+      expect(screen.getByText('2 bets available')).toBeInTheDocument();
+    });
     
     // Should reset to "All" since politics is not available in Middleton
     // We can verify this by checking that all Middleton bets are shown
@@ -335,21 +518,31 @@ describe('CityPage Component Tests', () => {
   });
 
   // Filter State Persistence Tests
-  test('saves filter state to localStorage when filters change', () => {
+  test('saves filter state to localStorage when filters change', async () => {
     render(<CityPage {...mockProps} />);
+    
+    // Wait for component to mount and initial save to localStorage
+    await waitFor(() => {
+      expect(localStorage.setItem).toHaveBeenCalled();
+    });
+    
+    // Clear the mock to test the change
+    localStorage.setItem.mockClear();
     
     // Change search filter
     const searchInput = screen.getByDisplayValue('');
     fireEvent.change(searchInput, { target: { value: 'weather' } });
     
     // Check that localStorage.setItem was called with filter data
-    expect(localStorage.setItem).toHaveBeenCalledWith(
-      'betAppFilters_madison',
-      expect.stringContaining('"search":"weather"')
-    );
+    await waitFor(() => {
+      expect(localStorage.setItem).toHaveBeenCalledWith(
+        'betAppFilters_madison',
+        expect.stringContaining('"search":"weather"')
+      );
+    });
   });
 
-  test('restores filter state from localStorage on mount', () => {
+  test('restores filter state from localStorage on mount', async () => {
     // Mock stored filter state
     const storedFilters = {
       search: 'basketball',
@@ -363,14 +556,24 @@ describe('CityPage Component Tests', () => {
     
     render(<CityPage {...mockProps} />);
     
+    // Wait for data to load and sports button to appear
+    await waitFor(() => {
+      expect(screen.getByText('1 bet available')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'sports' })).toBeInTheDocument();
+    });
+    
     // Should restore the search value
     expect(screen.getByDisplayValue('basketball')).toBeInTheDocument();
     
     // Should restore the selected type (sports button should be active)
-    expect(screen.getByRole('button', { name: 'sports' })).toHaveClass('btn-warning');
+    // Wait a bit for the restoration logic to complete
+    await waitFor(() => {
+      const sportsButton = screen.getByRole('button', { name: 'sports' });
+      expect(sportsButton).toHaveClass('btn-warning');
+    }, { timeout: 3000 });
   });
 
-  test('resets filters when switching to different city', () => {
+  test('resets filters when switching to different city', async () => {
     // Mock stored filters for Madison
     const madisonFilters = {
       search: 'weather',
@@ -380,21 +583,30 @@ describe('CityPage Component Tests', () => {
       timestamp: new Date().toISOString()
     };
     
-    localStorage.getItem.mockReturnValue(JSON.stringify(madisonFilters));
+    localStorage.getItem.mockImplementation((key) => {
+      if (key === 'betAppFilters_madison') {
+        return JSON.stringify(madisonFilters);
+      }
+      return null; // No stored filters for other cities
+    });
     
     const { rerender } = render(<CityPage {...mockProps} />);
     
-    // Should restore Madison filters
-    expect(screen.getByDisplayValue('weather')).toBeInTheDocument();
-    
-    // Mock no stored filters for Chicago
-    localStorage.getItem.mockReturnValue(null);
+    // Wait for Madison data and filters to load
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('weather')).toBeInTheDocument();
+    });
     
     // Switch to Chicago
     const chicagoProps = { ...mockProps, cityName: 'Chicago' };
     rerender(<CityPage {...chicagoProps} />);
     
-    // Should reset to default values
+    // Wait for Chicago data to load and filters to reset
+    await waitFor(() => {
+      expect(screen.getByText('3 bets available')).toBeInTheDocument();
+    });
+    
+    // Should reset to default values since no stored filters for Chicago
     expect(screen.getByDisplayValue('')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'All' })).toHaveClass('btn-warning');
   });
@@ -447,24 +659,38 @@ describe('CityPage Component Tests', () => {
     );
   });
 
-  test('preserves filter state through multiple filter changes', () => {
+  test('preserves filter state through multiple filter changes', async () => {
     render(<CityPage {...mockProps} />);
+    
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('3 bets available')).toBeInTheDocument();
+    });
+    
+    // Clear initial localStorage calls
+    localStorage.setItem.mockClear();
     
     // Change multiple filters
     const searchInput = screen.getByDisplayValue('');
     fireEvent.change(searchInput, { target: { value: 'test search' } });
     
+    // Wait for search change to save
+    await waitFor(() => {
+      expect(localStorage.setItem).toHaveBeenCalledWith(
+        'betAppFilters_madison',
+        expect.stringContaining('"search":"test search"')
+      );
+    });
+    
     const sportsButton = screen.getByRole('button', { name: 'sports' });
     fireEvent.click(sportsButton);
     
-    // Should save updated state with all changes
-    expect(localStorage.setItem).toHaveBeenLastCalledWith(
-      'betAppFilters_madison',
-      expect.stringContaining('"search":"test search"')
-    );
-    expect(localStorage.setItem).toHaveBeenLastCalledWith(
-      'betAppFilters_madison',
-      expect.stringContaining('"selectedType":"sports"')
-    );
+    // Wait for type change to save
+    await waitFor(() => {
+      expect(localStorage.setItem).toHaveBeenCalledWith(
+        'betAppFilters_madison',
+        expect.stringContaining('"selectedType":"sports"')
+      );
+    });
   });
 });

@@ -26,24 +26,24 @@ describe('BetListTable Component Tests', () => {
     // Mock data and functions
     const mockBets = [
       {
-        id: 1,
-        title: 'Rain Prediction',
-        bet_type: 'weather',
-        entry_fee: 5.0,
-        total_amount_bet: 125.50,
-        entries: '25/100',
-        bet_start: 'Today 6:00p',
-        description: 'Predict if it will rain tomorrow'
+        betId: 1,
+        betDescription: 'Rain Prediction',
+        betType: 'weather',
+        setLine: '50%',
+        moneylineOdds: '-110',
+        totalAmountBet: 125.50,
+        betStart: '2025-11-07T18:00:00.000Z',
+        betClose: '2025-11-08T18:00:00.000Z'
       },
       {
-        id: 2,
-        title: 'Temperature Bet',
-        bet_type: 'temp',
-        entry_fee: 10.0,
-        total_amount_bet: 250.00,
-        entries: '50/200',
-        bet_start: 'Today 8:00p',
-        description: 'Guess the max temperature'
+        betId: 2,
+        betDescription: 'Temperature Bet',
+        betType: 'temp',
+        setLine: '75°F',
+        moneylineOdds: '+120',
+        totalAmountBet: 250.00,
+        betStart: '2025-11-07T20:00:00.000Z',
+        betClose: '2025-11-08T20:00:00.000Z'
       }
     ];
     const mockOnSelectBet = jest.fn();
@@ -57,8 +57,12 @@ describe('BetListTable Component Tests', () => {
       render(<BetListTable bets={mockBets} onSelectBet={mockOnSelectBet} />);
       expect(screen.getByText('Rain Prediction')).toBeInTheDocument();
       expect(screen.getByText('Temperature Bet')).toBeInTheDocument();
-      expect(screen.getByText('WEATHER')).toBeInTheDocument();
-      expect(screen.getByText('TEMP')).toBeInTheDocument();
+      expect(screen.getByText('weather')).toBeInTheDocument();
+      expect(screen.getByText('temp')).toBeInTheDocument();
+      expect(screen.getByText('50%')).toBeInTheDocument();
+      expect(screen.getByText('75°F')).toBeInTheDocument();
+      expect(screen.getByText('-110')).toBeInTheDocument();
+      expect(screen.getByText('+120')).toBeInTheDocument();
     });
 
     // Interaction Tests

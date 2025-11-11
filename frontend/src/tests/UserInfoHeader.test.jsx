@@ -69,8 +69,8 @@ jest.mock('../components/Drawer', () => {
         <h5>Navigation</h5>
         <button onClick={() => onNavigate && onNavigate('landing')}>Landing Page</button>
         <button onClick={() => onNavigate && onNavigate('Madison')}>Madison</button>
-        <button onClick={() => onNavigate && onNavigate('Middleton')}>Middleton</button>
-        <button onClick={() => onNavigate && onNavigate('Chicago')}>Chicago</button>
+        <button onClick={() => onNavigate && onNavigate('Los Angeles')}>Los Angeles</button>
+        <button onClick={() => onNavigate && onNavigate('New York City')}>New York City</button>
         <button onClick={() => onNavigate && onNavigate('logout')} style={{color: 'red'}}>Logout</button>
         {currentPage && <span>Current: {currentPage}</span>}
         <button onClick={onClose}>Close</button>
@@ -165,8 +165,8 @@ describe('UserInfoHeader Component Tests', () => {
     // Check all navigation links
     expect(screen.getByText('Landing Page')).toBeInTheDocument();
     expect(screen.getByText('Madison')).toBeInTheDocument();
-    expect(screen.getByText('Middleton')).toBeInTheDocument();
-    expect(screen.getByText('Chicago')).toBeInTheDocument();
+    expect(screen.getByText('Los Angeles')).toBeInTheDocument();
+    expect(screen.getByText('New York City')).toBeInTheDocument();
     expect(screen.getByText('Logout')).toBeInTheDocument();
   });
 
@@ -218,28 +218,28 @@ describe('UserInfoHeader Component Tests', () => {
     expect(mockProps.onNavigateToCity).toHaveBeenCalledWith('Madison');
   });
 
-  test('Middleton navigation works', () => {
+  test('Los Angeles navigation works', () => {
     render(<UserInfoHeader {...mockProps} />);
     
     const menuButton = screen.getByText('☰');
     fireEvent.click(menuButton);
     
-    const middletonLink = screen.getByText('Middleton');
-    fireEvent.click(middletonLink);
+    const losAngelesLink = screen.getByText('Los Angeles');
+    fireEvent.click(losAngelesLink);
     
-    expect(mockProps.onNavigateToCity).toHaveBeenCalledWith('Middleton');
+    expect(mockProps.onNavigateToCity).toHaveBeenCalledWith('Los Angeles');
   });
 
-  test('Chicago navigation works', () => {
+  test('New York City navigation works', () => {
     render(<UserInfoHeader {...mockProps} />);
     
     const menuButton = screen.getByText('☰');
     fireEvent.click(menuButton);
     
-    const chicagoLink = screen.getByText('Chicago');
-    fireEvent.click(chicagoLink);
+    const newYorkCityLink = screen.getByText('New York City');
+    fireEvent.click(newYorkCityLink);
     
-    expect(mockProps.onNavigateToCity).toHaveBeenCalledWith('Chicago');
+    expect(mockProps.onNavigateToCity).toHaveBeenCalledWith('New York City');
   });
 
   // State Management Tests

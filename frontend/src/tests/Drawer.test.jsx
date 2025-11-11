@@ -132,8 +132,8 @@ describe('Drawer Component Tests', () => {
     expect(screen.getByText('Landing Page')).toBeInTheDocument();
     expect(screen.getByText('User Page')).toBeInTheDocument();
     expect(screen.getByText('Madison')).toBeInTheDocument();
-    expect(screen.getByText('Middleton')).toBeInTheDocument();
-    expect(screen.getByText('Chicago')).toBeInTheDocument();
+    expect(screen.getByText('Los Angeles')).toBeInTheDocument();
+    expect(screen.getByText('New York City')).toBeInTheDocument();
     expect(screen.getByText('Logout')).toBeInTheDocument();
   });
 
@@ -168,23 +168,23 @@ describe('Drawer Component Tests', () => {
     expect(mockProps.onNavigate).toHaveBeenCalledTimes(1);
   });
 
-  test('Middleton navigation works', () => {
+  test('Los Angeles navigation works', () => {
     render(<Drawer {...mockProps} />);
     
-    const middletonLink = screen.getByText('Middleton');
-    fireEvent.click(middletonLink);
+    const losAngelesLink = screen.getByText('Los Angeles');
+    fireEvent.click(losAngelesLink);
     
-    expect(mockProps.onNavigate).toHaveBeenCalledWith('Middleton');
+    expect(mockProps.onNavigate).toHaveBeenCalledWith('Los Angeles');
     expect(mockProps.onNavigate).toHaveBeenCalledTimes(1);
   });
 
-  test('Chicago navigation works', () => {
+  test('New York City navigation works', () => {
     render(<Drawer {...mockProps} />);
     
-    const chicagoLink = screen.getByText('Chicago');
-    fireEvent.click(chicagoLink);
+    const newYorkCityLink = screen.getByText('New York City');
+    fireEvent.click(newYorkCityLink);
     
-    expect(mockProps.onNavigate).toHaveBeenCalledWith('Chicago');
+    expect(mockProps.onNavigate).toHaveBeenCalledWith('New York City');
     expect(mockProps.onNavigate).toHaveBeenCalledTimes(1);
   });
 
@@ -292,8 +292,8 @@ describe('Drawer Component Tests', () => {
     // This is tested implicitly through the navigation functionality
     expect(screen.getByText('Landing Page')).toBeInTheDocument();
     expect(screen.getByText('Madison')).toBeInTheDocument();
-    expect(screen.getByText('Middleton')).toBeInTheDocument();
-    expect(screen.getByText('Chicago')).toBeInTheDocument();
+    expect(screen.getByText('Los Angeles')).toBeInTheDocument();
+    expect(screen.getByText('New York City')).toBeInTheDocument();
     expect(screen.getByText('Logout')).toBeInTheDocument();
   });
 

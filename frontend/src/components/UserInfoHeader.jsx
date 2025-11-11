@@ -23,12 +23,22 @@ import Drawer from "./Drawer";
  *   - onLogout: function to handle user logout
  *   - onNavigateToCity: function to navigate to city pages
  *   - onNavigateToLanding: function to navigate to landing page
+ *   - onRefreshBalance: function to refresh user balance from backend
  */
 
 
-function UserInfoHeader({ username, balance, currentPage, onLogout, onNavigateToCity, onNavigateToLanding, onNavigateToUser }) {
+function UserInfoHeader({ username, balance, currentPage, onLogout, onNavigateToCity, onNavigateToLanding, onNavigateToUser, onRefreshBalance }) {
   // Drawer state
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Log balance updates to console
+  React.useEffect(() => {
+    if (username && balance !== undefined) {
+      console.log(`💰 UserInfoHeader - Displaying balance for ${username}: $${balance.toFixed(2)}`);
+    } else if (username && balance === undefined) {
+      console.log(`⚠️ UserInfoHeader - Balance undefined for ${username}`);
+    }
+  }, [username, balance]);
 
   // Handle navigation from drawer
   const handleDrawerNavigation = (page) => {
@@ -116,8 +126,22 @@ function UserInfoHeader({ username, balance, currentPage, onLogout, onNavigateTo
               <span>
                 <strong>{username}</strong>
               </span>
-              <Badge bg="info" text="dark">
-                ${balance.toFixed(2)}
+              <Badge bg="info" text="dark" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                ${balance !== undefined && balance !== null ? balance.toFixed(2) : '0.00'}
+                {onRefreshBalance && (
+                  <span 
+                    onClick={() => onRefreshBalance(username)}
+                    style={{ 
+                      cursor: 'pointer', 
+                      fontSize: '0.8em',
+                      opacity: 0.8,
+                      marginLeft: '3px'
+                    }}
+                    title="Refresh balance"
+                  >
+                    ↻
+                  </span>
+                )}
               </Badge>
             </div>
           )}

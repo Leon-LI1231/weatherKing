@@ -4,6 +4,9 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
 
     private final UserService userService;
@@ -23,9 +27,13 @@ public class UserController {
     // Handle user registration
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
-        userService.createUser(user);
+        String result = userService.createUser(user);
+        if (result.equals("Username already exists")) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", result));
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Map.of("message", "User registered successfully."));
+                .body(Map.of("message", result));
     }
 
     // Handle user login
@@ -37,5 +45,24 @@ public class UserController {
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("message", "Invalid credentials."));
+    }
+
+    // Get user information by username
+    @GetMapping("/user/{username}")
+    public ResponseEntity<?> getUserInfo(@PathVariable String username) {
+        User user = userService.getUserByUsername(username);
+        if (user != null) {
+            // Return user info without password
+            Map<String, Object> userInfo = Map.of(
+                "uid", user.getUid(),
+                "username", user.getUsername(),
+                "email", user.getEmail(),
+                "balanceUsd", user.getBalanceUsd(),
+                "createdAt", user.getCreatedAt()
+            );
+            return ResponseEntity.ok(userInfo);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", "User not found."));
     }
 }

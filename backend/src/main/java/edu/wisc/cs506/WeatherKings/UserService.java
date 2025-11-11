@@ -31,4 +31,9 @@ public class UserService {
                 .map(existing -> passwordEncoder.matches(rawPassword, existing.getPassword()))
                 .orElse(false);
     }
+
+    // get user by username
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username).orElse(null);
+    }
 }

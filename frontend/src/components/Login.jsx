@@ -36,13 +36,24 @@ function Login({ onNavigateToCreateAccount, onSuccessfulLogin }) {
                 headers: {  'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
             });
-            const text = await response.text();
-            setMessage(text);
-            if (text === 'Login successful!') {
-                onSuccessfulLogin({ username }); // Navigate to dashboard
+            
+            if (response.ok) {
+                const data = await response.json();
+                setMessage(data.message);
+                
+                if (data.message === 'Login successful.') {
+                    console.log('🎉 Login successful for username:', username);
+                    console.log('🚀 Calling onSuccessfulLogin with userData:', { username });
+                    onSuccessfulLogin({ username }); // Navigate to dashboard
+                }
+            } else {
+                // Handle HTTP error responses (like 401 Unauthorized)
+                const errorData = await response.json();
+                setMessage(errorData.message || 'Login failed. Please try again.');
             }
         } catch (error) {
-            setMessage('An error occurred. Please try again.');
+            console.error('Login error:', error);
+            setMessage('Unable to connect to server. Please try again.');
         }
     };
 

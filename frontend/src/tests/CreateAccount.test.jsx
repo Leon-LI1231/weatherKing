@@ -76,14 +76,16 @@ describe('CreateAccount Component Tests', () => {
         // Mock successful API response
         fetch.mockResolvedValueOnce({
             ok: true,
-            text: async () => 'Account created successfully!',
+            json: async () => ({ message: 'Account created successfully!' }),
         });
         render(<CreateAccount onNavigateToLogin={mockOnNavigateToLogin} />);
         const usernameInput = screen.getByPlaceholderText('Username');
+        const emailInput = screen.getByPlaceholderText('Email');
         const passwordInput = screen.getByPlaceholderText('Password');
         const createButton = screen.getByRole('button', { name: /Create Account/i });
         // Fill in form
         fireEvent.change(usernameInput, { target: { value: 'newuser' } });
+        fireEvent.change(emailInput, { target: { value: 'newuser@example.com' } });
         fireEvent.change(passwordInput, { target: { value: 'newpassword' } });
         fireEvent.click(createButton);
         // Wait for success message to appear and navigation function to be called
@@ -92,21 +94,23 @@ describe('CreateAccount Component Tests', () => {
         });
         await waitFor(() => {
             expect(mockOnNavigateToLogin).toHaveBeenCalled();
-        });
+        }, { timeout: 3000 });
     });
 
     test('account creation with existing username displays error message', async () => {
         // Mock API response for existing username
         fetch.mockResolvedValueOnce({
-            ok: true,
-            text: async () => 'Username already exists',
+            ok: false,
+            json: async () => ({ message: 'Username already exists' }),
         });
         render(<CreateAccount onNavigateToLogin={mockOnNavigateToLogin} />);
         const usernameInput = screen.getByPlaceholderText('Username');
+        const emailInput = screen.getByPlaceholderText('Email');
         const passwordInput = screen.getByPlaceholderText('Password');
         const createButton = screen.getByRole('button', { name: /Create Account/i });
         // Fill in form with existing username
         fireEvent.change(usernameInput, { target: { value: 'existinguser' } });
+        fireEvent.change(emailInput, { target: { value: 'existing@example.com' } });
         fireEvent.change(passwordInput, { target: { value: 'somepassword' } });
         fireEvent.click(createButton);
         // Wait for error message to appear
