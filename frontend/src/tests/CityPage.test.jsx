@@ -358,8 +358,13 @@ describe('CityPage Component Tests', () => {
     expect(screen.getByText('Madison Bets')).toBeInTheDocument();
   });
 
-  test('shows no bets message when filters result in empty list', () => {
+  test('shows no bets message when filters result in empty list', async () => {
     render(<CityPage {...mockProps} />);
+    
+    // Wait for initial loading to complete
+    await waitFor(() => {
+      expect(screen.queryByText('Loading bets...')).not.toBeInTheDocument();
+    });
     
     // Search for something that doesn't exist
     const searchInput = screen.getByDisplayValue('');
@@ -381,9 +386,14 @@ describe('CityPage Component Tests', () => {
   });
 
   // Edge Cases
-  test('handles unknown city gracefully', () => {
+  test('handles unknown city gracefully', async () => {
     const unknownCityProps = { ...mockProps, cityName: 'unknowncity' };
     render(<CityPage {...unknownCityProps} />);
+    
+    // Wait for initial loading to complete
+    await waitFor(() => {
+      expect(screen.queryByText('Loading bets...')).not.toBeInTheDocument();
+    });
     
     // Should render without crashing - city name is lowercase in output
     expect(screen.getByText('unknowncity Bets')).toBeInTheDocument();

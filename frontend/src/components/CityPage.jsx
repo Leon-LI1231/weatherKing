@@ -9,7 +9,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
  *                    CITY PAGE COMPONENT
  * =======================================================
  *
- * This component creates a dedicated page for each city (Madison, Middleton, Chicago).
+ * This component creates a dedicated page for each city (Madison, New York, Los Angeles).
  * It displays:
  *   - The city name as a header
  *   - A list of available bets for that city
@@ -18,7 +18,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
  *   - Back navigation to landing page
  *
  * Props:
- *   - cityName: String name of the city (e.g., "Madison", "Middleton", "Chicago")
+ *   - cityName: String name of the city (e.g., "Madison", "New York", "Los Angeles")
  *   - user: User object containing user information
  *   - onNavigateBack: Function to navigate back to landing page
  *   - onLogout: Function to handle user logout
@@ -65,6 +65,7 @@ function CityPage({ cityName, user, onNavigateBack, onLogout }) {
   const [maxFee, setMaxFee] = useState("100");
   const [bets, setBets] = useState([]);
   const [filtersInitialized, setFiltersInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // dynamic types
   const availableBetTypes = ["All", ...new Set(bets.map((b) => b.betType))];
@@ -85,20 +86,61 @@ function CityPage({ cityName, user, onNavigateBack, onLogout }) {
 
   useEffect(() => {
     const fetchBets = async () => {
+      if (!cityName) return;
+      
+      setIsLoading(true);
       try {
+        console.log("Fetching daily bets...");
         const response = await fetch("http://localhost:8080/api/bets/daily");
         if (!response.ok) throw new Error(`HTTP error! ${response.status}`);
         const data = await response.json();
 
-        const cityBets = data.filter(
-          (bet) =>
-            bet.cityName &&
-            cityName &&
-            bet.cityName.toLowerCase().includes(cityName.toLowerCase())
-        );
-        setBets(cityBets);
+        // If no bets are returned, generate daily bets and retry
+        if (data.length === 0) {
+          console.log("No daily bets found, generating daily bets...");
+          try {
+            const generateResponse = await fetch("http://localhost:8080/api/bets/generate-daily", {
+              method: "POST"
+            });
+            
+            console.log("Daily bets generated successfully, fetching updated bets...");
+            
+            // Retry fetching daily bets after generation
+            const retryResponse = await fetch("http://localhost:8080/api/bets/daily");
+            if (!retryResponse.ok) throw new Error(`HTTP error! ${retryResponse.status}`);
+            const retryData = await retryResponse.json();
+            
+            console.log("Fetched updated bets:", retryData.length, "total bets");
+            
+            const cityBets = retryData.filter(
+              (bet) =>
+                bet.cityName &&
+                cityName &&
+                bet.cityName.toLowerCase().includes(cityName.toLowerCase())
+            );
+            
+            console.log("Filtered bets for", cityName + ":", cityBets.length, "bets");
+            setBets(cityBets);
+          } catch (generateError) {
+            console.error("Failed to generate or fetch daily bets:", generateError);
+            setBets([]); // Set empty array if generation fails
+          }
+        } else {
+          console.log("Found existing daily bets:", data.length, "total bets");
+          const cityBets = data.filter(
+            (bet) =>
+              bet.cityName &&
+              cityName &&
+              bet.cityName.toLowerCase().includes(cityName.toLowerCase())
+          );
+          console.log("Filtered bets for", cityName + ":", cityBets.length, "bets");
+          setBets(cityBets);
+        }
       } catch (error) {
         console.error("Failed to fetch bets:", error);
+        setBets([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -170,7 +212,14 @@ function CityPage({ cityName, user, onNavigateBack, onLogout }) {
           />
         </Col>
         <Col md={9}>
-          {filteredBets.length > 0 ? (
+          {isLoading ? (
+            <div className="text-center">
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-2 text-muted">Loading bets...</p>
+            </div>
+          ) : filteredBets.length > 0 ? (
             <BetListTable bets={filteredBets} />
           ) : (
             <div className="text-center text-muted">
