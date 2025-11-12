@@ -31,7 +31,12 @@ import { Form, Button } from "react-bootstrap";
 function BetFilters({ search, setSearch, selectedType, setSelectedType, minFee, setMinFee, maxFee, setMaxFee, availableBetTypes }) {
 
   const betTypes = availableBetTypes || ["All"];
-  const entryFees = ["Free", 1, 2, 3, 5, 10, 20, 40, 60, 100];
+  // Replace entry fee filtering with odds filtering (American moneyline)
+  const oddsOptions = [
+      "Any",
+      -500, -300, -200, -150, -120, -110, -105, -100,
+      100, 120, 150, 200, 300, 500
+  ];
 
   return (
     <div
@@ -54,17 +59,17 @@ function BetFilters({ search, setSearch, selectedType, setSelectedType, minFee, 
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label>Entry Fee</Form.Label>
+        <Form.Label>Odds</Form.Label>
         <div style={{ display: "flex", gap: "10px" }}>
           <Form.Select value={minFee} onChange={(e) => setMinFee(e.target.value)}>
-            {entryFees.map((fee) => (
-              <option key={fee}>{fee}</option>
+            {oddsOptions.map((o) => (
+              <option key={o}>{o}</option>
             ))}
           </Form.Select>
           <span style={{ alignSelf: "center" }}>to</span>
           <Form.Select value={maxFee} onChange={(e) => setMaxFee(e.target.value)}>
-            {entryFees.map((fee) => (
-              <option key={fee}>{fee}</option>
+            {oddsOptions.map((o) => (
+              <option key={o}>{o}</option>
             ))}
           </Form.Select>
         </div>

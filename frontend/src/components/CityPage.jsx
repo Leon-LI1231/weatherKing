@@ -61,8 +61,8 @@ function CityPage({ cityName, user, onNavigateBack, onLogout }) {
 
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState("All");
-  const [minFee, setMinFee] = useState("Free");
-  const [maxFee, setMaxFee] = useState("100");
+  const [minFee, setMinFee] = useState("Any");
+  const [maxFee, setMaxFee] = useState("Any");
   const [bets, setBets] = useState([]);
   const [filtersInitialized, setFiltersInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -149,8 +149,8 @@ function CityPage({ cityName, user, onNavigateBack, onLogout }) {
       const storedFilters = getStoredFilters(cityName);
       setSearch(storedFilters?.search || "");
       setSelectedType(storedFilters?.selectedType || "All");
-      setMinFee(storedFilters?.minFee || "Free");
-      setMaxFee(storedFilters?.maxFee || "100");
+      setMinFee(storedFilters?.minFee || "Any");
+      setMaxFee(storedFilters?.maxFee || "Any");
       setFiltersInitialized(true);
       
       fetchBets();
@@ -172,11 +172,11 @@ function CityPage({ cityName, user, onNavigateBack, onLogout }) {
     .filter((b) => b.betDescription?.toLowerCase().includes(search.toLowerCase()))
     .filter((b) => (selectedType === "All" ? true : b.betType === selectedType))
     .filter((b) => {
-      const min = minFee === "Free" ? 0 : parseFloat(minFee);
-      const max = maxFee === "Free" ? 0 : parseFloat(maxFee);
-      const fee = b.setLine ?? 0;
-      return fee >= min && fee <= max;
-    });
+        const min = minFee === "Any" ? -Infinity : parseFloat(minFee);
+        const max = maxFee === "Any" ?  Infinity : parseFloat(maxFee);
+        const odds = parseFloat(b.moneylineOdds ?? 0);
+        return odds >= min && odds <= max;
+      });
 
   return (
     <Container style={{ marginTop: "140px", textAlign: "center" }}>

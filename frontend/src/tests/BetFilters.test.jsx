@@ -72,9 +72,9 @@ describe('BetFilters Component Tests', () => {
     setSearch: mockSetSearch,
     selectedType: 'All',
     setSelectedType: mockSetSelectedType,
-    minFee: 'Free',
+    minFee: 'Any',
     setMinFee: mockSetMinFee,
-    maxFee: '100',
+    maxFee: 'Any',
     setMaxFee: mockSetMaxFee,
     availableBetTypes: ['All', 'weather', 'sports', 'politics', 'local']
   };
