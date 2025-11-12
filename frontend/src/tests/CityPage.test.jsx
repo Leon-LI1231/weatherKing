@@ -275,7 +275,7 @@ describe('CityPage Component Tests', () => {
     expect(screen.getByText('Start')).toBeInTheDocument();
     expect(screen.getByText('Action')).toBeInTheDocument();
     // Entry Fee appears in filter section
-    expect(screen.getByText('Entry Fee')).toBeInTheDocument();
+    expect(screen.getByText('Odds')).toBeInTheDocument();
   });
 
   // Navigation Tests

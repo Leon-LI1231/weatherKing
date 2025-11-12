@@ -377,15 +377,7 @@ function App() {
           onNavigateToCreateAccount={navigateToCreateAccount}
           onSuccessfulLogin={navigateToLandingPage}
         />
-        <button onClick={() => navigateToLandingPage({ 
-          username: "TestUser", 
-          balanceUsd: 1000.00,
-          email: "testuser@example.com",
-          uid: "test-uid-123",
-          createdAt: new Date().toISOString()
-        })}>
-          Temporary button to get to landing page
-        </button>
+
         </div>
         
       );
