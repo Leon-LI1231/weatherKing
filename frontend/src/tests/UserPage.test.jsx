@@ -99,3 +99,26 @@ test("table header has sticky style", () => {
 });
 
 });
+
+// Test 7: shows initial loading or empty table before data loads
+test("shows empty table state before mock data loads", () => {
+  render(<UserPage user={user} />);
+  const table = screen.getByRole("table");
+
+  const rows = within(table).getAllByRole("row");
+  expect(rows.length).toBe(1); // only header
+});
+
+// Test 8: verifies each bet type A/B/C appears once
+test("renders bet types A, B, and C each exactly once", async () => {
+  render(<UserPage user={user} />);
+
+  await waitFor(() => {
+    expect(screen.getAllByText("A").length).toBe(1);
+    expect(screen.getAllByText("B").length).toBe(1);
+    expect(screen.getAllByText("C").length).toBe(1);
+  });
+});
+
+
+
