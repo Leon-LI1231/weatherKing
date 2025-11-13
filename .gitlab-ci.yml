@@ -92,6 +92,36 @@ unit_test_frontend:
   rules:
     - changes: [frontend/**]
 
+ # Backend JUnit tests (Gradle)
+unit_test_backend:
+  stage: unit_test
+  image: eclipse-temurin:21-jdk
+  tags: [dind]
+  before_script:
+    - cd backend
+    - dos2unix ./gradlew || echo "dos2unix not installed, skipping"
+    - chmod +x ./gradlew
+  script:
+    - ./gradlew test
+  artifacts:
+    when: always
+    reports:
+      junit: backend/build/test-results/test/*.xml
+    paths:
+      - backend/build/reports/tests/test/
+    expire_in: 1 week
+  cache:
+    key: ${CI_PROJECT_PATH_SLUG}-${CI_COMMIT_REF_SLUG}-gradle
+    paths:
+      - backend/.gradle/caches/
+      - backend/.gradle/wrapper/
+    policy: pull-push
+  rules:
+    - changes:
+        - backend/**
+        - .gitlab-ci.yml
+
+        
 
 ######################
 # 3) Build (main only)
