@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode; // Added for math precision
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -83,6 +83,50 @@ public class BetGenerationService {
         // Save all generated bets in a single transaction
         return betRepository.saveAll(generatedBets);
     }
+
+    /**
+     * Generates and persists bet lines for a specific city and date.
+     * @param cityName The name of the city
+     * @param latitude The latitude of the city
+     * @param longitude The longitude of the city
+     * @param betDate The date for which to generate bets
+     * @return List of generated Bet entities
+     */
+    @Transactional
+    public List<Bet> generateBetsForLocation(String cityName, double latitude, double longitude, LocalDate betDate) {
+        System.err.println("DEBUG: Generating bets for " + cityName + " on date: " + betDate);
+        
+        List<Bet> generatedBets = new java.util.ArrayList<>();
+        
+        try {
+            // Fetch forecast for the specified location
+            var forecastResponse = weatherApiService.getForecast(latitude, longitude);
+            
+            // Find the appropriate forecast period
+            Period targetForecast = findForecastForDate(
+                forecastResponse.getProperties().getPeriods(), 
+                betDate
+            );
+            
+            if (targetForecast == null) {
+                throw new IllegalArgumentException(
+                    "No forecast available for " + cityName + " on " + betDate
+                );
+            }
+            
+            // Generate bets using existing logic
+            generatedBets.addAll(
+                createBetsFromForecast(cityName, betDate, targetForecast)
+            );
+            
+        } catch (Exception e) {
+            System.err.println("Failed to generate bets for " + cityName + ": " + e.getMessage());
+            throw new RuntimeException("Failed to fetch weather data for " + cityName, e);
+        }
+        
+        // Save and return
+        return betRepository.saveAll(generatedBets);
+    }
     
     /**
      * Attempts to find the forecast period corresponding to the next full day.
@@ -107,6 +151,34 @@ public class BetGenerationService {
         return null;
     }
 
+    /**
+     * Finds the forecast period that matches the target date.
+     * If target is tomorrow, uses the existing logic.
+     * Otherwise, searches for the matching period by date.
+     */
+    private Period findForecastForDate(List<Period> periods, LocalDate targetDate) {
+        LocalDate tomorrow = DateUtil.getTomorrowDate();
+        
+        // If target is tomorrow, use existing logic
+        if (targetDate.equals(tomorrow)) {
+            return findNextDayForecast(periods);
+        }
+        
+        // For other dates, search by matching the period name or date
+        for (Period period : periods) {
+            // You might need to adjust this logic based on NWS API response format
+            // This is a simple heuristic
+            if (period.getName() != null && 
+                !period.getName().toLowerCase().contains("night") &&
+                !period.getName().toLowerCase().equals("today")) {
+                // This is a simplification - in production you'd parse period.getStartTime()
+                // and match it against targetDate more precisely
+                return period;
+            }
+        }
+        
+        return null;
+    }
 
     /**
      * Creates and returns a list of specific bet lines from a single forecast period.

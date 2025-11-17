@@ -35,4 +35,19 @@ public class BetService {
         
         return existingBets;
     }
+
+    /**
+     * Retrieves all bet lines for a specific city and date.
+     * @param cityName The name of the city
+     * @param betDate The date of the bets
+     * @return List of Bet entities
+     */
+    public List<Bet> getBetsForCityAndDate(String cityName, LocalDate betDate) {
+        List<Bet> allBetsForDate = betRepository.findByBetDate(betDate);
+        
+        // Filter by city name
+        return allBetsForDate.stream()
+                .filter(bet -> bet.getCityName().equalsIgnoreCase(cityName))
+                .toList();
+    }
 }
