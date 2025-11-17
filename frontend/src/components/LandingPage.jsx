@@ -22,7 +22,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
  *   - Add bet placement modal triggered by "ENTER" button
  */
 
-function LandingPage({ user, onLogout, onNavigateToCity }) {
+function LandingPage({ onNavigateToCity }) {
   return (
 
       <Container style={{ marginTop: "140px", textAlign: "center" }}>

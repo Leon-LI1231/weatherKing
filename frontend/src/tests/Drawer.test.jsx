@@ -49,11 +49,13 @@ import Drawer from '../components/Drawer';
 
 // Mock Bootstrap components
 jest.mock('react-bootstrap', () => {
-  const MockOffcanvas = ({ show, onHide, children }) => show ? (
-    <div className="offcanvas" data-testid="offcanvas">
-      {children}
-    </div>
-  ) : null;
+  const MockOffcanvas = ({ show,  children }) =>
+    show ? (
+      <div className="offcanvas" data-testid="offcanvas">
+        {children}
+      </div>
+    ) : null;
+  MockOffcanvas.displayName = "MockOffcanvas";
 
   MockOffcanvas.Header = ({ closeButton, children }) => (
     <div className="offcanvas-header">
@@ -61,19 +63,28 @@ jest.mock('react-bootstrap', () => {
       {closeButton && <button className="btn-close" onClick={() => {}} />}
     </div>
   );
+  MockOffcanvas.Header.displayName = "MockOffcanvasHeader";
 
-  MockOffcanvas.Title = ({ children }) => <h5 className="offcanvas-title">{children}</h5>;
-  MockOffcanvas.Body = ({ children }) => <div className="offcanvas-body">{children}</div>;
+  MockOffcanvas.Title = ({ children }) => (
+    <h5 className="offcanvas-title">{children}</h5>
+  );
+  MockOffcanvas.Title.displayName = "MockOffcanvasTitle";
+
+  MockOffcanvas.Body = ({ children }) => (
+    <div className="offcanvas-body">{children}</div>
+  );
+  MockOffcanvas.Body.displayName = "MockOffcanvasBody";
 
   const MockNav = ({ defaultActiveKey, className, children }) => (
-    <div className={`nav ${className || ''}`} data-active-key={defaultActiveKey}>
+    <div className={`nav ${className || ""}`} data-active-key={defaultActiveKey}>
       {children}
     </div>
   );
+  MockNav.displayName = "MockNav";
 
   MockNav.Link = ({ eventKey, onClick, children, style }) => (
-    <button 
-      className="nav-link" 
+    <button
+      className="nav-link"
       data-event-key={eventKey}
       onClick={onClick}
       style={style}
@@ -81,12 +92,14 @@ jest.mock('react-bootstrap', () => {
       {children}
     </button>
   );
+  MockNav.Link.displayName = "MockNavLink";
 
   return {
     Offcanvas: MockOffcanvas,
     Nav: MockNav
   };
 });
+
 
 describe('Drawer Component Tests', () => {
   const mockProps = {
