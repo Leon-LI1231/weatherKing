@@ -20,6 +20,9 @@ public class UserService {
         if (userRepository.existsByUsername(user.getUsername())) {
             return "Username already exists";
         }
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return "Email already exists";
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         return "Account created successfully!";

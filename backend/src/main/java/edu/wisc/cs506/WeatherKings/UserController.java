@@ -28,7 +28,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         String result = userService.createUser(user);
-        if (result.equals("Username already exists")) {
+        if (result.equals("Username already exists") || result.equals("Email already exists")) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("message", result));
         }
