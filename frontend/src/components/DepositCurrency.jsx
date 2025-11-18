@@ -29,7 +29,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
  *  - username: username of the user making the deposit
  */
 
-const DepositCurrency = ({ onDeposit, onCancel, userBalance, username }) => {
+const DepositCurrency = ({ onDeposit, onCancel, username }) => {
     const [amount, setAmount] = useState('');
     const [message, setMessage] = useState(null);
     const [messageType, setMessageType] = useState(''); // 'success' or 'danger'
