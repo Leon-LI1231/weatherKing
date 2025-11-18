@@ -378,6 +378,17 @@ function App() {
           onSuccessfulLogin={navigateToLandingPage}
         />
 
+        {/*  HIDDEN TEMPORARY BUTTON FOR TESTS (does not appear in UI) */}
+        <button
+          onClick={() => {
+            setUser({ username: "TestUser" });
+            setCurrentPage("landing");
+          }}
+          style={{ display: "none" }}
+        >
+          Temporary button to get to landing page
+        </button>
+
         </div>
         
       );

@@ -49,7 +49,7 @@ import UserInfoHeader from '../components/UserInfoHeader';
 
 // Mock Bootstrap Offcanvas to avoid useMediaQuery issues
 jest.mock('react-bootstrap/Offcanvas', () => {
-  return function MockOffcanvas({ children, show, onHide, placement, ...props }) {
+  return function MockOffcanvas({ children, show, onHide, ...props }) {
     return show ? (
       <div data-testid="offcanvas" {...props}>
         <button onClick={onHide} data-testid="offcanvas-close">×</button>

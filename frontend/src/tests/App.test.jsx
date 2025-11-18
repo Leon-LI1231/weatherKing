@@ -68,7 +68,7 @@ global.fetch = jest.fn();
 
 // Mock BetFilters component that appears on city pages
 jest.mock('../components/BetFilters', () => {
-  return function MockBetFilters({ onFilterChange }) {
+  function MockBetFilters({ onFilterChange }) {
     return (
       <div data-testid="bet-filters">
         <button onClick={() => onFilterChange && onFilterChange({ active: true })}>
@@ -79,16 +79,20 @@ jest.mock('../components/BetFilters', () => {
         </button>
       </div>
     );
-  };
+  }
+  MockBetFilters.displayName = "MockBetFilters";
+  return MockBetFilters;
 });
 
 // Mock BetListTable component that appears on city pages
 jest.mock('../components/BetListTable', () => {
-  return function MockBetListTable({ bets, filters, selectedCity, onBackToLanding }) {
+  function MockBetListTable({ bets, selectedCity, onBackToLanding }) {
     return (
       <div data-testid="bet-list-table">
         <h3>{selectedCity} Bets</h3>
-        <button onClick={() => onBackToLanding && onBackToLanding()}>← Back to Landing Page</button>
+        <button onClick={() => onBackToLanding && onBackToLanding()}>
+          ← Back to Landing Page
+        </button>
         {bets && bets.length > 0 ? (
           <div>
             {bets.map((bet, index) => (
@@ -102,16 +106,20 @@ jest.mock('../components/BetListTable', () => {
         )}
       </div>
     );
-  };
+  }
+  MockBetListTable.displayName = "MockBetListTable";
+  return MockBetListTable;
 });
 
 // Mock Bootstrap components for App integration tests
 jest.mock('react-bootstrap', () => {
-  const MockOffcanvas = ({ show, onHide, children }) => show ? (
-    <div className="offcanvas" data-testid="offcanvas">
-      {children}
-    </div>
-  ) : null;
+  const MockOffcanvas = ({ show, children }) =>
+    show ? (
+      <div className="offcanvas" data-testid="offcanvas">
+        {children}
+      </div>
+    ) : null;
+  MockOffcanvas.displayName = "MockOffcanvas";
 
   MockOffcanvas.Header = ({ closeButton, children }) => (
     <div className="offcanvas-header">
@@ -119,15 +127,20 @@ jest.mock('react-bootstrap', () => {
       {closeButton && <button className="btn-close" onClick={() => {}} />}
     </div>
   );
+  MockOffcanvas.Header.displayName = "MockOffcanvasHeader";
 
   MockOffcanvas.Title = ({ children }) => <h5 className="offcanvas-title">{children}</h5>;
+  MockOffcanvas.Title.displayName = "MockOffcanvasTitle";
+
   MockOffcanvas.Body = ({ children }) => <div className="offcanvas-body">{children}</div>;
+  MockOffcanvas.Body.displayName = "MockOffcanvasBody";
 
   const MockNav = ({ defaultActiveKey, className, children }) => (
     <div className={`nav ${className || ''}`} data-active-key={defaultActiveKey}>
       {children}
     </div>
   );
+  MockNav.displayName = "MockNav";
 
   MockNav.Link = ({ eventKey, onClick, children, style }) => (
     <button 
@@ -139,18 +152,21 @@ jest.mock('react-bootstrap', () => {
       {children}
     </button>
   );
+  MockNav.Link.displayName = "MockNavLink";
 
   const MockNavbar = ({ className, children, style }) => (
     <nav className={`navbar ${className || ''}`} style={style}>
       {children}
     </nav>
   );
+  MockNavbar.displayName = "MockNavbar";
 
   MockNavbar.Brand = ({ href, children, style }) => (
     <a className="navbar-brand" href={href} style={style}>
       {children}
     </a>
   );
+  MockNavbar.Brand.displayName = "MockNavbarBrand";
 
   const MockButton = ({ variant, className, onClick, children, style, type }) => (
     <button 
@@ -162,6 +178,7 @@ jest.mock('react-bootstrap', () => {
       {children}
     </button>
   );
+  MockButton.displayName = "MockButton";
 
   const MockCard = ({ className, style, onClick, onMouseEnter, onMouseLeave, children }) => (
     <div 
@@ -174,66 +191,77 @@ jest.mock('react-bootstrap', () => {
       {children}
     </div>
   );
+  MockCard.displayName = "MockCard";
 
   MockCard.Body = ({ className, children }) => (
     <div className={`card-body ${className || ''}`}>
       {children}
     </div>
   );
+  MockCard.Body.displayName = "MockCardBody";
 
   MockCard.Title = ({ className, children }) => (
     <div className={`card-title ${className || ''}`}>
       {children}
     </div>
   );
+  MockCard.Title.displayName = "MockCardTitle";
 
   MockCard.Text = ({ className, children }) => (
     <p className={`card-text ${className || ''}`}>
       {children}
     </p>
   );
+  MockCard.Text.displayName = "MockCardText";
 
   const MockRow = ({ className, children }) => (
     <div className={`row ${className || ''}`}>
       {children}
     </div>
   );
+  MockRow.displayName = "MockRow";
 
   const MockCol = ({ md, className, children }) => (
     <div className={`col${md ? `-md-${md}` : ''} ${className || ''}`}>
       {children}
     </div>
   );
+  MockCol.displayName = "MockCol";
 
   const MockContainer = ({ className, style, children }) => (
     <div className={`container ${className || ''}`} style={style}>
       {children}
     </div>
   );
+  MockContainer.displayName = "MockContainer";
 
   const MockBadge = ({ className, bg, children, style }) => (
     <span className={`badge ${bg ? `bg-${bg}` : ''} ${className || ''}`} style={style}>
       {children}
     </span>
   );
+  MockBadge.displayName = "MockBadge";
 
   const MockForm = ({ className, onSubmit, children }) => (
     <form className={`${className || ''}`} onSubmit={onSubmit}>
       {children}
     </form>
   );
+  MockForm.displayName = "MockForm";
 
   MockForm.Group = ({ className, children }) => (
     <div className={`mb-3 ${className || ''}`}>
       {children}
     </div>
   );
+  MockForm.Group.displayName = "MockFormGroup";
 
   MockForm.Label = ({ htmlFor, children, className }) => (
     <label htmlFor={htmlFor} className={`form-label ${className || ''}`}>
       {children}
     </label>
   );
+  MockForm.Label.displayName = "MockFormLabel";
 
   MockForm.Control = ({ type, id, name, value, onChange, required, placeholder, className }) => (
     <input 
@@ -247,6 +275,7 @@ jest.mock('react-bootstrap', () => {
       className={`form-control ${className || ''}`}
     />
   );
+  MockForm.Control.displayName = "MockFormControl";
 
   return {
     Offcanvas: MockOffcanvas,
@@ -261,7 +290,6 @@ jest.mock('react-bootstrap', () => {
     Form: MockForm
   };
 });
-
 describe('App Component Tests', () => {
   beforeEach(() => {
     // Clear all mocks before each test
@@ -417,7 +445,6 @@ describe('App Component Tests', () => {
     // Should remain on login page
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /Login/i })).toBeInTheDocument();
-      // Could also test for error message if Login component displays one
     });
   });
 
@@ -434,7 +461,7 @@ describe('App Component Tests', () => {
     const createAccountButton = screen.getByRole('button', { name: /Create Account/i });
     fireEvent.click(createAccountButton);
     
-    // Fill out create account form (assuming similar structure to Login)
+    // Fill out create account form
     const usernameInput = screen.getByPlaceholderText('Username');
     const emailInput = screen.getByPlaceholderText('Email');
     const passwordInput = screen.getByPlaceholderText('Password');
@@ -445,7 +472,6 @@ describe('App Component Tests', () => {
     fireEvent.change(passwordInput, { target: { value: 'newpass' } });
     fireEvent.click(submitButton);
     
-    // Should navigate back to login page after successful creation (with delay)
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /Login/i })).toBeInTheDocument();
     }, { timeout: 3000 });
@@ -485,11 +511,9 @@ describe('App Component Tests', () => {
     const tempButton = screen.getByText('Temporary button to get to landing page');
     fireEvent.click(tempButton);
     
-    // Find and click on Madison city card
     const madisonCard = screen.getByText('View Madison Bets');
     fireEvent.click(madisonCard);
     
-    // Should now be on Madison city page
     expect(screen.getByText('Madison Bets')).toBeInTheDocument();
     expect(screen.getByText('← Back to Landing Page')).toBeInTheDocument();
   });
@@ -497,19 +521,15 @@ describe('App Component Tests', () => {
   test('navigates back to landing page from city page', () => {
     render(<App />);
     
-    // Navigate to landing page
     const tempButton = screen.getByText('Temporary button to get to landing page');
     fireEvent.click(tempButton);
     
-    // Navigate to city page
     const madisonCard = screen.getByText('View Madison Bets');
     fireEvent.click(madisonCard);
     
-    // Click back button - use getByRole to get the actual working button from CityPage
     const backButton = screen.getByRole('button', { name: /← Back to Landing Page/i });
     fireEvent.click(backButton);
     
-    // Should be back on landing page
     expect(screen.getByText(/Welcome to WeatherKings/i)).toBeInTheDocument();
     expect(screen.getByText('Select a City')).toBeInTheDocument();
   });
@@ -517,11 +537,9 @@ describe('App Component Tests', () => {
   test('UserInfoHeader appears on authenticated pages', () => {
     render(<App />);
     
-    // Navigate to landing page (authenticated)
     const tempButton = screen.getByText('Temporary button to get to landing page');
     fireEvent.click(tempButton);
     
-    // UserInfoHeader should be present
     expect(screen.getByText('WeatherKings')).toBeInTheDocument();
     expect(screen.getByText('TestUser')).toBeInTheDocument();
     expect(screen.getByText('$1000.00')).toBeInTheDocument();
@@ -530,27 +548,23 @@ describe('App Component Tests', () => {
   test('drawer navigation works from landing page', () => {
     render(<App />);
     
-    // Navigate to landing page
     const tempButton = screen.getByText('Temporary button to get to landing page');
     fireEvent.click(tempButton);
     
-    // Open drawer
     const menuButton = screen.getByText('☰');
     fireEvent.click(menuButton);
     
-    // Drawer should be open with navigation options
     expect(screen.getByText('Navigation')).toBeInTheDocument();
     expect(screen.getByText('Landing Page')).toBeInTheDocument();
     
-    // Check for city navigation links in the drawer (use getAllByText to handle multiples)
     const madisonElements = screen.getAllByText('Madison');
-    expect(madisonElements.length).toBeGreaterThan(0); // At least one Madison element exists
+    expect(madisonElements.length).toBeGreaterThan(0);
     
     const losAngelesElements = screen.getAllByText('Los Angeles');
-    expect(losAngelesElements.length).toBeGreaterThan(0); // At least one Los Angeles element exists
+    expect(losAngelesElements.length).toBeGreaterThan(0);
     
     const newYorkElements = screen.getAllByText('New York City');
-    expect(newYorkElements.length).toBeGreaterThan(0); // At least one New York City element exists
+    expect(newYorkElements.length).toBeGreaterThan(0);
     
     expect(screen.getByText('Logout')).toBeInTheDocument();
   });
@@ -558,59 +572,46 @@ describe('App Component Tests', () => {
   test('drawer city navigation works correctly', () => {
     render(<App />);
     
-    // Navigate to landing page
     const tempButton = screen.getByText('Temporary button to get to landing page');
     fireEvent.click(tempButton);
     
-    // Open drawer and click Madison
     const menuButton = screen.getByText('☰');
     fireEvent.click(menuButton);
     
-    // Use the drawer container to find the specific Madison link
     const drawer = screen.getByTestId('offcanvas');
     const madisonLink = drawer.querySelector('[data-event-key="Madison"]');
     fireEvent.click(madisonLink);
     
-    // Should navigate to Madison city page
     expect(screen.getByText('Madison Bets')).toBeInTheDocument();
   });
 
   test('selected city state is managed correctly', () => {
     render(<App />);
     
-    // Navigate to landing page
     const tempButton = screen.getByText('Temporary button to get to landing page');
     fireEvent.click(tempButton);
     
-    // Navigate to Madison
     const madisonCard = screen.getByText('View Madison Bets');
     fireEvent.click(madisonCard);
     
-    // Verify we're on Madison page
     expect(screen.getByText('Madison Bets')).toBeInTheDocument();
     
-    // Use drawer to navigate to New York City
     const menuButton = screen.getByText('☰');
     fireEvent.click(menuButton);
     
-    // Use the drawer container to find the specific New York City link
     const drawer = screen.getByTestId('offcanvas');
     const newYorkCityLink = drawer.querySelector('[data-event-key="New York City"]');
     fireEvent.click(newYorkCityLink);
     
-    // Should now be on New York City page
     expect(screen.getByText('New York City Bets')).toBeInTheDocument();
   });
 
   test('handles invalid city navigation gracefully', () => {
     render(<App />);
     
-    // Navigate to landing page
     const tempButton = screen.getByText('Temporary button to get to landing page');
     fireEvent.click(tempButton);
     
-    // The app should handle edge cases without crashing
-    // This test ensures the app doesn't crash on unexpected navigation
     expect(screen.getByText(/Welcome to WeatherKings/i)).toBeInTheDocument();
   });
 
@@ -618,11 +619,9 @@ describe('App Component Tests', () => {
   test('saves app state to localStorage when navigating', () => {
     render(<App />);
     
-    // Navigate to landing page
     const tempButton = screen.getByText('Temporary button to get to landing page');
     fireEvent.click(tempButton);
     
-    // Check that localStorage.setItem was called to save state
     expect(localStorage.setItem).toHaveBeenCalledWith(
       'betAppState',
       expect.stringContaining('"currentPage":"landing"')
@@ -630,7 +629,6 @@ describe('App Component Tests', () => {
   });
 
   test('restores app state from localStorage on mount', () => {
-    // Mock stored state
     const storedState = {
       currentPage: 'landing',
       user: { username: 'TestUser' },
@@ -642,12 +640,10 @@ describe('App Component Tests', () => {
     
     render(<App />);
     
-    // Should restore to landing page
     expect(screen.getByText(/Welcome to WeatherKings/i)).toBeInTheDocument();
   });
 
   test('restores city page state from localStorage', () => {
-    // Mock stored state for city page
     const storedState = {
       currentPage: 'city',
       user: { username: 'TestUser' },
@@ -659,12 +655,10 @@ describe('App Component Tests', () => {
     
     render(<App />);
     
-    // Should restore to Madison city page
     expect(screen.getByText('Madison Bets')).toBeInTheDocument();
   });
 
   test('handles expired localStorage state gracefully', async () => {
-    // Mock expired state (25 hours old)
     const expiredTimestamp = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
     const expiredState = {
       currentPage: 'landing',
@@ -673,7 +667,6 @@ describe('App Component Tests', () => {
       timestamp: expiredTimestamp
     };
     
-    // Mock both the initial getStoredState call and any subsequent calls
     localStorage.getItem.mockImplementation((key) => {
       if (key === 'betAppState') {
         return JSON.stringify(expiredState);
@@ -683,22 +676,18 @@ describe('App Component Tests', () => {
     
     render(<App />);
     
-    // Wait for the expired state to be detected and removed
     await waitFor(() => {
       expect(localStorage.removeItem).toHaveBeenCalledWith('betAppState');
     }, { timeout: 2000 });
     
-    // The app should eventually render the login page or at least not crash
-    // Even if it's still showing loading, the main logic (removing expired state) worked
     expect(localStorage.removeItem).toHaveBeenCalledWith('betAppState');
   });
 
   test('handles invalid localStorage state gracefully', () => {
-    // Mock invalid state (city page without selected city)
     const invalidState = {
       currentPage: 'city',
       user: { username: 'TestUser' },
-      selectedCity: null, // Invalid: city page without selected city
+      selectedCity: null,
       timestamp: new Date().toISOString()
     };
     
@@ -706,32 +695,25 @@ describe('App Component Tests', () => {
     
     render(<App />);
     
-    // Should redirect to landing page
     expect(screen.getByText(/Welcome to WeatherKings/i)).toBeInTheDocument();
   });
 
   test('handles malformed localStorage data gracefully', () => {
-    // Mock console.error to suppress expected error messages
     const originalConsoleError = console.error;
     console.error = jest.fn();
     
-    // Mock malformed JSON
     localStorage.getItem.mockReturnValue('invalid json data');
     
     render(<App />);
     
-    // Should default to login page
     expect(screen.getByRole('heading', { name: /Login/i })).toBeInTheDocument();
     
-    // Verify that error was logged (but we suppressed it from console)
     expect(console.error).toHaveBeenCalledWith('Error parsing stored state:', expect.any(SyntaxError));
     
-    // Restore original console.error
     console.error = originalConsoleError;
   });
 
   test('clears localStorage on logout', async () => {
-    // Mock initial storage data
     const mockStorageData = {
       'betAppState': JSON.stringify({
         currentPage: 'landing',
@@ -746,7 +728,6 @@ describe('App Component Tests', () => {
       'someOtherKey': 'should not be removed'
     };
     
-    // Update localStorage mocks to use the mock data
     localStorage.getItem.mockImplementation((key) => mockStorageData[key] || null);
     localStorage.key.mockImplementation((index) => Object.keys(mockStorageData)[index] || null);
     localStorage.removeItem.mockImplementation((key) => { delete mockStorageData[key]; });
@@ -756,14 +737,11 @@ describe('App Component Tests', () => {
     
     render(<App />);
     
-    // Should be on landing page
     expect(screen.getByText(/Welcome to WeatherKings/i)).toBeInTheDocument();
     
-    // Find and click the drawer button (☰) to open the drawer
     const drawerButton = screen.getByRole('button', { name: '☰' });
     fireEvent.click(drawerButton);
     
-    // Wait for drawer to open and find logout option
     await waitFor(() => {
       expect(screen.getByText('Logout')).toBeInTheDocument();
     });
@@ -771,19 +749,16 @@ describe('App Component Tests', () => {
     const logoutOption = screen.getByText('Logout');
     fireEvent.click(logoutOption);
     
-    // Wait for logout to complete
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /Login/i })).toBeInTheDocument();
     });
     
-    // Should have removed betApp keys but not others
     expect(localStorage.removeItem).toHaveBeenCalledWith('betAppState');
     expect(localStorage.removeItem).toHaveBeenCalledWith('betAppFilters_madison');
     expect(localStorage.removeItem).not.toHaveBeenCalledWith('someOtherKey');
   });
 
   test('shows loading indicator while restoring state', () => {
-    // Mock stored state
     const storedState = {
       currentPage: 'landing',
       user: { username: 'TestUser' },
@@ -795,8 +770,6 @@ describe('App Component Tests', () => {
     
     render(<App />);
     
-    // Should show loading indicator initially (though it may disappear quickly)
-    // We check if the component renders without crashing during state restoration
     expect(screen.getByText(/Welcome to WeatherKings/i)).toBeInTheDocument();
   });
 });

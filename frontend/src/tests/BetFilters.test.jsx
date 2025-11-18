@@ -172,10 +172,11 @@ describe('BetFilters Component Tests', () => {
     const selects = screen.getAllByRole('combobox');
     const minFeeSelect = selects[0];
     
-    expectedFees.forEach(fee => {
+    expectedFees.forEach(() => {
       expect(minFeeSelect).toHaveDisplayValue('Free'); // Current value
       // We can't easily test all options without opening dropdown, but we can test functionality
     });
+    
   });
 
   // Visual State Tests  

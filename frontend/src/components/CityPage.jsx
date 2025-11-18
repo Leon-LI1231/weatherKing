@@ -24,7 +24,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
  *   - onLogout: Function to handle user logout
  */
 
-function CityPage({ cityName, user, onNavigateBack, onLogout }) {
+function CityPage({ cityName, onNavigateBack }) {
   if (!cityName) {
     return (
       <div style={{ marginTop: "200px", textAlign: "center" }}>
@@ -99,7 +99,7 @@ function CityPage({ cityName, user, onNavigateBack, onLogout }) {
         if (data.length === 0) {
           console.log("No daily bets found, generating daily bets...");
           try {
-            const generateResponse = await fetch("http://localhost:8080/api/bets/generate-daily", {
+            await fetch("http://localhost:8080/api/bets/generate-daily", {
               method: "POST"
             });
             
