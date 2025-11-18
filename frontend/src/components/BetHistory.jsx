@@ -16,11 +16,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
  * 
  * Props:
  *  - username: the username of the user whose bet history is to be displayed
- *  - BetHistoryFilter: an optional filter object to filter bets by city, contest, or outcome
- *  - onFilterChange: a callback function that is called when the filter changes
+ *  - filter: an optional filter object to filter bets by city, contest, or outcome
+ *  - onAvailableOptionsChange: callback to pass available filter options to parent
  */
 
-function BetHistory({ username, filter }) {
+function BetHistory({ username, filter, onAvailableOptionsChange }) {
     const [bets, setBets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -35,6 +35,19 @@ function BetHistory({ username, filter }) {
                 }
                 const data = await response.json();
                 setBets(data);
+                
+                // Extract unique values for filters
+                if (onAvailableOptionsChange && data.length > 0) {
+                    const uniqueCities = [...new Set(data.map(bet => bet.city))].sort();
+                    const uniqueContests = [...new Set(data.map(bet => bet.contest))].sort();
+                    const uniqueOutcomes = [...new Set(data.map(bet => bet.outcome))].sort();
+                    
+                    onAvailableOptionsChange({
+                        cities: uniqueCities,
+                        contests: uniqueContests,
+                        outcomes: uniqueOutcomes
+                    });
+                }
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -43,18 +56,27 @@ function BetHistory({ username, filter }) {
         };
 
         fetchBetHistory();
-    }, [username, filter]);
+    }, [username, onAvailableOptionsChange]);
 
-    // Apply filtering based on the filter prop
+    // Apply filtering based on the filter prop (now supports multiple selections)
     const filteredBets = bets.filter(bet => {
-        if (filter.city && !bet.city.toLowerCase().includes(filter.city.toLowerCase())) {
-            return false;
+        // Filter by cities (if any cities are selected)
+        if (filter.cities && filter.cities.length > 0) {
+            if (!filter.cities.includes(bet.city)) {
+                return false;
+            }
         }
-        if (filter.contest && !bet.contest.toLowerCase().includes(filter.contest.toLowerCase())) {
-            return false;
+        // Filter by contests (if any contests are selected)
+        if (filter.contests && filter.contests.length > 0) {
+            if (!filter.contests.includes(bet.contest)) {
+                return false;
+            }
         }
-        if (filter.outcome && !bet.outcome.toLowerCase().includes(filter.outcome.toLowerCase())) {
-            return false;
+        // Filter by outcomes (if any outcomes are selected)
+        if (filter.outcomes && filter.outcomes.length > 0) {
+            if (!filter.outcomes.includes(bet.outcome)) {
+                return false;
+            }
         }
         return true;
     });
@@ -105,3 +127,5 @@ function BetHistory({ username, filter }) {
         </Table>
     );
 }
+
+export default BetHistory;
