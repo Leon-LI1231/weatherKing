@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Table, Badge } from "react-bootstrap";
+import { Container, Row, Col, Table, Badge, Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import DepositCurrency from "./DepositCurrency";
 
 /**
  * =======================================================
@@ -15,8 +16,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
  *   - user: the logged-in user object
  */
 
-function UserPage({ user }) {
+function UserPage({ user, onBalanceUpdate }) {
   const [userBets, setUserBets] = useState([]);
+  const [showDepositModal, setShowDepositModal] = useState(false);
 
   // Mock data for user bets
   useEffect(() => {
@@ -52,6 +54,13 @@ function UserPage({ user }) {
     setUserBets(mockUserBets);
   }, []);
 
+  const handleDeposit = (newBalance) => {
+    // Update balance in parent component
+    if (onBalanceUpdate) {
+      onBalanceUpdate(newBalance);
+    }
+  };
+
   return (
     <Container style={{ marginTop: "140px", textAlign: "center" }}>
       {/* Header */}
@@ -67,6 +76,14 @@ function UserPage({ user }) {
         <Col>
           <h5>Username: <strong>{user?.username}</strong></h5>
           <h5>Balance: <Badge bg="info" text="dark">${user?.balanceUsd !== undefined ? user.balanceUsd.toFixed(2) : '0.00'}</Badge></h5>
+          <Button 
+            variant="success" 
+            size="sm" 
+            className="mt-2"
+            onClick={() => setShowDepositModal(true)}
+          >
+            Deposit Funds
+          </Button>
         </Col>
       </Row>
 
@@ -102,6 +119,16 @@ function UserPage({ user }) {
           </div>
         </Col>
       </Row>
+
+      {/* Deposit Modal */}
+      {showDepositModal && (
+        <DepositCurrency
+          username={user?.username}
+          userBalance={user?.balanceUsd}
+          onDeposit={handleDeposit}
+          onCancel={() => setShowDepositModal(false)}
+        />
+      )}
     </Container>
   );
 }

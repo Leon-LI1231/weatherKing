@@ -65,4 +65,27 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("message", "User not found."));
     }
+
+    // Handle deposit
+    @PostMapping("/deposit")
+    public ResponseEntity<?> deposit(@RequestBody Map<String, Object> request) {
+        String username = (String) request.get("username");
+        Double amount = ((Number) request.get("amount")).doubleValue();
+        
+        if (amount == null || amount <= 0 || amount > 1000) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Invalid deposit amount."));
+        }
+        
+        boolean success = userService.depositFunds(username, amount);
+        if (success) {
+            User user = userService.getUserByUsername(username);
+            return ResponseEntity.ok(Map.of(
+                "message", "Deposit successful!",
+                "newBalance", user.getBalanceUsd()
+            ));
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", "User not found."));
+    }
 }

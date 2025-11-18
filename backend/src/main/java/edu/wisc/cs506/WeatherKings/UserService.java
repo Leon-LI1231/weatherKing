@@ -39,4 +39,15 @@ public class UserService {
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username).orElse(null);
     }
+
+    // deposit funds to user account
+    public boolean depositFunds(String username, Double amount) {
+        return userRepository.findByUsername(username)
+                .map(user -> {
+                    user.setBalanceUsd(user.getBalanceUsd() + amount);
+                    userRepository.save(user);
+                    return true;
+                })
+                .orElse(false);
+    }
 }

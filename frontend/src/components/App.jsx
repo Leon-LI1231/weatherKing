@@ -281,6 +281,14 @@ function App() {
     }
     setCurrentPage("user");
   };
+
+  const handleBalanceUpdate = (newBalance) => {
+    console.log('💰 Updating balance to:', newBalance);
+    setUser(prevUser => ({
+      ...prevUser,
+      balanceUsd: newBalance
+    }));
+  };
   const logout = () => {
     console.log('🚪 Logging out - clearing user data and localStorage');
     setUser(null);
@@ -365,7 +373,7 @@ function App() {
               onNavigateToLanding={() => navigateToLandingPage(user)}
               onRefreshBalance={refreshUserData}
             />
-            <UserPage user={user} />
+            <UserPage user={user} onBalanceUpdate={handleBalanceUpdate} />
           </>
         );
     
