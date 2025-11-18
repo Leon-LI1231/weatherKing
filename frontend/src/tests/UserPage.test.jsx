@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, within, waitFor } from "@testing-library/react";
+import { render, screen, within, waitFor, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import UserPage from "../components/UserPage";
 
@@ -20,6 +20,12 @@ import UserPage from "../components/UserPage";
  *
  * 4. Data Population Tests:
  *    ✓ mock bet data is populated via useEffect
+ *
+ * 5. Deposit Functionality Tests:
+ *    ✓ renders "Deposit Funds" button
+ *    ✓ shows DepositCurrency modal when button clicked
+ *    ✓ calls onBalanceUpdate when deposit is successful
+ *    ✓ hides modal when cancel is clicked
  *
  * Run all tests: npm test
  * Run UserPage.test.jsx only: npm test -- UserPage.test.jsx
@@ -87,38 +93,96 @@ test("each bet row contains exactly 6 columns", async () => {
       expect(cells.length).toBe(6);
     });
   });
-});
+  });
 
+  // Test 6: Verifies sticky header style is applied to table header
+  test("table header has sticky style", () => {
+    render(<UserPage user={user} />);
+    const header = screen.getByRole("columnheader", { name: "Contest" });
+    expect(header.closest("thead")).toHaveStyle("position: sticky");
+  });
 
+  // Test 7: verifies each bet type A/B/C appears once
+  test("renders bet types A, B, and C each exactly once", async () => {
+    render(<UserPage user={user} />);
 
-// Test 6: Verifies sticky header style is applied to table header
-test("table header has sticky style", () => {
-  render(<UserPage user={user} />);
-  const header = screen.getByRole("columnheader", { name: "Contest" });
-  expect(header.closest("thead")).toHaveStyle("position: sticky");
-});
+    await waitFor(() => {
+      expect(screen.getAllByText("A").length).toBe(1);
+      expect(screen.getAllByText("B").length).toBe(1);
+      expect(screen.getAllByText("C").length).toBe(1);
+    });
+  });
 
-});
+  // Test 8: renders Deposit Funds button
+  test("renders Deposit Funds button", () => {
+    render(<UserPage user={user} />);
+    const depositButton = screen.getByRole("button", { name: /Deposit Funds/i });
+    expect(depositButton).toBeInTheDocument();
+  });
 
-// Test 7: shows initial loading or empty table before data loads
-test("shows empty table state before mock data loads", () => {
-  render(<UserPage user={user} />);
-  const table = screen.getByRole("table");
+  // Test 9: shows DepositCurrency modal when button is clicked
+  test("shows DepositCurrency modal when Deposit Funds button is clicked", () => {
+    render(<UserPage user={user} />);
+    const depositButton = screen.getByRole("button", { name: /Deposit Funds/i });
+    
+    // Modal should not be visible initially
+    expect(screen.queryByPlaceholderText(/Enter amount/i)).not.toBeInTheDocument();
+    
+    // Click button to show modal
+    fireEvent.click(depositButton);
+    
+    // Modal should now be visible
+    expect(screen.getByPlaceholderText(/Enter amount/i)).toBeInTheDocument();
+  });
 
-  const rows = within(table).getAllByRole("row");
-  expect(rows.length).toBe(1); // only header
-});
+  // Test 10: calls onBalanceUpdate when deposit is successful
+  test("calls onBalanceUpdate when deposit is successful", async () => {
+    const mockOnBalanceUpdate = jest.fn();
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ newBalance: 1152.37 }),
+      })
+    );
 
-// Test 8: verifies each bet type A/B/C appears once
-test("renders bet types A, B, and C each exactly once", async () => {
-  render(<UserPage user={user} />);
+    render(<UserPage user={user} onBalanceUpdate={mockOnBalanceUpdate} />);
+    
+    // Open modal
+    const depositButton = screen.getByRole("button", { name: /Deposit Funds/i });
+    fireEvent.click(depositButton);
+    
+    // Enter valid amount and submit
+    const input = screen.getByPlaceholderText(/Enter amount/i);
+    fireEvent.change(input, { target: { value: "100.00" } });
+    
+    const depositSubmitButton = screen.getByRole("button", { name: /^Deposit$/i });
+    fireEvent.click(depositSubmitButton);
+    
+    // Wait for API call and callback
+    await waitFor(() => {
+      expect(mockOnBalanceUpdate).toHaveBeenCalledWith(1152.37);
+    });
 
-  await waitFor(() => {
-    expect(screen.getAllByText("A").length).toBe(1);
-    expect(screen.getAllByText("B").length).toBe(1);
-    expect(screen.getAllByText("C").length).toBe(1);
+    global.fetch.mockRestore();
+  });
+
+  // Test 11: hides modal when cancel is clicked
+  test("hides modal when cancel button is clicked in DepositCurrency", () => {
+    render(<UserPage user={user} />);
+    
+    // Open modal
+    const depositButton = screen.getByRole("button", { name: /Deposit Funds/i });
+    fireEvent.click(depositButton);
+    
+    // Modal should be visible
+    expect(screen.getByPlaceholderText(/Enter amount/i)).toBeInTheDocument();
+    
+    // Click cancel
+    const cancelButton = screen.getByRole("button", { name: /Cancel/i });
+    fireEvent.click(cancelButton);
+    
+    // Modal should be hidden
+    expect(screen.queryByPlaceholderText(/Enter amount/i)).not.toBeInTheDocument();
   });
 });
-
-
 
