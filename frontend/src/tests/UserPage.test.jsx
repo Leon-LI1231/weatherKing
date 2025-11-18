@@ -15,13 +15,11 @@ import UserPage from "../components/UserPage";
  * 2. User Info Tests:
  *    ✓ username and balance are shown properly
  *
- * 3. Table Structure Tests:
- *    ✓ table headers are rendered correctly
+ * 3. Component Integration Tests:
+ *    ✓ BetHistory component is rendered
+ *    ✓ BetHistoryFilter component is rendered
  *
- * 4. Data Population Tests:
- *    ✓ mock bet data is populated via useEffect
- *
- * 5. Deposit Functionality Tests:
+ * 4. Deposit Functionality Tests:
  *    ✓ renders "Deposit Funds" button
  *    ✓ shows DepositCurrency modal when button clicked
  *    ✓ calls onBalanceUpdate when deposit is successful
@@ -33,8 +31,20 @@ import UserPage from "../components/UserPage";
  * =======================================================
  */
 
+// Mock fetch globally
+global.fetch = jest.fn();
+
 describe("UserPage", () => {
   const user = { username: "leon", balanceUsd: 152.37 };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Mock fetch for BetHistory component
+    global.fetch.mockResolvedValue({
+      ok: true,
+      json: async () => [],
+    });
+  });
 
   //Test 1: Check page title and subtitle
   test("renders page title and subtitle", () => {
@@ -51,76 +61,40 @@ describe("UserPage", () => {
     expect(screen.getByText(/\$152\.37/)).toBeInTheDocument();
   });
 
-  //Test 3: Check table headers
-  test("renders table headers", () => {
+  //Test 3: Check BetHistory component is rendered
+  test("renders BetHistory component", async () => {
     render(<UserPage user={user} />);
-    const table = screen.getByRole("table");
-    const header = within(table).getAllByRole("row")[0];
-    const headers = within(header).getAllByRole("columnheader").map((th) => th.textContent);
-    expect(headers).toEqual(["Contest", "City", "Type", "Amount", "Outcome", "Date"]);
-  });
-
-  //Test 4: Check table rows populated by mock data
-  test("populates bet rows from mock effect", async () => {
-    render(<UserPage user={user} />);
-    const table = screen.getByRole("table");
-
-    // Wait for useEffect to load mock data
+    
+    // Check that "Bet History" heading is present
+    expect(screen.getByRole("heading", { name: /Bet History/i })).toBeInTheDocument();
+    
+    // Wait for BetHistory to render
     await waitFor(() => {
-      const rows = within(table).getAllByRole("row");
-      expect(rows.length).toBe(4); // 1 header + 3 data rows
-    });
-
-    // Verify content of mock data
-    expect(screen.getAllByText(/Will be done in split 3/i).length).toBe(3);
-    expect(screen.getAllByText(/Madison/i).length).toBe(3);
-    expect(screen.getByText("A")).toBeInTheDocument();
-    expect(screen.getByText("B")).toBeInTheDocument();
-    expect(screen.getByText("C")).toBeInTheDocument();
-    expect(screen.getAllByText("$1.00").length).toBe(3);
-    expect(screen.getAllByText(/Pending/i).length).toBe(3);
-  });
-
-  // Test 5: Checks that each bet row has correct number of columns
-test("each bet row contains exactly 6 columns", async () => {
-  render(<UserPage user={user} />);
-  const table = screen.getByRole("table");
-
-  await waitFor(() => {
-    const rows = within(table).getAllByRole("row").slice(1); // skip header
-    rows.forEach((row) => {
-      const cells = within(row).getAllByRole("cell");
-      expect(cells.length).toBe(6);
+      expect(screen.getByText(/Loading bet history/i)).toBeInTheDocument();
     });
   });
-  });
 
-  // Test 6: Verifies sticky header style is applied to table header
-  test("table header has sticky style", () => {
+  //Test 4: Check BetHistoryFilter component is rendered
+  test("renders BetHistoryFilter component", () => {
     render(<UserPage user={user} />);
-    const header = screen.getByRole("columnheader", { name: "Contest" });
-    expect(header.closest("thead")).toHaveStyle("position: sticky");
+    
+    // Check filter heading is present
+    expect(screen.getByText(/Filter Bets/i)).toBeInTheDocument();
+    
+    // Check filter tabs are present
+    expect(screen.getByRole("tab", { name: /Cities/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Contests/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Outcomes/i })).toBeInTheDocument();
   });
 
-  // Test 7: verifies each bet type A/B/C appears once
-  test("renders bet types A, B, and C each exactly once", async () => {
-    render(<UserPage user={user} />);
-
-    await waitFor(() => {
-      expect(screen.getAllByText("A").length).toBe(1);
-      expect(screen.getAllByText("B").length).toBe(1);
-      expect(screen.getAllByText("C").length).toBe(1);
-    });
-  });
-
-  // Test 8: renders Deposit Funds button
+  // Test 5: renders Deposit Funds button
   test("renders Deposit Funds button", () => {
     render(<UserPage user={user} />);
     const depositButton = screen.getByRole("button", { name: /Deposit Funds/i });
     expect(depositButton).toBeInTheDocument();
   });
 
-  // Test 9: shows DepositCurrency modal when button is clicked
+  // Test 6: shows DepositCurrency modal when button is clicked
   test("shows DepositCurrency modal when Deposit Funds button is clicked", () => {
     render(<UserPage user={user} />);
     const depositButton = screen.getByRole("button", { name: /Deposit Funds/i });
@@ -135,15 +109,22 @@ test("each bet row contains exactly 6 columns", async () => {
     expect(screen.getByPlaceholderText(/Enter amount/i)).toBeInTheDocument();
   });
 
-  // Test 10: calls onBalanceUpdate when deposit is successful
+  // Test 7: calls onBalanceUpdate when deposit is successful
   test("calls onBalanceUpdate when deposit is successful", async () => {
     const mockOnBalanceUpdate = jest.fn();
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
+    // Mock both BetHistory fetch and deposit fetch
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('/api/deposit')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ newBalance: 1152.37 }),
+        });
+      }
+      return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ newBalance: 1152.37 }),
-      })
-    );
+        json: () => Promise.resolve([]),
+      });
+    });
 
     render(<UserPage user={user} onBalanceUpdate={mockOnBalanceUpdate} />);
     
@@ -162,11 +143,9 @@ test("each bet row contains exactly 6 columns", async () => {
     await waitFor(() => {
       expect(mockOnBalanceUpdate).toHaveBeenCalledWith(1152.37);
     });
-
-    global.fetch.mockRestore();
   });
 
-  // Test 11: hides modal when cancel is clicked
+  // Test 8: hides modal when cancel is clicked
   test("hides modal when cancel button is clicked in DepositCurrency", () => {
     render(<UserPage user={user} />);
     
