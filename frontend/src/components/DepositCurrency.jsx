@@ -139,3 +139,5 @@ const DepositCurrency = ({ onDeposit, onCancel, userBalance, username }) => {
         </Modal>
     );
 }
+
+export default DepositCurrency;
