@@ -281,7 +281,7 @@ jest.mock('react-bootstrap', () => {
   );
   MockForm.Control.displayName = "MockFormControl";
 
-  const MockModal = ({ show, onHide, children }) =>
+  const MockModal = ({ show, children }) =>
     show ? (
       <div className="modal" data-testid="modal">
         {children}
@@ -306,7 +306,7 @@ jest.mock('react-bootstrap', () => {
   MockModal.Footer = ({ children }) => <div className="modal-footer">{children}</div>;
   MockModal.Footer.displayName = "MockModalFooter";
 
-  const MockTable = ({ striped, hover, responsive, children }) => (
+  const MockTable = ({ striped, hover, children }) => (
     <table className={`table ${striped ? 'table-striped' : ''} ${hover ? 'table-hover' : ''}`}>
       {children}
     </table>
