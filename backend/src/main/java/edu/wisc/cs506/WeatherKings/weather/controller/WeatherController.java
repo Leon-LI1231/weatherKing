@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import edu.wisc.cs506.WeatherKings.weather.dto.WeatherForecastResponse;
 import edu.wisc.cs506.WeatherKings.weather.service.WeatherApiService;
- /* REST controller for weather-related endpoints
+/* REST controller for weather-related endpoints
  * 
  * Provides access to National Weather Service forecast data
  * Follows the same pattern as DummyController
