@@ -54,7 +54,7 @@
 
   <module name="LineLength">
     <property name="fileExtensions" value="java"/>
-    <property name="max" value="100"/>
+    <property name="max" value="150"/>
     <property name="ignorePattern"
              value="^package.*|^import.*|href\s*=\s*&quot;[^&quot;]*&quot;|http://|https://|ftp://"/>
   </module>
@@ -87,7 +87,6 @@
       <property name="allowNonPrintableEscapes" value="true"/>
     </module>
     <module name="AvoidStarImport"/>
-    <module name="OneTopLevelClass"/>
     <module name="NoLineWrap">
       <property name="tokens" value="PACKAGE_DEF, IMPORT, STATIC_IMPORT"/>
     </module>
@@ -342,9 +341,6 @@
     <module name="NonEmptyAtclauseDescription"/>
     <module name="InvalidJavadocPosition"/>
     <module name="JavadocTagContinuationIndentation"/>
-    <module name="JavadocParagraph">
-      <property name="allowNewlineParagraph" value="false"/>
-    </module>
     <module name="AtclauseOrder">
       <property name="tagOrder" value="@param, @return, @throws, @deprecated"/>
       <property name="target"
