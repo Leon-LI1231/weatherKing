@@ -134,19 +134,19 @@ public class BetGenerationService {
     private Period findNextDayForecast(List<Period> periods) {
          // Logic to find the next full day period (skipping 'Today' and 'Tonight')
         if (periods.size() > 2) {
-             Period potentialNextDay = periods.get(2);
-             // Simple check to ensure we get a full day forecast and not a night forecast
-             if (potentialNextDay.getName() != null && !potentialNextDay.getName().toLowerCase().contains("night")) {
-                 return potentialNextDay;
-             }
-             // Fallback to find the first non-night, non-today period
-             for (Period period : periods) {
-                 if (period.getName() != null && 
-                     !period.getName().toLowerCase().contains("night") && 
-                     !period.getName().toLowerCase().equals("today")) {
-                     return period;
-                 }
-             }
+            Period potentialNextDay = periods.get(2);
+            // Simple check to ensure we get a full day forecast and not a night forecast
+            if (potentialNextDay.getName() != null && !potentialNextDay.getName().toLowerCase().contains("night")) {
+                return potentialNextDay;
+            }
+            // Fallback to find the first non-night, non-today period
+            for (Period period : periods) {
+                if (period.getName() != null && 
+                    !period.getName().toLowerCase().contains("night") && 
+                    !period.getName().toLowerCase().equals("today")) {
+                    return period;
+                }
+            }
         }
         return null;
     }
@@ -272,13 +272,13 @@ public class BetGenerationService {
         double zScore = (setLine - mean) / stdDev;
         
         // 2. Use the Z-score to find the Cumulative Distribution Function (CDF) value.
-        return Phi(zScore);
+        return phi(zScore);
     }
     
     /**
      * Approximates the standard Normal Cumulative Distribution Function (CDF).
      */
-    private double Phi(double z) {
+    private double phi(double z) {
         if (z < -8.0) return 0.0;
         if (z > 8.0) return 1.0;
 
