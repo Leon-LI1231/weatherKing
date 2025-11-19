@@ -152,12 +152,6 @@
                                  | //SLIST[count(./*)=1][parent::LITERAL_CATCH and
                                  not(parent::LITERAL_CATCH/following-sibling::*)]"/>
     </module>
-    <module name="RegexpSinglelineJava">
-      <property name="format" value="\{[ ]+\}"/>
-      <property name="message" value="Empty blocks should have no spaces. Empty blocks
-                                   may only be represented as '{}' when not part of a
-                                   multi-block statement (4.1.3)"/>
-    </module>
     <module name="OneStatementPerLine"/>
     <module name="MultipleVariableDeclarations"/>
     <module name="ArrayTypeStyle"/>

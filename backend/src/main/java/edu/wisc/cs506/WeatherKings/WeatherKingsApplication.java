@@ -25,7 +25,7 @@ public class WeatherKingsApplication {
 }
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
-class HelloController { //temporary function to test if we can fetch this from frontend
+class HelloController { // temporary function to test if we can fetch this from frontend
     @GetMapping("/api/hello")
     public String hello() {
         return "This message is created in WeatherKings Application.java";

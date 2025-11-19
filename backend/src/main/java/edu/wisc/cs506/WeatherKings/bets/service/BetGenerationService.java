@@ -132,7 +132,7 @@ public class BetGenerationService {
      * Attempts to find the forecast period corresponding to the next full day.
      */
     private Period findNextDayForecast(List<Period> periods) {
-         // Logic to find the next full day period (skipping 'Today' and 'Tonight')
+        // Logic to find the next full day period (skipping 'Today' and 'Tonight')
         if (periods.size() > 2) {
             Period potentialNextDay = periods.get(2);
             // Simple check to ensure we get a full day forecast and not a night forecast
@@ -269,10 +269,10 @@ public class BetGenerationService {
      */
     private double calculateUnderProbability(double setLine, double mean, double stdDev) {
         // 1. Calculate the Z-score
-        double zScore = (setLine - mean) / stdDev;
+        double zscore = (setLine - mean) / stdDev;
         
         // 2. Use the Z-score to find the Cumulative Distribution Function (CDF) value.
-        return phi(zScore);
+        return phi(zscore);
     }
     
     /**
