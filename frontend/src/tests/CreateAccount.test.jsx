@@ -18,9 +18,16 @@ import CreateAccount from '../components/CreateAccount';
  * 3. Form Submission Tests:
  *    ✓ successful account creation displays success message and redirects
  *    ✓ account creation with existing username displays error message
+ *    ✓ account creation with existing email displays error message
  *    ✓ account creation with empty fields is prevented
  * 
- * 4. Cancel Action Tests:
+ * 4. Error Handling and Recovery Tests:
+ *    ✓ create account button is disabled when email already exists
+ *    ✓ changing email clears email already exists error
+ *    ✓ create account button is disabled when username already exists
+ *    ✓ changing username clears username already exists error
+ * 
+ * 5. Cancel Action Tests:
  *    ✓ cancel button redirects to login page
  * 
  *  Run all tests: npm test
@@ -133,5 +140,135 @@ describe('CreateAccount Component Tests', () => {
         const cancelButton = screen.getByRole('button', { name: /Cancel/i });
         fireEvent.click(cancelButton);
         expect(mockOnNavigateToLogin).toHaveBeenCalled();
+    });
+
+    test('account creation with existing email displays error message', async () => {
+        // Mock API response for existing email
+        fetch.mockResolvedValueOnce({
+            ok: false,
+            json: async () => ({ message: 'Email already exists' }),
+        });
+        render(<CreateAccount onNavigateToLogin={mockOnNavigateToLogin} />);
+        const usernameInput = screen.getByPlaceholderText('Username');
+        const emailInput = screen.getByPlaceholderText('Email');
+        const passwordInput = screen.getByPlaceholderText('Password');
+        const createButton = screen.getByRole('button', { name: /Create Account/i });
+        // Fill in form with existing email
+        fireEvent.change(usernameInput, { target: { value: 'newuser' } });
+        fireEvent.change(emailInput, { target: { value: 'existing@example.com' } });
+        fireEvent.change(passwordInput, { target: { value: 'somepassword' } });
+        fireEvent.click(createButton);
+        // Wait for error message to appear
+        await waitFor(() => {
+            expect(screen.getByText('Email already exists')).toBeInTheDocument();
+        });
+    });
+
+    test('create account button is disabled when email already exists', async () => {
+        // Mock API response for existing email
+        fetch.mockResolvedValueOnce({
+            ok: false,
+            json: async () => ({ message: 'Email already exists' }),
+        });
+        render(<CreateAccount onNavigateToLogin={mockOnNavigateToLogin} />);
+        const usernameInput = screen.getByPlaceholderText('Username');
+        const emailInput = screen.getByPlaceholderText('Email');
+        const passwordInput = screen.getByPlaceholderText('Password');
+        const createButton = screen.getByRole('button', { name: /Create Account/i });
+        // Fill in form
+        fireEvent.change(usernameInput, { target: { value: 'newuser' } });
+        fireEvent.change(emailInput, { target: { value: 'existing@example.com' } });
+        fireEvent.change(passwordInput, { target: { value: 'somepassword' } });
+        fireEvent.click(createButton);
+        // Wait for error message
+        await waitFor(() => {
+            expect(screen.getByText('Email already exists')).toBeInTheDocument();
+        });
+        // Button should be disabled
+        expect(createButton).toBeDisabled();
+    });
+
+    test('changing email clears email already exists error', async () => {
+        // Mock API response for existing email
+        fetch.mockResolvedValueOnce({
+            ok: false,
+            json: async () => ({ message: 'Email already exists' }),
+        });
+        render(<CreateAccount onNavigateToLogin={mockOnNavigateToLogin} />);
+        const usernameInput = screen.getByPlaceholderText('Username');
+        const emailInput = screen.getByPlaceholderText('Email');
+        const passwordInput = screen.getByPlaceholderText('Password');
+        const createButton = screen.getByRole('button', { name: /Create Account/i });
+        // Fill in form
+        fireEvent.change(usernameInput, { target: { value: 'newuser' } });
+        fireEvent.change(emailInput, { target: { value: 'existing@example.com' } });
+        fireEvent.change(passwordInput, { target: { value: 'somepassword' } });
+        fireEvent.click(createButton);
+        // Wait for error message
+        await waitFor(() => {
+            expect(screen.getByText('Email already exists')).toBeInTheDocument();
+        });
+        // Change email
+        fireEvent.change(emailInput, { target: { value: 'newemail@example.com' } });
+        // Error should be cleared
+        await waitFor(() => {
+            expect(screen.queryByText('Email already exists')).not.toBeInTheDocument();
+        });
+        // Button should be enabled again
+        expect(createButton).not.toBeDisabled();
+    });
+
+    test('create account button is disabled when username already exists', async () => {
+        // Mock API response for existing username
+        fetch.mockResolvedValueOnce({
+            ok: false,
+            json: async () => ({ message: 'Username already exists' }),
+        });
+        render(<CreateAccount onNavigateToLogin={mockOnNavigateToLogin} />);
+        const usernameInput = screen.getByPlaceholderText('Username');
+        const emailInput = screen.getByPlaceholderText('Email');
+        const passwordInput = screen.getByPlaceholderText('Password');
+        const createButton = screen.getByRole('button', { name: /Create Account/i });
+        // Fill in form
+        fireEvent.change(usernameInput, { target: { value: 'existinguser' } });
+        fireEvent.change(emailInput, { target: { value: 'new@example.com' } });
+        fireEvent.change(passwordInput, { target: { value: 'somepassword' } });
+        fireEvent.click(createButton);
+        // Wait for error message
+        await waitFor(() => {
+            expect(screen.getByText('Username already exists')).toBeInTheDocument();
+        });
+        // Button should be disabled
+        expect(createButton).toBeDisabled();
+    });
+
+    test('changing username clears username already exists error', async () => {
+        // Mock API response for existing username
+        fetch.mockResolvedValueOnce({
+            ok: false,
+            json: async () => ({ message: 'Username already exists' }),
+        });
+        render(<CreateAccount onNavigateToLogin={mockOnNavigateToLogin} />);
+        const usernameInput = screen.getByPlaceholderText('Username');
+        const emailInput = screen.getByPlaceholderText('Email');
+        const passwordInput = screen.getByPlaceholderText('Password');
+        const createButton = screen.getByRole('button', { name: /Create Account/i });
+        // Fill in form
+        fireEvent.change(usernameInput, { target: { value: 'existinguser' } });
+        fireEvent.change(emailInput, { target: { value: 'new@example.com' } });
+        fireEvent.change(passwordInput, { target: { value: 'somepassword' } });
+        fireEvent.click(createButton);
+        // Wait for error message
+        await waitFor(() => {
+            expect(screen.getByText('Username already exists')).toBeInTheDocument();
+        });
+        // Change username
+        fireEvent.change(usernameInput, { target: { value: 'newusername' } });
+        // Error should be cleared
+        await waitFor(() => {
+            expect(screen.queryByText('Username already exists')).not.toBeInTheDocument();
+        });
+        // Button should be enabled again
+        expect(createButton).not.toBeDisabled();
     });
 });

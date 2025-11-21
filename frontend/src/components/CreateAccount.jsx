@@ -32,8 +32,10 @@ function CreateAccount({ onNavigateToLogin }) {
     // Handle email change and clear validation messages
     const handleEmailChange = (e) => {
         setEmail(e.target.value);
-        // Clear validation messages when user changes email
-        if (message.includes('email')) {
+        // Clear the message when user starts typing a new email
+        if (message === 'Email already exists') {
+            setMessage('');
+        } else if (message.includes('email')) {
             setMessage('');
         }
     };
@@ -99,8 +101,9 @@ function CreateAccount({ onNavigateToLogin }) {
     // Ensure that the username and password are not empty when trying to create an account
     const isFormValid = username.trim() !== '' && email.trim() !== '' && password.trim() !== '';
 
-    // Check if the username is already taken based on the backend response
+    // Check if the username or email is already taken based on the backend response
     const isUsernameTaken = message === 'Username already exists';
+    const isEmailTaken = message === 'Email already exists';
     return (
         <div style={{ textAlign: 'center', marginTop: '50px' }}>
             <h2>Create Account</h2> {/* Heading for the create account page */}
@@ -134,12 +137,12 @@ function CreateAccount({ onNavigateToLogin }) {
             <div>
                 <button
                     onClick={handleCreateAccount}
-                    disabled={!isFormValid || isUsernameTaken}
+                    disabled={!isFormValid || isUsernameTaken || isEmailTaken}
                     style={{
                         margin: '10px',
                         padding: '10px 20px',
                         fontSize: '16px',
-                        cursor: !isFormValid || isUsernameTaken ? 'not-allowed' : 'pointer',
+                        cursor: !isFormValid || isUsernameTaken || isEmailTaken ? 'not-allowed' : 'pointer',
                     }}>Create Account
                 </button>
                 <button
@@ -156,7 +159,7 @@ function CreateAccount({ onNavigateToLogin }) {
                 <p style={{ 
                     marginTop: '20px', 
                     fontSize: '18px', 
-                    color: message === 'Username already exists' ? 'red' : 
+                    color: message === 'Username already exists' || message === 'Email already exists' ? 'red' : 
                            message === 'Account created successfully!' ? 'green' :
                            message.includes('Please enter') || message.includes('valid email') ? 'orange' : 'red'
                 }}>

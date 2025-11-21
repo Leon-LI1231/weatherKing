@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Table, Badge } from "react-bootstrap";
+import React, { useState } from "react";
+import { Container, Row, Col, Badge, Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import DepositCurrency from "./DepositCurrency";
+import BetHistory from "./BetHistory";
+import BetHistoryFilter from "./BetHistoryFilter";
 
 /**
  * =======================================================
@@ -8,49 +11,27 @@ import "bootstrap/dist/css/bootstrap.min.css";
  * =======================================================
  *
  * This page displays:
- *   - User account information (username, balance, etc.)
- *   - A list of the user’s past and active bets (mocked for now)
+ *   - User account information (username, balance)
+ *   - Deposit currency functionality via modal
+ *   - Filterable bet history table showing user's past and active bets
+ *   - Filter controls for city, contest, and outcome
  * 
  * Props:
- *   - user: the logged-in user object
+ *   - user: the logged-in user object (contains username, balanceUsd, etc.)
+ *   - onBalanceUpdate: callback function to update user balance in parent component
  */
 
-function UserPage({ user }) {
-  const [userBets, setUserBets] = useState([]);
+function UserPage({ user, onBalanceUpdate }) {
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [filter, setFilter] = useState({ cities: [], contests: [], outcomes: [] });
+  const [availableOptions, setAvailableOptions] = useState({ cities: [], contests: [], outcomes: [] });
 
-  // Mock data for user bets
-  useEffect(() => {
-    const mockUserBets = [
-      {
-        id: 1,
-        title: "Will be done in split 3",
-        city: "Madison",
-        bet_type: "A",
-        amount: 1.0,
-        outcome: "Pending",
-        date: "1/1/2025",
-      },
-      {
-        id: 2,
-        title: "Will be done in split 3",
-        city: "Madison",
-        bet_type: "B",
-        amount: 1.0,
-        outcome: "Pending",
-        date: "1/2/2025",
-      },
-      {
-        id: 3,
-        title: "Will be done in split 3",
-        city: "Madison",
-        bet_type: "C",
-        amount: 1.0,
-        outcome: "Pending",
-        date: "1/3/2025",
-      },
-    ];
-    setUserBets(mockUserBets);
-  }, []);
+  const handleDeposit = (newBalance) => {
+    // Update balance in parent component
+    if (onBalanceUpdate) {
+      onBalanceUpdate(newBalance);
+    }
+  };
 
   return (
     <Container style={{ marginTop: "140px", textAlign: "center" }}>
@@ -67,41 +48,51 @@ function UserPage({ user }) {
         <Col>
           <h5>Username: <strong>{user?.username}</strong></h5>
           <h5>Balance: <Badge bg="info" text="dark">${user?.balanceUsd !== undefined ? user.balanceUsd.toFixed(2) : '0.00'}</Badge></h5>
+          <Button 
+            variant="success" 
+            size="sm" 
+            className="mt-2"
+            onClick={() => setShowDepositModal(true)}
+          >
+            Deposit Funds
+          </Button>
         </Col>
       </Row>
 
-      {/* Bet History Table */}
+      {/* Bet History Section */}
       <Row>
         <Col>
           <h4 className="mb-3">Bet History</h4>
+        </Col>
+      </Row>
+      <Row>
+        <Col md={3}>
+          <BetHistoryFilter 
+            onFilterChange={setFilter}
+            initialFilter={filter}
+            availableOptions={availableOptions}
+          />
+        </Col>
+        <Col md={9}>
           <div style={{ maxHeight: "500px", overflowY: "auto", borderRadius: "10px" }}>
-            <Table striped hover responsive>
-              <thead style={{ backgroundColor: "#f8f9fa", position: "sticky", top: 0 }}>
-                <tr>
-                  <th>Contest</th>
-                  <th>City</th>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>Outcome</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {userBets.map((bet) => (
-                  <tr key={bet.id}>
-                    <td><strong>{bet.title}</strong></td>
-                    <td>{bet.city}</td>
-                    <td><Badge bg="secondary">{bet.bet_type.toUpperCase()}</Badge></td>
-                    <td>${bet.amount.toFixed(2)}</td>
-                    <td>{bet.outcome}</td>
-                    <td>{bet.date}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
+            <BetHistory 
+              username={user?.username}
+              filter={filter}
+              onAvailableOptionsChange={setAvailableOptions}
+            />
           </div>
         </Col>
       </Row>
+
+      {/* Deposit Modal */}
+      {showDepositModal && (
+        <DepositCurrency
+          username={user?.username}
+          userBalance={user?.balanceUsd}
+          onDeposit={handleDeposit}
+          onCancel={() => setShowDepositModal(false)}
+        />
+      )}
     </Container>
   );
 }

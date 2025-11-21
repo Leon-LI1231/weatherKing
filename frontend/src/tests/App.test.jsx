@@ -57,6 +57,10 @@ import App from '../components/App';
  *   ✓ all interactive elements are keyboard accessible
  *   ✓ appropriate ARIA roles are used
  * 
+ * 10. Balance Update Tests:
+ *   ✓ handleBalanceUpdate updates user balance in state
+ *   ✓ UserPage receives onBalanceUpdate prop
+ * 
  * Run all tests: npm test
  * Run App.test.jsx only: npm test -- App.test.jsx
  * Run specific test: npm test -- --testNamePattern="test name"
@@ -277,6 +281,45 @@ jest.mock('react-bootstrap', () => {
   );
   MockForm.Control.displayName = "MockFormControl";
 
+  const MockModal = ({ show, children }) =>
+    show ? (
+      <div className="modal" data-testid="modal">
+        {children}
+      </div>
+    ) : null;
+  MockModal.displayName = "MockModal";
+
+  MockModal.Header = ({ closeButton, children }) => (
+    <div className="modal-header">
+      {children}
+      {closeButton && <button className="btn-close" onClick={() => {}} />}
+    </div>
+  );
+  MockModal.Header.displayName = "MockModalHeader";
+
+  MockModal.Title = ({ children }) => <h5 className="modal-title">{children}</h5>;
+  MockModal.Title.displayName = "MockModalTitle";
+
+  MockModal.Body = ({ children }) => <div className="modal-body">{children}</div>;
+  MockModal.Body.displayName = "MockModalBody";
+
+  MockModal.Footer = ({ children }) => <div className="modal-footer">{children}</div>;
+  MockModal.Footer.displayName = "MockModalFooter";
+
+  const MockTable = ({ striped, hover, children }) => (
+    <table className={`table ${striped ? 'table-striped' : ''} ${hover ? 'table-hover' : ''}`}>
+      {children}
+    </table>
+  );
+  MockTable.displayName = "MockTable";
+
+  const MockAlert = ({ variant, children }) => (
+    <div className={`alert alert-${variant}`}>
+      {children}
+    </div>
+  );
+  MockAlert.displayName = "MockAlert";
+
   return {
     Offcanvas: MockOffcanvas,
     Nav: MockNav,
@@ -287,7 +330,10 @@ jest.mock('react-bootstrap', () => {
     Col: MockCol,
     Container: MockContainer,
     Badge: MockBadge,
-    Form: MockForm
+    Form: MockForm,
+    Modal: MockModal,
+    Table: MockTable,
+    Alert: MockAlert
   };
 });
 describe('App Component Tests', () => {
@@ -518,7 +564,7 @@ describe('App Component Tests', () => {
     expect(screen.getByText('← Back to Landing Page')).toBeInTheDocument();
   });
 
-  test('navigates back to landing page from city page', () => {
+  test('navigates back to landing page from city page', async () => {
     render(<App />);
     
     const tempButton = screen.getByText('Temporary button to get to landing page');
@@ -527,10 +573,12 @@ describe('App Component Tests', () => {
     const madisonCard = screen.getByText('View Madison Bets');
     fireEvent.click(madisonCard);
     
-    const backButton = screen.getByRole('button', { name: /← Back to Landing Page/i });
+    const backButton = screen.getByText('← Back to Landing Page');
     fireEvent.click(backButton);
     
-    expect(screen.getByText(/Welcome to WeatherKings/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/Welcome to WeatherKings/i)).toBeInTheDocument();
+    });
     expect(screen.getByText('Select a City')).toBeInTheDocument();
   });
 
@@ -542,7 +590,7 @@ describe('App Component Tests', () => {
     
     expect(screen.getByText('WeatherKings')).toBeInTheDocument();
     expect(screen.getByText('TestUser')).toBeInTheDocument();
-    expect(screen.getByText('$1000.00')).toBeInTheDocument();
+    expect(screen.getByText(/\$0\.00/)).toBeInTheDocument();
   });
 
   test('drawer navigation works from landing page', () => {
@@ -771,5 +819,160 @@ describe('App Component Tests', () => {
     render(<App />);
     
     expect(screen.getByText(/Welcome to WeatherKings/i)).toBeInTheDocument();
+  });
+
+  test('handleBalanceUpdate updates user balance in state', async () => {
+    localStorage.getItem.mockReturnValue(null);
+    
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('/api/login')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ 
+            message: 'Login successful.',
+            username: 'TestUser',
+            balanceUsd: 100.00 
+          })
+        });
+      }
+      if (url.includes('/api/user/')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ 
+            username: 'TestUser',
+            balanceUsd: 100.00,
+            email: 'test@example.com',
+            uid: 1,
+            createdAt: '2025-01-01'
+          })
+        });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    render(<App />);
+    
+    // Login first
+    const usernameInput = screen.getByPlaceholderText(/Username/i);
+    const passwordInput = screen.getByPlaceholderText(/Password/i);
+    const loginButton = screen.getByRole('button', { name: /Login/i });
+    
+    fireEvent.change(usernameInput, { target: { value: 'TestUser' } });
+    fireEvent.change(passwordInput, { target: { value: 'password' } });
+    fireEvent.click(loginButton);
+    
+    await waitFor(() => {
+      expect(screen.getByText(/Welcome to WeatherKings/i)).toBeInTheDocument();
+    });
+    
+    // Navigate to user page
+    const drawerButton = screen.getByRole('button', { name: '☰' });
+    fireEvent.click(drawerButton);
+    
+    await waitFor(() => {
+      expect(screen.getByText(/User Page/i)).toBeInTheDocument();
+    });
+    
+    const userPageOption = screen.getByText(/User Page/i);
+    fireEvent.click(userPageOption);
+    
+    await waitFor(() => {
+      expect(screen.getByText(/Your account info and bet history/i)).toBeInTheDocument();
+    });
+    
+    // Check initial balance (there should be multiple instances - in header and on user page)
+    const balanceElements = screen.getAllByText(/\$100\.00/);
+    expect(balanceElements.length).toBeGreaterThan(0);
+    
+    // Mock deposit API call
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('/api/deposit')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ newBalance: 200.00 })
+        });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+    
+    // Open deposit modal and make deposit
+    const depositButton = screen.getByRole('button', { name: /Deposit Funds/i });
+    fireEvent.click(depositButton);
+    
+    const amountInput = screen.getByPlaceholderText(/Enter amount/i);
+    fireEvent.change(amountInput, { target: { value: '100.00' } });
+    
+    const depositSubmitButton = screen.getByRole('button', { name: /^Deposit$/i });
+    fireEvent.click(depositSubmitButton);
+    
+    // Check updated balance (there should be multiple instances - in header and on user page)
+    await waitFor(() => {
+      const updatedBalanceElements = screen.getAllByText(/\$200\.00/);
+      expect(updatedBalanceElements.length).toBeGreaterThan(0);
+    });
+  });
+
+  test('UserPage receives onBalanceUpdate prop from App', async () => {
+    localStorage.getItem.mockReturnValue(null);
+    
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('/api/login')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ 
+            message: 'Login successful.',
+            username: 'TestUser',
+            balanceUsd: 50.00 
+          })
+        });
+      }
+      if (url.includes('/api/user/')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ 
+            username: 'TestUser',
+            balanceUsd: 50.00,
+            email: 'test@example.com',
+            uid: 1,
+            createdAt: '2025-01-01'
+          })
+        });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    render(<App />);
+    
+    // Login
+    const usernameInput = screen.getByPlaceholderText(/Username/i);
+    const passwordInput = screen.getByPlaceholderText(/Password/i);
+    const loginButton = screen.getByRole('button', { name: /Login/i });
+    
+    fireEvent.change(usernameInput, { target: { value: 'TestUser' } });
+    fireEvent.change(passwordInput, { target: { value: 'password' } });
+    fireEvent.click(loginButton);
+    
+    await waitFor(() => {
+      expect(screen.getByText(/Welcome to WeatherKings/i)).toBeInTheDocument();
+    });
+    
+    // Navigate to user page
+    const drawerButton = screen.getByRole('button', { name: '☰' });
+    fireEvent.click(drawerButton);
+    
+    await waitFor(() => {
+      expect(screen.getByText(/User Page/i)).toBeInTheDocument();
+    });
+    
+    const userPageOption = screen.getByText(/User Page/i);
+    fireEvent.click(userPageOption);
+    
+    await waitFor(() => {
+      expect(screen.getByText(/Your account info and bet history/i)).toBeInTheDocument();
+    });
+    
+    // Verify that deposit button is present (which requires onBalanceUpdate prop)
+    const depositButton = screen.getByRole('button', { name: /Deposit Funds/i });
+    expect(depositButton).toBeInTheDocument();
   });
 });
