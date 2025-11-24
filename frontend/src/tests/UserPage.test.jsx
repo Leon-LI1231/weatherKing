@@ -64,10 +64,10 @@ describe("UserPage", () => {
   //Test 3: Check BetHistory component is rendered
   test("renders BetHistory component", async () => {
     render(<UserPage user={user} />);
-    
+
     // Check that "Bet History" heading is present
     expect(screen.getByRole("heading", { name: /Bet History/i })).toBeInTheDocument();
-    
+
     // Wait for BetHistory to render
     await waitFor(() => {
       expect(screen.getByText(/Loading bet history/i)).toBeInTheDocument();
@@ -77,10 +77,10 @@ describe("UserPage", () => {
   //Test 4: Check BetHistoryFilter component is rendered
   test("renders BetHistoryFilter component", () => {
     render(<UserPage user={user} />);
-    
+
     // Check filter heading is present
     expect(screen.getByText(/Filter Bets/i)).toBeInTheDocument();
-    
+
     // Check filter tabs are present
     expect(screen.getByRole("tab", { name: /Cities/i })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: /Contests/i })).toBeInTheDocument();
@@ -98,13 +98,13 @@ describe("UserPage", () => {
   test("shows DepositCurrency modal when Deposit Funds button is clicked", () => {
     render(<UserPage user={user} />);
     const depositButton = screen.getByRole("button", { name: /Deposit Funds/i });
-    
+
     // Modal should not be visible initially
     expect(screen.queryByPlaceholderText(/Enter amount/i)).not.toBeInTheDocument();
-    
+
     // Click button to show modal
     fireEvent.click(depositButton);
-    
+
     // Modal should now be visible
     expect(screen.getByPlaceholderText(/Enter amount/i)).toBeInTheDocument();
   });
@@ -114,7 +114,7 @@ describe("UserPage", () => {
     const mockOnBalanceUpdate = jest.fn();
     // Mock both BetHistory fetch and deposit fetch
     global.fetch.mockImplementation((url) => {
-      if (url.includes('/api/deposit')) {
+      if (url.includes("/api/deposit")) {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({ newBalance: 1152.37 }),
@@ -127,18 +127,18 @@ describe("UserPage", () => {
     });
 
     render(<UserPage user={user} onBalanceUpdate={mockOnBalanceUpdate} />);
-    
+
     // Open modal
     const depositButton = screen.getByRole("button", { name: /Deposit Funds/i });
     fireEvent.click(depositButton);
-    
+
     // Enter valid amount and submit
     const input = screen.getByPlaceholderText(/Enter amount/i);
     fireEvent.change(input, { target: { value: "100.00" } });
-    
+
     const depositSubmitButton = screen.getByRole("button", { name: /^Deposit$/i });
     fireEvent.click(depositSubmitButton);
-    
+
     // Wait for API call and callback
     await waitFor(() => {
       expect(mockOnBalanceUpdate).toHaveBeenCalledWith(1152.37);
@@ -148,20 +148,19 @@ describe("UserPage", () => {
   // Test 8: hides modal when cancel is clicked
   test("hides modal when cancel button is clicked in DepositCurrency", () => {
     render(<UserPage user={user} />);
-    
+
     // Open modal
     const depositButton = screen.getByRole("button", { name: /Deposit Funds/i });
     fireEvent.click(depositButton);
-    
+
     // Modal should be visible
     expect(screen.getByPlaceholderText(/Enter amount/i)).toBeInTheDocument();
-    
+
     // Click cancel
     const cancelButton = screen.getByRole("button", { name: /Cancel/i });
     fireEvent.click(cancelButton);
-    
+
     // Modal should be hidden
     expect(screen.queryByPlaceholderText(/Enter amount/i)).not.toBeInTheDocument();
   });
 });
-

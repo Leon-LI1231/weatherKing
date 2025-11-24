@@ -27,15 +27,35 @@ import { Form, Button } from "react-bootstrap";
  *   - availableBetTypes: array of available bet types for this city
  */
 
-
-function BetFilters({ search, setSearch, selectedType, setSelectedType, minFee, setMinFee, maxFee, setMaxFee, availableBetTypes }) {
-
+function BetFilters({
+  search,
+  setSearch,
+  selectedType,
+  setSelectedType,
+  minFee,
+  setMinFee,
+  maxFee,
+  setMaxFee,
+  availableBetTypes,
+}) {
   const betTypes = availableBetTypes || ["All"];
   // Replace entry fee filtering with odds filtering (American moneyline)
   const oddsOptions = [
-      "Any",
-      -500, -300, -200, -150, -120, -110, -105, -100,
-      100, 120, 150, 200, 300, 500
+    "Any",
+    -500,
+    -300,
+    -200,
+    -150,
+    -120,
+    -110,
+    -105,
+    -100,
+    100,
+    120,
+    150,
+    200,
+    300,
+    500,
   ];
 
   return (
@@ -46,7 +66,6 @@ function BetFilters({ search, setSearch, selectedType, setSelectedType, minFee, 
         padding: "15px",
         borderRadius: "10px",
         height: "100%",
-        
       }}
     >
       <Form.Group className="mb-3">
@@ -78,18 +97,17 @@ function BetFilters({ search, setSearch, selectedType, setSelectedType, minFee, 
       <Form.Group className="mb-3">
         <Form.Label>Contest Type</Form.Label>
         <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-        {betTypes.map((type) => (
-  <Button
-    key={type}
-    variant={selectedType === type ? "warning" : "outline-secondary"} 
-    onClick={() => setSelectedType(type)}
-    size="sm"
-    style={{ fontWeight: selectedType === type ? "600" : "400" }}
-  >
-    {type}
-  </Button>
-))}
-
+          {betTypes.map((type) => (
+            <Button
+              key={type}
+              variant={selectedType === type ? "warning" : "outline-secondary"}
+              onClick={() => setSelectedType(type)}
+              size="sm"
+              style={{ fontWeight: selectedType === type ? "600" : "400" }}
+            >
+              {type}
+            </Button>
+          ))}
         </div>
       </Form.Group>
     </div>

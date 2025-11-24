@@ -78,7 +78,7 @@ function CityPage({ cityName, onNavigateBack }) {
         selectedType,
         minFee,
         maxFee,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       saveFiltersToStorage(cityName, currentFilters);
     }
@@ -87,7 +87,7 @@ function CityPage({ cityName, onNavigateBack }) {
   useEffect(() => {
     const fetchBets = async () => {
       if (!cityName) return;
-      
+
       setIsLoading(true);
       try {
         console.log("Fetching daily bets...");
@@ -100,25 +100,25 @@ function CityPage({ cityName, onNavigateBack }) {
           console.log("No daily bets found, generating daily bets...");
           try {
             await fetch("http://localhost:8080/api/bets/generate-daily", {
-              method: "POST"
+              method: "POST",
             });
-            
+
             console.log("Daily bets generated successfully, fetching updated bets...");
-            
+
             // Retry fetching daily bets after generation
             const retryResponse = await fetch("http://localhost:8080/api/bets/daily");
             if (!retryResponse.ok) throw new Error(`HTTP error! ${retryResponse.status}`);
             const retryData = await retryResponse.json();
-            
+
             console.log("Fetched updated bets:", retryData.length, "total bets");
-            
+
             const cityBets = retryData.filter(
               (bet) =>
                 bet.cityName &&
                 cityName &&
-                bet.cityName.toLowerCase().includes(cityName.toLowerCase())
+                bet.cityName.toLowerCase().includes(cityName.toLowerCase()),
             );
-            
+
             console.log("Filtered bets for", cityName + ":", cityBets.length, "bets");
             setBets(cityBets);
           } catch (generateError) {
@@ -131,7 +131,7 @@ function CityPage({ cityName, onNavigateBack }) {
             (bet) =>
               bet.cityName &&
               cityName &&
-              bet.cityName.toLowerCase().includes(cityName.toLowerCase())
+              bet.cityName.toLowerCase().includes(cityName.toLowerCase()),
           );
           console.log("Filtered bets for", cityName + ":", cityBets.length, "bets");
           setBets(cityBets);
@@ -152,7 +152,7 @@ function CityPage({ cityName, onNavigateBack }) {
       setMinFee(storedFilters?.minFee || "Any");
       setMaxFee(storedFilters?.maxFee || "Any");
       setFiltersInitialized(true);
-      
+
       fetchBets();
     }
   }, [cityName]);
@@ -172,11 +172,11 @@ function CityPage({ cityName, onNavigateBack }) {
     .filter((b) => b.betDescription?.toLowerCase().includes(search.toLowerCase()))
     .filter((b) => (selectedType === "All" ? true : b.betType === selectedType))
     .filter((b) => {
-        const min = minFee === "Any" ? -Infinity : parseFloat(minFee);
-        const max = maxFee === "Any" ?  Infinity : parseFloat(maxFee);
-        const odds = parseFloat(b.moneylineOdds ?? 0);
-        return odds >= min && odds <= max;
-      });
+      const min = minFee === "Any" ? -Infinity : parseFloat(minFee);
+      const max = maxFee === "Any" ? Infinity : parseFloat(maxFee);
+      const odds = parseFloat(b.moneylineOdds ?? 0);
+      return odds >= min && odds <= max;
+    });
 
   return (
     <Container style={{ marginTop: "140px", textAlign: "center" }}>

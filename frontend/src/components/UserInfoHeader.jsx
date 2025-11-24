@@ -26,8 +26,16 @@ import Drawer from "./Drawer";
  *   - onRefreshBalance: function to refresh user balance from backend
  */
 
-
-function UserInfoHeader({ username, balance, currentPage, onLogout, onNavigateToCity, onNavigateToLanding, onNavigateToUser, onRefreshBalance }) {
+function UserInfoHeader({
+  username,
+  balance,
+  currentPage,
+  onLogout,
+  onNavigateToCity,
+  onNavigateToLanding,
+  onNavigateToUser,
+  onRefreshBalance,
+}) {
   // Drawer state
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -44,19 +52,19 @@ function UserInfoHeader({ username, balance, currentPage, onLogout, onNavigateTo
   const handleDrawerNavigation = (page) => {
     console.log("Drawer navigation called with page:", page);
     setDrawerOpen(false); // Close drawer after navigation
-    
+
     try {
-      if (page === 'logout') {
+      if (page === "logout") {
         console.log("Logging out...");
         onLogout();
-      } else if (page === 'landing') {
+      } else if (page === "landing") {
         console.log("Navigating to landing...");
         onNavigateToLanding && onNavigateToLanding();
-      } else if (['Madison', 'Los Angeles', 'New York City'].includes(page)) {
+      } else if (["Madison", "Los Angeles", "New York City"].includes(page)) {
         console.log("Navigating to city:", page);
         onNavigateToCity(page); // Navigate to dedicated city page
-      } else if (page === 'user') {
-        console.log("Navigating to user...")
+      } else if (page === "user") {
+        console.log("Navigating to user...");
         onNavigateToUser && onNavigateToUser();
       }
     } catch (error) {
@@ -91,63 +99,67 @@ function UserInfoHeader({ username, balance, currentPage, onLogout, onNavigateTo
             background: "transparent",
             fontSize: "1.2rem",
             color: "#0d6efd",
-            zIndex: 1001
+            zIndex: 1001,
           }}
         >
           ☰
         </Button>
 
         {/* WeatherKings Brand - Positioned absolutely next to the hamburger button */}
-        <Navbar.Brand 
-          style={{ 
+        <Navbar.Brand
+          style={{
             position: "absolute",
             left: "60px",
             top: "50%",
             transform: "translateY(-50%)",
             fontWeight: "600",
             margin: 0,
-            zIndex: 1001
+            zIndex: 1001,
           }}
         >
           WeatherKings
         </Navbar.Brand>
 
         <Container>
-        <Nav className="ms-auto">
-          {username && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                fontSize: "1rem",
-              }}
-            >
-              <span>
-                <strong>{username}</strong>
-              </span>
-              <Badge bg="info" text="dark" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                ${balance !== undefined && balance !== null ? balance.toFixed(2) : '0.00'}
-                {onRefreshBalance && (
-                  <span 
-                    onClick={() => onRefreshBalance(username)}
-                    style={{ 
-                      cursor: 'pointer', 
-                      fontSize: '0.8em',
-                      opacity: 0.8,
-                      marginLeft: '3px'
-                    }}
-                    title="Refresh balance"
-                  >
-                    ↻
-                  </span>
-                )}
-              </Badge>
-            </div>
-          )}
-        </Nav>
-      </Container>
-    </Navbar>
+          <Nav className="ms-auto">
+            {username && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  fontSize: "1rem",
+                }}
+              >
+                <span>
+                  <strong>{username}</strong>
+                </span>
+                <Badge
+                  bg="info"
+                  text="dark"
+                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                >
+                  ${balance !== undefined && balance !== null ? balance.toFixed(2) : "0.00"}
+                  {onRefreshBalance && (
+                    <span
+                      onClick={() => onRefreshBalance(username)}
+                      style={{
+                        cursor: "pointer",
+                        fontSize: "0.8em",
+                        opacity: 0.8,
+                        marginLeft: "3px",
+                      }}
+                      title="Refresh balance"
+                    >
+                      ↻
+                    </span>
+                  )}
+                </Badge>
+              </div>
+            )}
+          </Nav>
+        </Container>
+      </Navbar>
 
       {/* Drawer Component */}
       <Drawer

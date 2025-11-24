@@ -1,10 +1,10 @@
 // src/setupTests.js
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
 
 // Mock matchMedia for Bootstrap components that use it (like Offcanvas)
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: jest.fn().mockImplementation(query => {
+  value: jest.fn().mockImplementation((query) => {
     const mockMediaQueryList = {
       matches: false,
       media: query,
@@ -15,10 +15,10 @@ Object.defineProperty(window, 'matchMedia', {
       removeEventListener: jest.fn(),
       dispatchEvent: jest.fn(),
     };
-    
+
     // Add refCount property that the useMediaQuery hook expects
     mockMediaQueryList.refCount = 1;
-    
+
     return mockMediaQueryList;
   }),
 });
