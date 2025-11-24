@@ -275,7 +275,7 @@ describe("CityPage Component Tests", () => {
     expect(screen.getByText("Start")).toBeInTheDocument();
     expect(screen.getByText("Action")).toBeInTheDocument();
     // Entry Fee appears in filter section
-    expect(screen.getByText("Odds")).toBeInTheDocument();
+    expect(screen.getAllByText("Odds").length).toBeGreaterThan(0);
   });
 
   // Navigation Tests
@@ -351,8 +351,8 @@ describe("CityPage Component Tests", () => {
     render(<CityPage {...mockProps} />);
 
     // Test that free bets can be filtered
-    const minFeeSelect = screen.getByDisplayValue("Free");
-    fireEvent.change(minFeeSelect, { target: { value: "0" } });
+    const minOddsSelect = screen.getAllByRole("combobox")[0];
+    fireEvent.change(minOddsSelect, { target: { value: "-500" } });
 
     // Should work without errors
     expect(screen.getByText("Madison Bets")).toBeInTheDocument();
@@ -384,7 +384,7 @@ describe("CityPage Component Tests", () => {
     // Check default filter values
     expect(screen.getByDisplayValue("")).toBeInTheDocument(); // Empty search
     expect(screen.getByText("All")).toBeInTheDocument(); // All bet types button (not dropdown)
-    expect(screen.getByDisplayValue("Free")).toBeInTheDocument(); // Free min fee
+    expect(screen.getAllByDisplayValue("Any")[0]).toBeInTheDocument();
   });
 
   // Edge Cases
@@ -559,8 +559,8 @@ describe("CityPage Component Tests", () => {
     const storedFilters = {
       search: "basketball",
       selectedType: "sports",
-      minFee: "5",
-      maxFee: "20",
+      minOdds: "Any",
+      maxOdds: "Any",
       timestamp: new Date().toISOString(),
     };
 
@@ -593,8 +593,8 @@ describe("CityPage Component Tests", () => {
     const madisonFilters = {
       search: "weather",
       selectedType: "weather",
-      minFee: "5",
-      maxFee: "20",
+      minOdds: "-500",
+      maxOdds: "100",
       timestamp: new Date().toISOString(),
     };
 

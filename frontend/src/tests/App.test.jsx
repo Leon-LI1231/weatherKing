@@ -113,6 +113,13 @@ jest.mock("../components/BetListTable", () => {
   return MockBetListTable;
 });
 
+// Mock BetHistoryFilter
+jest.mock("../components/BetHistoryFilter", () => {
+  return function MockBetHistoryFilter() {
+    return <div data-testid="bet-history-filter"></div>;
+  };
+});
+
 // Mock Bootstrap components for App integration tests
 jest.mock("react-bootstrap", () => {
   const MockOffcanvas = ({ show, children }) =>
