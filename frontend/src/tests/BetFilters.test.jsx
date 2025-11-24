@@ -88,7 +88,7 @@ describe("BetFilters Component Tests", () => {
     render(<BetFilters {...defaultProps} />);
 
     expect(screen.getByPlaceholderText("Search Contests")).toBeInTheDocument();
-    expect(screen.getByText("Entry Fee")).toBeInTheDocument();
+    expect(screen.getByText("Odds")).toBeInTheDocument();
     expect(screen.getByText("Contest Type")).toBeInTheDocument();
 
     // Check that all contest type buttons are present
@@ -142,11 +142,11 @@ describe("BetFilters Component Tests", () => {
   test("min fee selector works correctly", () => {
     render(<BetFilters {...defaultProps} />);
 
-    const minFeeSelects = screen.getAllByDisplayValue("Free");
+    const minFeeSelects = screen.getAllByDisplayValue("Any");
     const minFeeSelect = minFeeSelects[0]; // First one is min fee
 
-    fireEvent.change(minFeeSelect, { target: { value: "5" } });
-    expect(mockSetMinFee).toHaveBeenCalledWith("5");
+    fireEvent.change(minFeeSelect, { target: { value: "-500" } });
+    expect(mockSetMinFee).toHaveBeenCalledWith("-500");
   });
 
   test("max fee selector works correctly", () => {
@@ -173,7 +173,7 @@ describe("BetFilters Component Tests", () => {
     const minFeeSelect = selects[0];
 
     expectedFees.forEach(() => {
-      expect(minFeeSelect).toHaveDisplayValue("Free"); // Current value
+      expect(minFeeSelect).toHaveDisplayValue("Any"); // Current value
       // We can't easily test all options without opening dropdown, but we can test functionality
     });
   });
@@ -255,14 +255,15 @@ describe("BetFilters Component Tests", () => {
 
     // Change fees
     const selects = screen.getAllByRole("combobox");
-    fireEvent.change(selects[0], { target: { value: "5" } }); // min fee
-    fireEvent.change(selects[1], { target: { value: "20" } }); // max fee
+    fireEvent.change(selects[0], { target: { value: "-500" } });//min
+  fireEvent.change(selects[1], { target: { value: "500" } });//max
+
 
     // Verify all functions were called
     expect(mockSetSearch).toHaveBeenCalledWith("weather");
     expect(mockSetSelectedType).toHaveBeenCalledWith("sports");
-    expect(mockSetMinFee).toHaveBeenCalledWith("5");
-    expect(mockSetMaxFee).toHaveBeenCalledWith("20");
+    expect(mockSetMinFee).toHaveBeenCalledWith("-500");
+    expect(mockSetMaxFee).toHaveBeenCalledWith("500");
   });
 
   // Component Structure Tests
@@ -273,7 +274,7 @@ describe("BetFilters Component Tests", () => {
     expect(screen.getByText("to")).toBeInTheDocument();
 
     // Check that all form labels are present
-    expect(screen.getByText("Entry Fee")).toBeInTheDocument();
+    expect(screen.getByText("Odds")).toBeInTheDocument();
     expect(screen.getByText("Contest Type")).toBeInTheDocument();
 
     // Check that there are exactly 2 select dropdowns
