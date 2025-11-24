@@ -255,9 +255,8 @@ describe("BetFilters Component Tests", () => {
 
     // Change fees
     const selects = screen.getAllByRole("combobox");
-    fireEvent.change(selects[0], { target: { value: "-500" } });//min
-  fireEvent.change(selects[1], { target: { value: "500" } });//max
-
+    fireEvent.change(selects[0], { target: { value: "-500" } }); //min
+    fireEvent.change(selects[1], { target: { value: "500" } }); //max
 
     // Verify all functions were called
     expect(mockSetSearch).toHaveBeenCalledWith("weather");

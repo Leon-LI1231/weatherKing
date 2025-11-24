@@ -351,7 +351,7 @@ describe("CityPage Component Tests", () => {
     render(<CityPage {...mockProps} />);
 
     // Test that free bets can be filtered
-    const minOddsSelect = screen.getAllByRole("combobox")[0];  
+    const minOddsSelect = screen.getAllByRole("combobox")[0];
     fireEvent.change(minOddsSelect, { target: { value: "-500" } });
 
     // Should work without errors
