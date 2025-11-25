@@ -82,7 +82,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
     expect(screen.getByText("Place Your Bet")).toBeInTheDocument();
   });
@@ -95,7 +95,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
     expect(screen.queryByText("Place Your Bet")).not.toBeInTheDocument();
   });
@@ -108,7 +108,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
     expect(screen.getByText(/Madison: Max Temperature Over\/Under 45.0°F/)).toBeInTheDocument();
     expect(screen.getByText("MAX_TEMP_OVER_UNDER")).toBeInTheDocument();
@@ -124,7 +124,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={250.75}
-      />
+      />,
     );
     expect(screen.getByText("$250.75")).toBeInTheDocument();
   });
@@ -138,7 +138,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
     expect(screen.getByText("Over")).toBeInTheDocument();
     expect(screen.getByText("Under")).toBeInTheDocument();
@@ -153,7 +153,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={rainBet}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
     expect(screen.getByText("Yes")).toBeInTheDocument();
     expect(screen.getByText("No")).toBeInTheDocument();
@@ -168,7 +168,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={conditionBet}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
     expect(screen.getByText("Match")).toBeInTheDocument();
     expect(screen.getByText("Not Match")).toBeInTheDocument();
@@ -183,7 +183,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const outcomeSelect = screen.getByLabelText("Select Outcome:");
@@ -203,7 +203,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const outcomeSelect = screen.getByLabelText("Select Outcome:");
@@ -226,7 +226,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const outcomeSelect = screen.getByLabelText("Select Outcome:");
@@ -249,7 +249,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const outcomeSelect = screen.getByLabelText("Select Outcome:");
@@ -261,7 +261,9 @@ describe("PlacingBet Component Tests", () => {
     const placeButton = screen.getByText("Place Bet");
     fireEvent.click(placeButton);
 
-    expect(screen.getByText("Amount must have no decimal or exactly 2 decimal places")).toBeInTheDocument();
+    expect(
+      screen.getByText("Amount must have no decimal or exactly 2 decimal places"),
+    ).toBeInTheDocument();
   });
 
   test("validates amount exceeds balance", () => {
@@ -272,7 +274,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={50}
-      />
+      />,
     );
 
     const outcomeSelect = screen.getByLabelText("Select Outcome:");
@@ -295,7 +297,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const amountInput = screen.getByLabelText("Bet Amount:");
@@ -316,7 +318,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const amountInput = screen.getByLabelText("Bet Amount:");
@@ -333,7 +335,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const outcomeSelect = screen.getByLabelText("Select Outcome:");
@@ -350,7 +352,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const placeButton = screen.getByText("Place Bet");
@@ -372,7 +374,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const cancelButton = screen.getByText("Cancel");
@@ -389,7 +391,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const overlay = screen.getByText("Place Your Bet").parentElement.parentElement;
@@ -412,7 +414,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const outcomeSelect = screen.getByLabelText("Select Outcome:");
@@ -450,7 +452,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const placeButton = screen.getByText("Place Bet");
@@ -470,9 +472,9 @@ describe("PlacingBet Component Tests", () => {
                 ok: true,
                 json: async () => ({ success: true }),
               }),
-            100
-          )
-        )
+            100,
+          ),
+        ),
     );
 
     render(
@@ -482,7 +484,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const outcomeSelect = screen.getByLabelText("Select Outcome:");
@@ -515,7 +517,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const outcomeSelect = screen.getByLabelText("Select Outcome:");
@@ -547,7 +549,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const outcomeSelect = screen.getByLabelText("Select Outcome:");
@@ -571,12 +573,12 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
-      />
+      />,
     );
 
     const newAmountInput = screen.getByLabelText("Bet Amount:");
     const newOutcomeSelect = screen.getByLabelText("Select Outcome:");
-    
+
     expect(newAmountInput.value).toBe("");
     expect(newOutcomeSelect.value).toBe("");
   });

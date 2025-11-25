@@ -716,7 +716,7 @@ describe("CityPage Component Tests", () => {
   describe("PlacingBet Modal Integration", () => {
     const mockPropsWithBalance = {
       ...mockProps,
-      user: { username: "testuser", balanceUsd: 100.50 },
+      user: { username: "testuser", balanceUsd: 100.5 },
     };
 
     test("opens PlacingBet modal when ENTER button is clicked", async () => {
@@ -866,7 +866,7 @@ describe("CityPage Component Tests", () => {
       });
 
       const enterButtons = screen.getAllByText("ENTER");
-      
+
       // Click first bet
       fireEvent.click(enterButtons[0]);
       await waitFor(() => {

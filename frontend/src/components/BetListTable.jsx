@@ -62,11 +62,7 @@ function BetListTable({ bets, onEnterBet }) {
               <td>{new Date(bet.betStart).toLocaleString()}</td>
               <td>{new Date(bet.betClose).toLocaleString()}</td>
               <td>
-                <Button 
-                  variant="success" 
-                  size="sm"
-                  onClick={() => onEnterBet(bet)}
-                >
+                <Button variant="success" size="sm" onClick={() => onEnterBet(bet)}>
                   ENTER
                 </Button>
               </td>
