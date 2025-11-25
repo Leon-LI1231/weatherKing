@@ -711,4 +711,228 @@ describe("CityPage Component Tests", () => {
       );
     });
   });
+
+  // PlacingBet Modal Integration Tests
+  describe("PlacingBet Modal Integration", () => {
+    const mockPropsWithBalance = {
+      ...mockProps,
+      user: { username: "testuser", balanceUsd: 100.50 },
+    };
+
+    test("opens PlacingBet modal when ENTER button is clicked", async () => {
+      render(<CityPage {...mockPropsWithBalance} />);
+
+      await waitFor(() => {
+        expect(screen.getByText("3 bets available")).toBeInTheDocument();
+      });
+
+      const enterButtons = screen.getAllByText("ENTER");
+      fireEvent.click(enterButtons[0]);
+
+      await waitFor(() => {
+        expect(screen.getByText("Place Your Bet")).toBeInTheDocument();
+      });
+    });
+
+    test("displays correct bet details in modal", async () => {
+      render(<CityPage {...mockPropsWithBalance} />);
+
+      await waitFor(() => {
+        expect(screen.getByText("3 bets available")).toBeInTheDocument();
+      });
+
+      const enterButtons = screen.getAllByText("ENTER");
+      fireEvent.click(enterButtons[0]);
+
+      await waitFor(() => {
+        expect(screen.getByText("Place Your Bet")).toBeInTheDocument();
+        expect(screen.getByText("Bet Description")).toBeInTheDocument();
+        // Check that the modal contains the bet description (will appear twice - table and modal)
+        expect(screen.getAllByText("Madison Weather Tomorrow").length).toBeGreaterThan(0);
+      });
+    });
+
+    test("displays user balance in modal", async () => {
+      render(<CityPage {...mockPropsWithBalance} />);
+
+      await waitFor(() => {
+        expect(screen.getByText("3 bets available")).toBeInTheDocument();
+      });
+
+      const enterButtons = screen.getAllByText("ENTER");
+      fireEvent.click(enterButtons[0]);
+
+      await waitFor(() => {
+        expect(screen.getByText("Place Your Bet")).toBeInTheDocument();
+        expect(screen.getByText("$100.50")).toBeInTheDocument();
+      });
+    });
+
+    test("closes modal when Cancel button is clicked", async () => {
+      render(<CityPage {...mockPropsWithBalance} />);
+
+      await waitFor(() => {
+        expect(screen.getByText("3 bets available")).toBeInTheDocument();
+      });
+
+      const enterButtons = screen.getAllByText("ENTER");
+      fireEvent.click(enterButtons[0]);
+
+      await waitFor(() => {
+        expect(screen.getByText("Place Your Bet")).toBeInTheDocument();
+      });
+
+      const cancelButton = screen.getByText("Cancel");
+      fireEvent.click(cancelButton);
+
+      await waitFor(() => {
+        expect(screen.queryByText("Place Your Bet")).not.toBeInTheDocument();
+      });
+    });
+
+    test("closes modal when clicking outside", async () => {
+      render(<CityPage {...mockPropsWithBalance} />);
+
+      await waitFor(() => {
+        expect(screen.getByText("3 bets available")).toBeInTheDocument();
+      });
+
+      const enterButtons = screen.getAllByText("ENTER");
+      fireEvent.click(enterButtons[0]);
+
+      await waitFor(() => {
+        expect(screen.getByText("Place Your Bet")).toBeInTheDocument();
+      });
+
+      const overlay = screen.getByText("Place Your Bet").parentElement.parentElement;
+      fireEvent.click(overlay);
+
+      await waitFor(() => {
+        expect(screen.queryByText("Place Your Bet")).not.toBeInTheDocument();
+      });
+    });
+
+    test("handles bet placement successfully", async () => {
+      // Mock successful bet placement
+      global.fetch = jest.fn((url) => {
+        if (url.includes("/api/bets/daily")) {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: () => Promise.resolve(mockBetsData),
+          });
+        }
+        if (url === "/api/place-bet") {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ success: true, betId: 123 }),
+          });
+        }
+      });
+
+      render(<CityPage {...mockPropsWithBalance} />);
+
+      await waitFor(() => {
+        expect(screen.getByText("3 bets available")).toBeInTheDocument();
+      });
+
+      const enterButtons = screen.getAllByText("ENTER");
+      fireEvent.click(enterButtons[0]);
+
+      await waitFor(() => {
+        expect(screen.getByText("Place Your Bet")).toBeInTheDocument();
+      });
+
+      // Fill in the form
+      const outcomeSelect = screen.getByLabelText("Select Outcome:");
+      fireEvent.change(outcomeSelect, { target: { value: "Yes" } });
+
+      const amountInput = screen.getByLabelText("Bet Amount:");
+      fireEvent.change(amountInput, { target: { value: "25.00" } });
+
+      const placeButton = screen.getByText("Place Bet");
+      fireEvent.click(placeButton);
+
+      await waitFor(() => {
+        expect(screen.queryByText("Place Your Bet")).not.toBeInTheDocument();
+      });
+    });
+
+    test("opens modal for different bets", async () => {
+      render(<CityPage {...mockPropsWithBalance} />);
+
+      await waitFor(() => {
+        expect(screen.getByText("3 bets available")).toBeInTheDocument();
+      });
+
+      const enterButtons = screen.getAllByText("ENTER");
+      
+      // Click first bet
+      fireEvent.click(enterButtons[0]);
+      await waitFor(() => {
+        expect(screen.getByText("Place Your Bet")).toBeInTheDocument();
+        // First bet description appears in both table and modal
+        expect(screen.getAllByText("Madison Weather Tomorrow").length).toBeGreaterThan(0);
+      });
+
+      // Close modal
+      const cancelButton = screen.getByText("Cancel");
+      fireEvent.click(cancelButton);
+
+      await waitFor(() => {
+        expect(screen.queryByText("Place Your Bet")).not.toBeInTheDocument();
+      });
+
+      // Click second bet
+      fireEvent.click(enterButtons[1]);
+      await waitFor(() => {
+        expect(screen.getByText("Place Your Bet")).toBeInTheDocument();
+        // Second bet description appears in both table and modal
+        expect(screen.getAllByText("UW Madison Basketball Game").length).toBeGreaterThan(0);
+      });
+    });
+
+    test("handles user with zero balance", async () => {
+      const zeroBalanceProps = {
+        ...mockProps,
+        user: { username: "testuser", balanceUsd: 0 },
+      };
+
+      render(<CityPage {...zeroBalanceProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByText("3 bets available")).toBeInTheDocument();
+      });
+
+      const enterButtons = screen.getAllByText("ENTER");
+      fireEvent.click(enterButtons[0]);
+
+      await waitFor(() => {
+        expect(screen.getByText("Place Your Bet")).toBeInTheDocument();
+        expect(screen.getByText("$0.00")).toBeInTheDocument();
+      });
+    });
+
+    test("handles user without balance property", async () => {
+      const noBalanceProps = {
+        ...mockProps,
+        user: { username: "testuser" },
+      };
+
+      render(<CityPage {...noBalanceProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByText("3 bets available")).toBeInTheDocument();
+      });
+
+      const enterButtons = screen.getAllByText("ENTER");
+      fireEvent.click(enterButtons[0]);
+
+      await waitFor(() => {
+        expect(screen.getByText("Place Your Bet")).toBeInTheDocument();
+        // Should default to 0
+        expect(screen.getByText("$0.00")).toBeInTheDocument();
+      });
+    });
+  });
 });
