@@ -15,9 +15,10 @@ import { Table, Button, Badge } from "react-bootstrap";
  *
  * Props:
  *   - bets: Array of bet objects [{ id, title, bet_type, entry_fee, total_amount_bet, entries, bet_start, description }]
+ *   - onEnterBet: Function to call when user clicks ENTER button on a bet
  */
 
-function BetListTable({ bets }) {
+function BetListTable({ bets, onEnterBet }) {
   return (
     <div
       style={{
@@ -61,7 +62,11 @@ function BetListTable({ bets }) {
               <td>{new Date(bet.betStart).toLocaleString()}</td>
               <td>{new Date(bet.betClose).toLocaleString()}</td>
               <td>
-                <Button variant="success" size="sm">
+                <Button 
+                  variant="success" 
+                  size="sm"
+                  onClick={() => onEnterBet(bet)}
+                >
                   ENTER
                 </Button>
               </td>
