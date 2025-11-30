@@ -20,6 +20,7 @@ import edu.wisc.cs506.WeatherKings.weather.service.WeatherApiService;
  * - We get all data needed for betting
  */
 @SpringBootTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 class WeatherApiServiceTest {
 
     @Autowired
