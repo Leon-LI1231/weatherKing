@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import BetListTable from "./BetListTable";
 import BetFilters from "./BetFilters";
+import PlacingBet from "./PlacingBet";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 /**
@@ -24,7 +25,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
  *   - onLogout: Function to handle user logout
  */
 
-function CityPage({ cityName, onNavigateBack }) {
+function CityPage({ cityName, user, onNavigateBack }) {
   if (!cityName) {
     return (
       <div style={{ marginTop: "200px", textAlign: "center" }}>
@@ -66,6 +67,8 @@ function CityPage({ cityName, onNavigateBack }) {
   const [bets, setBets] = useState([]);
   const [filtersInitialized, setFiltersInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBet, setSelectedBet] = useState(null);
 
   // dynamic types
   const availableBetTypes = ["All", ...new Set(bets.map((b) => b.betType))];
@@ -178,6 +181,25 @@ function CityPage({ cityName, onNavigateBack }) {
       return odds >= min && odds <= max;
     });
 
+  // Handle opening the bet modal
+  const handleEnterBet = (bet) => {
+    setSelectedBet(bet);
+    setIsModalOpen(true);
+  };
+
+  // Handle closing the bet modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedBet(null);
+  };
+
+  // Handle successful bet placement
+  const handleBetPlaced = (result) => {
+    console.log("Bet placed successfully:", result);
+    // TODO: Update user balance and refresh bets list
+    // You may want to call a callback to parent component to update user balance
+  };
+
   return (
     <Container style={{ marginTop: "140px", textAlign: "center" }}>
       <Row className="mb-3">
@@ -220,7 +242,7 @@ function CityPage({ cityName, onNavigateBack }) {
               <p className="mt-2 text-muted">Loading bets...</p>
             </div>
           ) : filteredBets.length > 0 ? (
-            <BetListTable bets={filteredBets} />
+            <BetListTable bets={filteredBets} onEnterBet={handleEnterBet} />
           ) : (
             <div className="text-center text-muted">
               <h5>No bets found</h5>
@@ -229,6 +251,17 @@ function CityPage({ cityName, onNavigateBack }) {
           )}
         </Col>
       </Row>
+
+      {/* PlacingBet Modal */}
+      {selectedBet && (
+        <PlacingBet
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          betDetails={selectedBet}
+          onBetPlaced={handleBetPlaced}
+          userBalance={user?.balanceUsd || 0}
+        />
+      )}
     </Container>
   );
 }

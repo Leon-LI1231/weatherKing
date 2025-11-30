@@ -57,83 +57,63 @@ class BetControllerIntegrationTest {
 
     private WeatherForecastResponse mockForecast;
 
-    // FIX: The correct odds for a 52F forecast against a 50.0 line is 269.83.
-    private static final BigDecimal EXPECTED_TEMP_ODDS = new BigDecimal("269.83"); 
-    
-    // Coordinates from BetGenerationService.java for explicit mocking
+    private static final BigDecimal EXPECTED_TEMP_ODDS = new BigDecimal("269.83");
+
     private static final double MADISON_LAT = 43.0731;
     private static final double MADISON_LON = -89.4012;
     private static final double LA_LAT = 34.0522;
     private static final double LA_LON = -118.2437;
     private static final double NYC_LAT = 40.7128;
     private static final double NYC_LON = -74.0060;
-    
-    // Test city coordinates
     private static final double SEATTLE_LAT = 47.6062;
     private static final double SEATTLE_LON = -122.3321;
 
     @BeforeEach
     void setup() {
         betRepository.deleteAll();
-        
-        // Setup mock weather data (52F -> 50.0 line)
+
         Period tomorrowForecast = new Period();
         tomorrowForecast.setName("Tomorrow");
-        tomorrowForecast.setTemperature(52); // This value results in a 50.0 line
+        tomorrowForecast.setTemperature(52);
         tomorrowForecast.setShortForecast("Mostly Sunny");
 
         WeatherForecastResponse.ProbabilityValue lowPrecip = new WeatherForecastResponse.ProbabilityValue();
-        lowPrecip.setValue(35); 
+        lowPrecip.setValue(35);
         tomorrowForecast.setProbabilityOfPrecipitation(lowPrecip);
-        
-        // Mock the periods list to ensure the BetGenerationService finds the correct one (period index 2)
+
         WeatherForecastResponse.Properties props = new WeatherForecastResponse.Properties();
-        props.setPeriods(List.of(new Period(), new Period(), tomorrowForecast)); 
+        props.setPeriods(List.of(new Period(), new Period(), tomorrowForecast));
 
         mockForecast = new WeatherForecastResponse();
         mockForecast.setProperties(props);
 
-        // Explicitly mock the forecast for each city using its specific coordinates.
-        when(weatherApiService.getForecast(MADISON_LAT, MADISON_LON)).thenReturn(mockForecast); 
+        when(weatherApiService.getForecast(MADISON_LAT, MADISON_LON)).thenReturn(mockForecast);
         when(weatherApiService.getForecast(LA_LAT, LA_LON)).thenReturn(mockForecast);
         when(weatherApiService.getForecast(NYC_LAT, NYC_LON)).thenReturn(mockForecast);
         when(weatherApiService.getForecast(SEATTLE_LAT, SEATTLE_LON)).thenReturn(mockForecast);
-        
-        // Safety mock for any other coordinates
-        when(weatherApiService.getForecast(anyDouble(), anyDouble())).thenReturn(mockForecast); 
+        when(weatherApiService.getForecast(anyDouble(), anyDouble())).thenReturn(mockForecast);
     }
 
-    /**
-     * Tests the core flow: Call POST generate, confirm 9 bets created, and verify calculated odds.
-     */
     @Test
     void generateDailyBets_shouldCreateAndReturnBets() throws Exception {
-        // Act: Call the generation endpoint
         mockMvc.perform(post("/api/bets/generate-daily")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray()); 
+                .andExpect(jsonPath("$").isArray());
 
-        // Assert 1: Verify all 9 bets were saved to the database (The count is now fixed)
         List<Bet> createdBets = betRepository.findAll();
-        assertEquals(9, createdBets.size(), "Should have created 9 bets in the database."); 
+        assertEquals(9, createdBets.size(), "Should have created 9 bets in the database.");
 
-        // Assert 2: Verify the content of a representative Temperature bet
         Bet tempBet = createdBets.stream()
                 .filter(b -> b.getBetType().equals("MAX_TEMP_OVER_UNDER"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Missing MAX_TEMP_OVER_UNDER bet"));
 
-        // FIX: Correct the expected set line from 55.0 to 50.0
         assertEquals(new BigDecimal("50.0"), tempBet.getSetLine(), "Set line should be rounded down to 50.0.");
-        
-        // Check if the calculated odds from the statistical model were saved correctly.
         assertEquals(EXPECTED_TEMP_ODDS, tempBet.getMoneylineOdds(), "Moneyline odds must reflect the calculated statistical value.");
-        
-        // FIX: Update the description to reflect the correct 50.0 line
-        assertTrue(tempBet.getBetDescription().contains("Over/Under 50.0°F (Odds for UNDER)"), "Bet description should reflect the rounded line and odds side.");
+        assertTrue(tempBet.getBetDescription().contains("Over/Under 50.0°F (Odds for UNDER)"),
+                "Bet description should reflect the rounded line and odds side.");
 
-        // Assert 3: Check a fixed odds bet remains correct (Rain Yes/No)
         Bet rainBet = createdBets.stream()
                 .filter(b -> b.getBetType().equals("RAIN_YES_NO"))
                 .findFirst()
@@ -141,59 +121,40 @@ class BetControllerIntegrationTest {
         assertEquals(new BigDecimal("100.00"), rainBet.getMoneylineOdds(), "Rain odds should remain fixed at 100.00.");
     }
 
-    /**
-     * Tests the retrieval endpoint used by the frontend.
-     */
     @Test
     void getDailyBets_shouldReturnGeneratedBets() throws Exception {
-        // Arrange 1: Generate the bets first (ensuring data exists)
         mockMvc.perform(post("/api/bets/generate-daily"));
 
-        // Act & Assert: Call the retrieval endpoint and verify the response structure
         mockMvc.perform(get("/api/bets/daily")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(9))
-                // FIX: Updating JSONPath assertion to the correct calculated value 269.83
-                .andExpect(jsonPath("$[0].moneylineOdds").value(269.83)) 
+                .andExpect(jsonPath("$[0].moneylineOdds").value(269.83))
                 .andExpect(jsonPath("$[0].betDescription").isString());
     }
 
-    /**
-     * Test case to ensure the system handles incomplete forecast data gracefully.
-     */
     @Test
     void generateDailyBets_shouldHandleMissingForecastPeriod() throws Exception {
-        // Arrange: Create a mock response that only contains the current period, not tomorrow's
         WeatherForecastResponse.Properties props = new WeatherForecastResponse.Properties();
-        props.setPeriods(List.of(new Period())); 
+        props.setPeriods(List.of(new Period()));
 
         WeatherForecastResponse incompleteForecast = new WeatherForecastResponse();
         incompleteForecast.setProperties(props);
 
-        // Arrange: Mock the service to return the incomplete data explicitly for each city
-        when(weatherApiService.getForecast(MADISON_LAT, MADISON_LON)).thenReturn(incompleteForecast); 
+        when(weatherApiService.getForecast(MADISON_LAT, MADISON_LON)).thenReturn(incompleteForecast);
         when(weatherApiService.getForecast(LA_LAT, LA_LON)).thenReturn(incompleteForecast);
         when(weatherApiService.getForecast(NYC_LAT, NYC_LON)).thenReturn(incompleteForecast);
 
-        // Act: Call the generation endpoint
         mockMvc.perform(post("/api/bets/generate-daily")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                // Ensure the response is an empty array
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(0));
 
-        // Assert: Verify no bets were persisted (Primary check)
         assertEquals(0, betRepository.findAll().size(), "No bets should have been created if tomorrow's forecast is missing.");
     }
 
-    // ========== NEW TESTS FOR GENERATE-FOR-LOCATION ENDPOINT ==========
-
-    /**
-     * Test successful bet generation for a custom location.
-     */
     @Test
     void generateBetsForLocation_shouldCreateAndReturnBets() throws Exception {
         BetGenerationRequest request = new BetGenerationRequest(
@@ -212,20 +173,16 @@ class BetControllerIntegrationTest {
                 .andExpect(jsonPath("$[0].cityName").value("Seattle, WA"))
                 .andExpect(jsonPath("$[0].betType").exists());
 
-        // Verify bets were saved to database
         List<Bet> createdBets = betRepository.findAll();
         assertEquals(3, createdBets.size(), "Should have created 3 bets for Seattle");
         assertTrue(createdBets.stream().allMatch(bet -> bet.getCityName().equals("Seattle, WA")));
     }
 
-    /**
-     * Test validation for invalid latitude.
-     */
     @Test
     void generateBetsForLocation_shouldRejectInvalidLatitude() throws Exception {
         BetGenerationRequest request = new BetGenerationRequest(
             "Invalid City",
-            95.0, // Invalid latitude (must be -90 to 90)
+            95.0,
             -122.3321,
             DateUtil.getTomorrowDate()
         );
@@ -235,19 +192,15 @@ class BetControllerIntegrationTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        // Verify no bets were created
         assertEquals(0, betRepository.findAll().size());
     }
 
-    /**
-     * Test validation for invalid longitude.
-     */
     @Test
     void generateBetsForLocation_shouldRejectInvalidLongitude() throws Exception {
         BetGenerationRequest request = new BetGenerationRequest(
             "Invalid City",
             47.6062,
-            -200.0, // Invalid longitude (must be -180 to 180)
+            -200.0,
             DateUtil.getTomorrowDate()
         );
 
@@ -256,20 +209,16 @@ class BetControllerIntegrationTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        // Verify no bets were created
         assertEquals(0, betRepository.findAll().size());
     }
 
-    /**
-     * Test rejection of past dates.
-     */
     @Test
     void generateBetsForLocation_shouldRejectPastDate() throws Exception {
         BetGenerationRequest request = new BetGenerationRequest(
             "Seattle, WA",
             SEATTLE_LAT,
             SEATTLE_LON,
-            LocalDate.now().minusDays(1) // Past date
+            LocalDate.now().minusDays(1)
         );
 
         mockMvc.perform(post("/api/bets/generate-for-location")
@@ -278,13 +227,9 @@ class BetControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Cannot generate bets for past dates"));
 
-        // Verify no bets were created
         assertEquals(0, betRepository.findAll().size());
     }
 
-    /**
-     * Test handling of duplicate bet generation (should return existing bets).
-     */
     @Test
     void generateBetsForLocation_shouldReturnExistingBetsIfAlreadyGenerated() throws Exception {
         BetGenerationRequest request = new BetGenerationRequest(
@@ -294,14 +239,12 @@ class BetControllerIntegrationTest {
             DateUtil.getTomorrowDate()
         );
 
-        // First request - creates bets
         mockMvc.perform(post("/api/bets/generate-for-location")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.length()").value(3));
 
-        // Second request - should return existing bets with 200 OK
         mockMvc.perform(post("/api/bets/generate-for-location")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -310,17 +253,13 @@ class BetControllerIntegrationTest {
                 .andExpect(jsonPath("$.bets").isArray())
                 .andExpect(jsonPath("$.bets.length()").value(3));
 
-        // Verify only 3 bets exist (not 6)
         assertEquals(3, betRepository.findAll().size(), "Should not create duplicate bets");
     }
 
-    /**
-     * Test missing required field (city name).
-     */
     @Test
     void generateBetsForLocation_shouldRejectEmptyCityName() throws Exception {
         BetGenerationRequest request = new BetGenerationRequest(
-            "", // Empty city name
+            "",
             SEATTLE_LAT,
             SEATTLE_LON,
             DateUtil.getTomorrowDate()
@@ -331,20 +270,16 @@ class BetControllerIntegrationTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        // Verify no bets were created
         assertEquals(0, betRepository.findAll().size());
     }
 
-    /**
-     * Test default date handling (should use tomorrow if date not provided).
-     */
     @Test
     void generateBetsForLocation_shouldUseDefaultDateWhenNotProvided() throws Exception {
         BetGenerationRequest request = new BetGenerationRequest(
             "Seattle, WA",
             SEATTLE_LAT,
             SEATTLE_LON,
-            null // No date provided
+            null
         );
 
         mockMvc.perform(post("/api/bets/generate-for-location")
@@ -354,20 +289,15 @@ class BetControllerIntegrationTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(3));
 
-        // Verify bets were created for tomorrow
         List<Bet> createdBets = betRepository.findAll();
         assertEquals(3, createdBets.size());
-        assertTrue(createdBets.stream().allMatch(bet -> 
+        assertTrue(createdBets.stream().allMatch(bet ->
             bet.getBetDate().equals(DateUtil.getTomorrowDate())
         ));
     }
 
-    /**
-     * Test weather API failure handling.
-     */
     @Test
     void generateBetsForLocation_shouldHandleWeatherApiFailure() throws Exception {
-        // Mock weather service to throw exception
         double testLat = 50.0;
         double testLon = -100.0;
         when(weatherApiService.getForecast(testLat, testLon))
@@ -387,7 +317,99 @@ class BetControllerIntegrationTest {
                 .andExpect(jsonPath("$.error").value("Failed to generate bets"))
                 .andExpect(jsonPath("$.message").exists());
 
-        // Verify no bets were created
         assertEquals(0, betRepository.findAll().size());
+    }
+
+    // ========== NEW RESOLUTION ENDPOINT TESTS ==========
+
+    /**
+     * Test resolution endpoint when bet doesn't exist.
+     */
+    @Test
+    void resolveBet_shouldReturn404WhenBetNotFound() throws Exception {
+        mockMvc.perform(post("/api/bets/resolve/99999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").exists());
+    }
+
+    /**
+     * Test resolution endpoint when bet already resolved.
+     */
+    @Test
+    void resolveBet_shouldReturn400WhenBetAlreadyResolved() throws Exception {
+        // Create and resolve a bet first
+        Bet bet = new Bet();
+        bet.setCityName("Madison, WI");
+        bet.setBetDate(LocalDate.now());
+        bet.setBetType("MAX_TEMP_OVER_UNDER");
+        bet.setBetDescription("Test bet");
+        bet.setSetLine(new BigDecimal("45.0"));
+        bet.setMoneylineOdds(new BigDecimal("100.00"));
+        bet.setTotalAmountBet(BigDecimal.ZERO);
+        bet.setBetHit(true); // Already resolved
+        bet = betRepository.save(bet);
+
+        mockMvc.perform(post("/api/bets/resolve/" + bet.getBetId()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Bet already resolved"));
+    }
+
+    /**
+     * Test daily resolution endpoint with valid date.
+     */
+    @Test
+    void resolveDailyBets_shouldReturnSummaryForValidDate() throws Exception {
+        mockMvc.perform(post("/api/bets/resolve-daily")
+                .param("date", "2025-11-25"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date").value("2025-11-25"))
+                .andExpect(jsonPath("$.totalBetsResolved").exists())
+                .andExpect(jsonPath("$.totalWinners").exists())
+                .andExpect(jsonPath("$.totalPaidOut").exists());
+    }
+
+    /**
+     * Test daily resolution endpoint without date parameter.
+     */
+    @Test
+    void resolveDailyBets_shouldReturn400WhenDateMissing() throws Exception {
+        mockMvc.perform(post("/api/bets/resolve-daily"))
+                .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * Test daily resolution endpoint with invalid date format.
+     */
+    @Test
+    void resolveDailyBets_shouldReturn400WhenDateFormatInvalid() throws Exception {
+        mockMvc.perform(post("/api/bets/resolve-daily")
+                .param("date", "invalid-date"))
+                .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * Test resolution endpoint handles weather service failures gracefully.
+     */
+    @Test
+    void resolveBet_shouldReturn500WhenWeatherServiceFails() throws Exception {
+        // Create an unresolved bet
+        Bet bet = new Bet();
+        bet.setCityName("Test City");
+        bet.setBetDate(LocalDate.now());
+        bet.setBetType("MAX_TEMP_OVER_UNDER");
+        bet.setBetDescription("Test bet for weather failure");
+        bet.setSetLine(new BigDecimal("45.0"));
+        bet.setMoneylineOdds(new BigDecimal("100.00"));
+        bet.setTotalAmountBet(BigDecimal.ZERO);
+        bet.setBetHit(null); // Not resolved yet
+        bet = betRepository.save(bet);
+
+        // Note: This test may behave differently depending on whether
+        // the geocoding service or weather observation service fails.
+        // The actual behavior will depend on the real implementation.
+
+        mockMvc.perform(post("/api/bets/resolve/" + bet.getBetId()))
+                .andExpect(status().is5xxServerError())
+                .andExpect(jsonPath("$.error").exists());
     }
 }
