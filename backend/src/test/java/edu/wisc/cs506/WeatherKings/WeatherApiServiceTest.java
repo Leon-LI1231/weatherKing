@@ -10,6 +10,7 @@ import edu.wisc.cs506.WeatherKings.weather.dto.WeatherForecastResponse;
 import edu.wisc.cs506.WeatherKings.weather.dto.WeatherForecastResponse.Period;
 import edu.wisc.cs506.WeatherKings.weather.service.WeatherApiService;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Integration tests for WeatherApiService

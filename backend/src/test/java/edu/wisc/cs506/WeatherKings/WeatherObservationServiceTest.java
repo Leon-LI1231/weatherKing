@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import edu.wisc.cs506.WeatherKings.weather.dto.WeatherObservation;
 import edu.wisc.cs506.WeatherKings.weather.service.WeatherObservationService;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.test.context.ActiveProfiles;
 
 
 /**
