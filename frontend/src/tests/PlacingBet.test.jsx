@@ -111,7 +111,7 @@ describe("PlacingBet Component Tests", () => {
       />,
     );
     expect(screen.getByText(/Madison: Max Temperature Over\/Under 45.0°F/)).toBeInTheDocument();
-    expect(screen.getByText("MAX_TEMP_OVER_UNDER")).toBeInTheDocument();
+    expect(screen.getByText("Max Temp Over/Under")).toBeInTheDocument();
     expect(screen.getByText("45")).toBeInTheDocument();
     expect(screen.getByText("+100")).toBeInTheDocument();
   });

@@ -1,5 +1,6 @@
 import React from "react";
 import { Form, Button } from "react-bootstrap";
+import { formatBetType } from "../utils/betTypeFormatter";
 
 /**
  * =======================================================
@@ -105,7 +106,7 @@ function BetFilters({
               size="sm"
               style={{ fontWeight: selectedType === type ? "600" : "400" }}
             >
-              {type}
+              {formatBetType(type)}
             </Button>
           ))}
         </div>

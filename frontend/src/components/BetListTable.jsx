@@ -1,6 +1,6 @@
 import React from "react";
 import { Table, Button, Badge } from "react-bootstrap";
-
+import { formatBetType } from "../utils/betTypeFormatter";
 /**
  * =======================================================
  *                    BET LIST TABLE COMPONENT
@@ -54,7 +54,7 @@ function BetListTable({ bets, onEnterBet }) {
             <tr key={bet.betId}>
               <td>{bet.betDescription}</td>
               <td>
-                <Badge bg="secondary">{bet.betType}</Badge>
+                <Badge bg="secondary">{formatBetType(bet.betType)}</Badge>
               </td>
               <td>{bet.setLine ?? "—"}</td>
               <td>{bet.moneylineOdds ?? "—"}</td>
