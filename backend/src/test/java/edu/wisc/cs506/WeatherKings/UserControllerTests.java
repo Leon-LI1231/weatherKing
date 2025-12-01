@@ -30,7 +30,7 @@ class UserControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"username\":\"a\",\"password\":\"b\"}"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("User registered successfully."));
+                .andExpect(jsonPath("$.message").value("Account created successfully!"));
     }
 
     @Test

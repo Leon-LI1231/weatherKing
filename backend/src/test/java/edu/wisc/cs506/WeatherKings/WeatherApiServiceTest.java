@@ -9,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import edu.wisc.cs506.WeatherKings.weather.dto.WeatherForecastResponse;
 import edu.wisc.cs506.WeatherKings.weather.dto.WeatherForecastResponse.Period;
 import edu.wisc.cs506.WeatherKings.weather.service.WeatherApiService;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Integration tests for WeatherApiService
@@ -20,6 +22,8 @@ import edu.wisc.cs506.WeatherKings.weather.service.WeatherApiService;
  * - We get all data needed for betting
  */
 @SpringBootTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+@ActiveProfiles("test")
 class WeatherApiServiceTest {
 
     @Autowired

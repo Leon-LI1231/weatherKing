@@ -8,12 +8,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import edu.wisc.cs506.WeatherKings.weather.dto.WeatherObservation;
 import edu.wisc.cs506.WeatherKings.weather.service.WeatherObservationService;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.test.context.ActiveProfiles;
+
 
 /**
  * Integration tests for WeatherObservationService.
  * Makes REAL API calls to NWS observation stations.
  */
 @SpringBootTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+@ActiveProfiles("test")
 class WeatherObservationServiceTest {
 
     @Autowired
