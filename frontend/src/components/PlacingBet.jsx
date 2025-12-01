@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./PlacingBet.css";
+import { formatBetType } from "../utils/betTypeFormatter";
 
 /**
  * =================================================
@@ -168,7 +169,9 @@ function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0 
           <div className="bet-line-info">
             <div className="info-row">
               <span className="label">Type:</span>
-              <span className="value">{betDetails?.betType || "—"}</span>
+              <span className="value">
+                {betDetails?.betType ? formatBetType(betDetails.betType) : "—"}
+              </span>
             </div>
             <div className="info-row">
               <span className="label">Line:</span>
