@@ -260,6 +260,7 @@ function CityPage({ cityName, user, onNavigateBack }) {
           betDetails={selectedBet}
           onBetPlaced={handleBetPlaced}
           userBalance={user?.balanceUsd || 0}
+          username={user?.username}
         />
       )}
     </Container>

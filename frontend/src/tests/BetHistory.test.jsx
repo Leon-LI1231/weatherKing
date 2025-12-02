@@ -32,24 +32,34 @@ global.fetch = jest.fn();
 describe("BetHistory Component", () => {
   const mockOnAvailableOptionsChange = jest.fn();
   const username = "testuser";
-  const mockBets = [
+  const mockBackendResponse = [
     {
-      contest: "Contest A",
-      city: "City X",
-      type: "Win",
-      amount: 50,
-      outcome: "Hit!",
-      date: "2024-01-01",
-      payout: 100,
+      playerBetId: 1,
+      bet: {
+        betDescription: "Contest A",
+        cityName: "City X",
+        betType: "MAX_TEMP_OVER_UNDER",
+        moneylineOdds: 100,
+      },
+      betAmount: 50,
+      potentialPayout: 50,
+      actualPayout: 100,
+      status: "WON",
+      timePlaced: "2024-01-01T12:00:00",
     },
     {
-      contest: "Contest B",
-      city: "City Y",
-      type: "Place",
-      amount: 30,
-      outcome: "Miss!",
-      date: "2024-01-02",
-      payout: 0,
+      playerBetId: 2,
+      bet: {
+        betDescription: "Contest B",
+        cityName: "City Y",
+        betType: "RAIN_YES_NO",
+        moneylineOdds: -110,
+      },
+      betAmount: 30,
+      potentialPayout: 27.27,
+      actualPayout: 0,
+      status: "LOST",
+      timePlaced: "2024-01-02T14:30:00",
     },
   ];
 
@@ -67,10 +77,11 @@ describe("BetHistory Component", () => {
       <BetHistory
         username={username}
         onAvailableOptionsChange={mockOnAvailableOptionsChange}
-        filter={{ cities: [], contests: [], outcomes: [] }}
+        filter={{ cities: [], types: [], outcomes: [] }}
       />,
     );
     expect(screen.getByText(/Loading bet history.../i)).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledWith(`http://localhost:8080/api/player-bets/history/${username}`);
   });
 
   // Test 2: Error state
@@ -80,7 +91,7 @@ describe("BetHistory Component", () => {
       <BetHistory
         username={username}
         onAvailableOptionsChange={mockOnAvailableOptionsChange}
-        filter={{ cities: [], contests: [], outcomes: [] }}
+        filter={{ cities: [], types: [], outcomes: [] }}
       />,
     );
     await waitFor(() => {
@@ -93,17 +104,24 @@ describe("BetHistory Component", () => {
   test("displays bet history table on successful fetch", async () => {
     fetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => mockBets,
+      json: async () => mockBackendResponse,
     });
     render(
       <BetHistory
         username={username}
         onAvailableOptionsChange={mockOnAvailableOptionsChange}
-        filter={{ cities: [], contests: [], outcomes: [] }}
+        filter={{ cities: [], types: [], outcomes: [] }}
       />,
     );
     await waitFor(() => {
-      expect(screen.getByText(/Bet History/i)).toBeInTheDocument();
+      expect(screen.getByText("Contest")).toBeInTheDocument();
+      expect(screen.getByText("City")).toBeInTheDocument();
+      expect(screen.getByText("Type")).toBeInTheDocument();
+      expect(screen.getByText("Odds")).toBeInTheDocument();
+      expect(screen.getByText("Date")).toBeInTheDocument();
+      expect(screen.getByText("Outcome")).toBeInTheDocument();
+      expect(screen.getByText("Bet Amount")).toBeInTheDocument();
+      expect(screen.getByText("Payout")).toBeInTheDocument();
     });
   });
 
@@ -111,13 +129,13 @@ describe("BetHistory Component", () => {
   test("populates table with mock bet data", async () => {
     fetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => mockBets,
+      json: async () => mockBackendResponse,
     });
     render(
       <BetHistory
         username={username}
         onAvailableOptionsChange={mockOnAvailableOptionsChange}
-        filter={{ cities: [], contests: [], outcomes: [] }}
+        filter={{ cities: [], types: [], outcomes: [] }}
       />,
     );
     await waitFor(() => {
@@ -125,6 +143,9 @@ describe("BetHistory Component", () => {
       expect(screen.getByText("City X")).toBeInTheDocument();
       expect(screen.getByText("Contest B")).toBeInTheDocument();
       expect(screen.getByText("City Y")).toBeInTheDocument();
+      expect(screen.getByText("$50.00")).toBeInTheDocument(); // Bet amount for Contest A
+      expect(screen.getByText("$30.00")).toBeInTheDocument(); // Bet amount for Contest B
+      expect(screen.getByText("$100.00")).toBeInTheDocument(); // Payout for Contest A (won)
     });
   });
 
@@ -132,18 +153,18 @@ describe("BetHistory Component", () => {
   test("calls onAvailableOptionsChange with correct filter options", async () => {
     fetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => mockBets,
+      json: async () => mockBackendResponse,
     });
     render(
       <BetHistory
         username={username}
         onAvailableOptionsChange={mockOnAvailableOptionsChange}
-        filter={{ cities: [], contests: [], outcomes: [] }}
+        filter={{ cities: [], types: [], outcomes: [] }}
       />,
     );
     await waitFor(() => {
       expect(mockOnAvailableOptionsChange).toHaveBeenCalledWith({
-        contests: ["Contest A", "Contest B"],
+        types: ["MAX_TEMP_OVER_UNDER", "RAIN_YES_NO"],
         cities: ["City X", "City Y"],
         outcomes: ["Hit!", "Miss!"],
       });

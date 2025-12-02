@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Alert } from "react-bootstrap";
 import "./PlacingBet.css";
 import { formatBetType } from "../utils/betTypeFormatter";
 
@@ -20,13 +21,15 @@ import { formatBetType } from "../utils/betTypeFormatter";
  * - betDetails: object containing details of the bet (betId, betDescription, betType, setLine, moneylineOdds)
  * - onBetPlaced: function to call after a successful bet placement
  * - userBalance: the user's current balance (for validation)
+ * - username: the username of the current user
  */
 
-function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0 }) {
+function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0, username }) {
   const [betAmount, setBetAmount] = useState("");
   const [selectedOutcome, setSelectedOutcome] = useState("");
   const [isPlacingBet, setIsPlacingBet] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -34,6 +37,7 @@ function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0 
       setBetAmount("");
       setSelectedOutcome("");
       setErrorMessage("");
+      setSuccessMessage("");
     }
   }, [isOpen]);
 
@@ -109,32 +113,47 @@ function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0 
       return;
     }
 
+    // Validate username
+    if (!username) {
+      setErrorMessage("User not authenticated");
+      return;
+    }
+
     setIsPlacingBet(true);
     setErrorMessage("");
     try {
-      const response = await fetch("/api/place-bet", {
+      const response = await fetch("http://localhost:8080/api/player-bets/place", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           betId: betDetails.betId,
-          amount: parseFloat(betAmount),
-          outcome: selectedOutcome,
+          betAmount: parseFloat(betAmount),
+          username: username,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to place bet");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to place bet");
       }
 
       const result = await response.json();
-      onBetPlaced(result);
-
+      
+      // Show success message
+      setSuccessMessage(`Bet placed successfully! Amount: $${parseFloat(betAmount).toFixed(2)}`);
+      
       // Reset form
       setBetAmount("");
       setSelectedOutcome("");
-      onClose();
+      
+      // Call callback and close after a short delay to show success message
+      onBetPlaced(result);
+      setTimeout(() => {
+        setSuccessMessage("");
+        onClose();
+      }, 2000);
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
@@ -235,6 +254,13 @@ function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0 
             className="amount-input"
           />
         </div>
+
+        {/* Success Message */}
+        {successMessage && (
+          <Alert variant="success" className="mt-3">
+            {successMessage}
+          </Alert>
+        )}
 
         {/* Error Message */}
         {errorMessage && <p className="error-message">{errorMessage}</p>}

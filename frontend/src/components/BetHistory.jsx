@@ -29,22 +29,38 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
     const fetchBetHistory = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/bet-history/${username}`);
+        const response = await fetch(`http://localhost:8080/api/player-bets/history/${username}`);
         if (!response.ok) {
           throw new Error("Failed to fetch bet history");
         }
         const data = await response.json();
-        setBets(data);
+
+        // Transform the backend response to match the component's expected format
+        const transformedBets = data.map((playerBet) => ({
+          playerBetId: playerBet.playerBetId,
+          contest: playerBet.bet.betDescription,
+          city: playerBet.bet.cityName,
+          type: playerBet.bet.betType,
+          odds: playerBet.bet.moneylineOdds,
+          outcome:
+            playerBet.status === "WON" ? "Hit!" : playerBet.status === "LOST" ? "Miss!" : "Pending",
+          date: playerBet.timePlaced,
+          payout: playerBet.actualPayout || 0,
+          betAmount: playerBet.betAmount,
+          potentialPayout: playerBet.potentialPayout,
+        }));
+
+        setBets(transformedBets);
 
         // Extract unique values for filters
-        if (onAvailableOptionsChange && data.length > 0) {
-          const uniqueCities = [...new Set(data.map((bet) => bet.city))].sort();
-          const uniqueContests = [...new Set(data.map((bet) => bet.contest))].sort();
-          const uniqueOutcomes = [...new Set(data.map((bet) => bet.outcome))].sort();
+        if (onAvailableOptionsChange && transformedBets.length > 0) {
+          const uniqueCities = [...new Set(transformedBets.map((bet) => bet.city))].sort();
+          const uniqueTypes = [...new Set(transformedBets.map((bet) => bet.type))].sort();
+          const uniqueOutcomes = [...new Set(transformedBets.map((bet) => bet.outcome))].sort();
 
           onAvailableOptionsChange({
             cities: uniqueCities,
-            contests: uniqueContests,
+            types: uniqueTypes,
             outcomes: uniqueOutcomes,
           });
         }
@@ -66,9 +82,9 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
         return false;
       }
     }
-    // Filter by contests (if any contests are selected)
-    if (filter.contests && filter.contests.length > 0) {
-      if (!filter.contests.includes(bet.contest)) {
+    // Filter by types (if any types are selected)
+    if (filter.types && filter.types.length > 0) {
+      if (!filter.types.includes(bet.type)) {
         return false;
       }
     }
@@ -96,8 +112,9 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
           <th>City</th>
           <th>Type</th>
           <th>Odds</th>
-          <th>Outcome</th>
           <th>Date</th>
+          <th>Outcome</th>
+          <th>Bet Amount</th>
           <th>Payout</th>
         </tr>
       </thead>
@@ -108,6 +125,7 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
             <td>{bet.city}</td>
             <td>{bet.type}</td>
             <td>{bet.odds}</td>
+            <td>{new Date(bet.date).toLocaleDateString()}</td>
             <td>
               <span
                 style={{
@@ -126,7 +144,7 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
                 {bet.outcome}
               </span>
             </td>
-            <td>{new Date(bet.date).toLocaleDateString()}</td>
+            <td>${bet.betAmount.toFixed(2)}</td>
             <td>${bet.payout.toFixed(2)}</td>
           </tr>
         ))}

@@ -10,30 +10,30 @@ import "bootstrap/dist/css/bootstrap.min.css";
  * =============================================
  *
  * This component provides a filter interface for the BetHistory component.
- * It allows users to filter their bet history by city, contest, or outcome
+ * It allows users to filter their bet history by city, bet type, or outcome
  * using tabs and multi-select badges that dynamically populate based on available data.
  * Users can select multiple filters within each category and across categories.
  *
  * Props:
  *  - onFilterChange: a callback function that is called when the filter changes
  *  - initialFilter: an optional initial filter object with arrays of selected values
- *  - availableOptions: object containing arrays of available cities, contests, and outcomes
+ *  - availableOptions: object containing arrays of available cities, types, and outcomes
  */
 
 function BetHistoryFilter({ onFilterChange, initialFilter = {}, availableOptions = {} }) {
   const [selectedCities, setSelectedCities] = useState(initialFilter.cities || []);
-  const [selectedContests, setSelectedContests] = useState(initialFilter.contests || []);
+  const [selectedTypes, setSelectedTypes] = useState(initialFilter.types || []);
   const [selectedOutcomes, setSelectedOutcomes] = useState(initialFilter.outcomes || []);
 
-  const { cities = [], contests = [], outcomes = [] } = availableOptions;
+  const { cities = [], types = [], outcomes = [] } = availableOptions;
 
   React.useEffect(() => {
     onFilterChange({
       cities: selectedCities,
-      contests: selectedContests,
+      types: selectedTypes,
       outcomes: selectedOutcomes,
     });
-  }, [selectedCities, selectedContests, selectedOutcomes, onFilterChange]);
+  }, [selectedCities, selectedTypes, selectedOutcomes, onFilterChange]);
 
   const toggleSelection = (item, selectedArray, setSelectedArray) => {
     if (selectedArray.includes(item)) {
@@ -45,12 +45,12 @@ function BetHistoryFilter({ onFilterChange, initialFilter = {}, availableOptions
 
   const clearAll = () => {
     setSelectedCities([]);
-    setSelectedContests([]);
+    setSelectedTypes([]);
     setSelectedOutcomes([]);
   };
 
   const hasActiveFilters =
-    selectedCities.length > 0 || selectedContests.length > 0 || selectedOutcomes.length > 0;
+    selectedCities.length > 0 || selectedTypes.length > 0 || selectedOutcomes.length > 0;
 
   return (
     <div
@@ -118,59 +118,83 @@ function BetHistoryFilter({ onFilterChange, initialFilter = {}, availableOptions
               <div
                 style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center" }}
               >
-                {cities.map((city, index) => (
-                  <Badge
-                    key={index}
-                    style={{
-                      cursor: "pointer",
-                      padding: "10px 16px",
-                      fontSize: "0.9rem",
-                      backgroundColor: selectedCities.includes(city) ? "#0d6efd" : "#6c9bd6",
-                      border: "none",
-                      minWidth: "100px",
-                      textAlign: "center",
-                      color: "white",
-                    }}
-                    onClick={() => toggleSelection(city, selectedCities, setSelectedCities)}
-                  >
-                    {city}
-                  </Badge>
-                ))}
+                {cities.map((city, index) => {
+                  const isSelected = selectedCities.includes(city);
+                  return (
+                    <Badge
+                      key={index}
+                      bg={isSelected ? "primary" : "secondary"}
+                      style={{
+                        cursor: "pointer",
+                        padding: "10px 16px",
+                        fontSize: "0.9rem",
+                        border: "none",
+                        minWidth: "100px",
+                        textAlign: "center",
+                        opacity: isSelected ? 1 : 0.6,
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = "1";
+                        e.currentTarget.style.transform = "scale(1.05)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = isSelected ? "1" : "0.6";
+                        e.currentTarget.style.transform = "scale(1)";
+                      }}
+                      onClick={() => toggleSelection(city, selectedCities, setSelectedCities)}
+                    >
+                      {city}
+                    </Badge>
+                  );
+                })}
               </div>
             )}
           </div>
         </Tab>
 
         <Tab
-          eventKey="contests"
-          title={`Contests ${selectedContests.length > 0 ? `(${selectedContests.length})` : ""}`}
+          eventKey="types"
+          title={`Types ${selectedTypes.length > 0 ? `(${selectedTypes.length})` : ""}`}
           tabClassName="custom-tab"
         >
           <div style={{ padding: "10px 0" }}>
-            {contests.length === 0 ? (
-              <p className="text-muted text-center">No contests available</p>
+            {types.length === 0 ? (
+              <p className="text-muted text-center">No bet types available</p>
             ) : (
               <div
                 style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center" }}
               >
-                {contests.map((contest, index) => (
-                  <Badge
-                    key={index}
-                    style={{
-                      cursor: "pointer",
-                      padding: "10px 16px",
-                      fontSize: "0.9rem",
-                      backgroundColor: selectedContests.includes(contest) ? "#0d6efd" : "#6c9bd6",
-                      border: "none",
-                      minWidth: "100px",
-                      textAlign: "center",
-                      color: "white",
-                    }}
-                    onClick={() => toggleSelection(contest, selectedContests, setSelectedContests)}
-                  >
-                    {contest}
-                  </Badge>
-                ))}
+                {types.map((type, index) => {
+                  const isSelected = selectedTypes.includes(type);
+                  return (
+                    <Badge
+                      key={index}
+                      bg={isSelected ? "primary" : "secondary"}
+                      style={{
+                        cursor: "pointer",
+                        padding: "10px 16px",
+                        fontSize: "0.9rem",
+                        border: "none",
+                        minWidth: "100px",
+                        textAlign: "center",
+                        opacity: isSelected ? 1 : 0.6,
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = "1";
+                        e.currentTarget.style.transform = "scale(1.05)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = isSelected ? "1" : "0.6";
+                        e.currentTarget.style.transform = "scale(1)";
+                      }}
+                      onClick={() => toggleSelection(type, selectedTypes, setSelectedTypes)}
+                    >
+                      {type}
+                    </Badge>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -188,24 +212,38 @@ function BetHistoryFilter({ onFilterChange, initialFilter = {}, availableOptions
               <div
                 style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center" }}
               >
-                {outcomes.map((outcome, index) => (
-                  <Badge
-                    key={index}
-                    style={{
-                      cursor: "pointer",
-                      padding: "10px 16px",
-                      fontSize: "0.9rem",
-                      backgroundColor: selectedOutcomes.includes(outcome) ? "#0d6efd" : "#6c9bd6",
-                      border: "none",
-                      minWidth: "100px",
-                      textAlign: "center",
-                      color: "white",
-                    }}
-                    onClick={() => toggleSelection(outcome, selectedOutcomes, setSelectedOutcomes)}
-                  >
-                    {outcome}
-                  </Badge>
-                ))}
+                {outcomes.map((outcome, index) => {
+                  const isSelected = selectedOutcomes.includes(outcome);
+                  return (
+                    <Badge
+                      key={index}
+                      bg={isSelected ? "primary" : "secondary"}
+                      style={{
+                        cursor: "pointer",
+                        padding: "10px 16px",
+                        fontSize: "0.9rem",
+                        border: "none",
+                        minWidth: "100px",
+                        textAlign: "center",
+                        opacity: isSelected ? 1 : 0.6,
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = "1";
+                        e.currentTarget.style.transform = "scale(1.05)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = isSelected ? "1" : "0.6";
+                        e.currentTarget.style.transform = "scale(1)";
+                      }}
+                      onClick={() =>
+                        toggleSelection(outcome, selectedOutcomes, setSelectedOutcomes)
+                      }
+                    >
+                      {outcome}
+                    </Badge>
+                  );
+                })}
               </div>
             )}
           </div>

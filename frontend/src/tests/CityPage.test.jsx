@@ -822,10 +822,10 @@ describe("CityPage Component Tests", () => {
             json: () => Promise.resolve(mockBetsData),
           });
         }
-        if (url === "/api/place-bet") {
+        if (url === "http://localhost:8080/api/player-bets/place") {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({ success: true, betId: 123 }),
+            json: () => Promise.resolve({ success: true, playerBetId: 123 }),
           });
         }
       });
@@ -853,9 +853,18 @@ describe("CityPage Component Tests", () => {
       const placeButton = screen.getByText("Place Bet");
       fireEvent.click(placeButton);
 
+      // Check success message is displayed
       await waitFor(() => {
-        expect(screen.queryByText("Place Your Bet")).not.toBeInTheDocument();
+        expect(screen.getByText(/Bet placed successfully!/i)).toBeInTheDocument();
       });
+
+      // Modal should close after 2 seconds
+      await waitFor(
+        () => {
+          expect(screen.queryByText("Place Your Bet")).not.toBeInTheDocument();
+        },
+        { timeout: 2500 },
+      );
     });
 
     test("opens modal for different bets", async () => {
