@@ -29,18 +29,33 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
     const fetchBetHistory = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/bet-history/${username}`);
+        const response = await fetch(`http://localhost:8080/api/player-bets/history/${username}`);
         if (!response.ok) {
           throw new Error("Failed to fetch bet history");
         }
         const data = await response.json();
-        setBets(data);
+        
+        // Transform the backend response to match the component's expected format
+        const transformedBets = data.map((playerBet) => ({
+          playerBetId: playerBet.playerBetId,
+          contest: playerBet.bet.betDescription,
+          city: playerBet.bet.cityName,
+          type: playerBet.bet.betType,
+          odds: playerBet.bet.moneylineOdds,
+          outcome: playerBet.status === "WON" ? "Hit!" : playerBet.status === "LOST" ? "Miss!" : "Pending",
+          date: playerBet.timePlaced,
+          payout: playerBet.actualPayout || 0,
+          betAmount: playerBet.betAmount,
+          potentialPayout: playerBet.potentialPayout,
+        }));
+        
+        setBets(transformedBets);
 
         // Extract unique values for filters
-        if (onAvailableOptionsChange && data.length > 0) {
-          const uniqueCities = [...new Set(data.map((bet) => bet.city))].sort();
-          const uniqueContests = [...new Set(data.map((bet) => bet.contest))].sort();
-          const uniqueOutcomes = [...new Set(data.map((bet) => bet.outcome))].sort();
+        if (onAvailableOptionsChange && transformedBets.length > 0) {
+          const uniqueCities = [...new Set(transformedBets.map((bet) => bet.city))].sort();
+          const uniqueContests = [...new Set(transformedBets.map((bet) => bet.contest))].sort();
+          const uniqueOutcomes = [...new Set(transformedBets.map((bet) => bet.outcome))].sort();
 
           onAvailableOptionsChange({
             cities: uniqueCities,

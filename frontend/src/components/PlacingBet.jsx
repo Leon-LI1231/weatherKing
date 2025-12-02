@@ -20,9 +20,10 @@ import { formatBetType } from "../utils/betTypeFormatter";
  * - betDetails: object containing details of the bet (betId, betDescription, betType, setLine, moneylineOdds)
  * - onBetPlaced: function to call after a successful bet placement
  * - userBalance: the user's current balance (for validation)
+ * - username: the username of the current user
  */
 
-function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0 }) {
+function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0, username }) {
   const [betAmount, setBetAmount] = useState("");
   const [selectedOutcome, setSelectedOutcome] = useState("");
   const [isPlacingBet, setIsPlacingBet] = useState(false);
@@ -109,23 +110,30 @@ function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0 
       return;
     }
 
+    // Validate username
+    if (!username) {
+      setErrorMessage("User not authenticated");
+      return;
+    }
+
     setIsPlacingBet(true);
     setErrorMessage("");
     try {
-      const response = await fetch("/api/place-bet", {
+      const response = await fetch("http://localhost:8080/api/player-bets/place", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           betId: betDetails.betId,
-          amount: parseFloat(betAmount),
-          outcome: selectedOutcome,
+          betAmount: parseFloat(betAmount),
+          username: username,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to place bet");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to place bet");
       }
 
       const result = await response.json();
