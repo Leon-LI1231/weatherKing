@@ -55,12 +55,12 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
         // Extract unique values for filters
         if (onAvailableOptionsChange && transformedBets.length > 0) {
           const uniqueCities = [...new Set(transformedBets.map((bet) => bet.city))].sort();
-          const uniqueContests = [...new Set(transformedBets.map((bet) => bet.contest))].sort();
+          const uniqueTypes = [...new Set(transformedBets.map((bet) => bet.type))].sort();
           const uniqueOutcomes = [...new Set(transformedBets.map((bet) => bet.outcome))].sort();
 
           onAvailableOptionsChange({
             cities: uniqueCities,
-            contests: uniqueContests,
+            types: uniqueTypes,
             outcomes: uniqueOutcomes,
           });
         }
@@ -82,9 +82,9 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
         return false;
       }
     }
-    // Filter by contests (if any contests are selected)
-    if (filter.contests && filter.contests.length > 0) {
-      if (!filter.contests.includes(bet.contest)) {
+    // Filter by types (if any types are selected)
+    if (filter.types && filter.types.length > 0) {
+      if (!filter.types.includes(bet.type)) {
         return false;
       }
     }
@@ -112,8 +112,9 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
           <th>City</th>
           <th>Type</th>
           <th>Odds</th>
-          <th>Outcome</th>
           <th>Date</th>
+          <th>Outcome</th>
+          <th>Bet Amount</th>
           <th>Payout</th>
         </tr>
       </thead>
@@ -124,6 +125,7 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
             <td>{bet.city}</td>
             <td>{bet.type}</td>
             <td>{bet.odds}</td>
+            <td>{new Date(bet.date).toLocaleDateString()}</td>
             <td>
               <span
                 style={{
@@ -142,7 +144,7 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
                 {bet.outcome}
               </span>
             </td>
-            <td>{new Date(bet.date).toLocaleDateString()}</td>
+            <td>${bet.betAmount.toFixed(2)}</td>
             <td>${bet.payout.toFixed(2)}</td>
           </tr>
         ))}

@@ -77,7 +77,7 @@ describe("BetHistory Component", () => {
       <BetHistory
         username={username}
         onAvailableOptionsChange={mockOnAvailableOptionsChange}
-        filter={{ cities: [], contests: [], outcomes: [] }}
+        filter={{ cities: [], types: [], outcomes: [] }}
       />,
     );
     expect(screen.getByText(/Loading bet history.../i)).toBeInTheDocument();
@@ -91,7 +91,7 @@ describe("BetHistory Component", () => {
       <BetHistory
         username={username}
         onAvailableOptionsChange={mockOnAvailableOptionsChange}
-        filter={{ cities: [], contests: [], outcomes: [] }}
+        filter={{ cities: [], types: [], outcomes: [] }}
       />,
     );
     await waitFor(() => {
@@ -110,11 +110,18 @@ describe("BetHistory Component", () => {
       <BetHistory
         username={username}
         onAvailableOptionsChange={mockOnAvailableOptionsChange}
-        filter={{ cities: [], contests: [], outcomes: [] }}
+        filter={{ cities: [], types: [], outcomes: [] }}
       />,
     );
     await waitFor(() => {
-      expect(screen.getByText(/Bet History/i)).toBeInTheDocument();
+      expect(screen.getByText("Contest")).toBeInTheDocument();
+      expect(screen.getByText("City")).toBeInTheDocument();
+      expect(screen.getByText("Type")).toBeInTheDocument();
+      expect(screen.getByText("Odds")).toBeInTheDocument();
+      expect(screen.getByText("Date")).toBeInTheDocument();
+      expect(screen.getByText("Outcome")).toBeInTheDocument();
+      expect(screen.getByText("Bet Amount")).toBeInTheDocument();
+      expect(screen.getByText("Payout")).toBeInTheDocument();
     });
   });
 
@@ -128,7 +135,7 @@ describe("BetHistory Component", () => {
       <BetHistory
         username={username}
         onAvailableOptionsChange={mockOnAvailableOptionsChange}
-        filter={{ cities: [], contests: [], outcomes: [] }}
+        filter={{ cities: [], types: [], outcomes: [] }}
       />,
     );
     await waitFor(() => {
@@ -136,6 +143,9 @@ describe("BetHistory Component", () => {
       expect(screen.getByText("City X")).toBeInTheDocument();
       expect(screen.getByText("Contest B")).toBeInTheDocument();
       expect(screen.getByText("City Y")).toBeInTheDocument();
+      expect(screen.getByText("$50.00")).toBeInTheDocument(); // Bet amount for Contest A
+      expect(screen.getByText("$30.00")).toBeInTheDocument(); // Bet amount for Contest B
+      expect(screen.getByText("$100.00")).toBeInTheDocument(); // Payout for Contest A (won)
     });
   });
 
@@ -149,12 +159,12 @@ describe("BetHistory Component", () => {
       <BetHistory
         username={username}
         onAvailableOptionsChange={mockOnAvailableOptionsChange}
-        filter={{ cities: [], contests: [], outcomes: [] }}
+        filter={{ cities: [], types: [], outcomes: [] }}
       />,
     );
     await waitFor(() => {
       expect(mockOnAvailableOptionsChange).toHaveBeenCalledWith({
-        contests: ["Contest A", "Contest B"],
+        types: ["MAX_TEMP_OVER_UNDER", "RAIN_YES_NO"],
         cities: ["City X", "City Y"],
         outcomes: ["Hit!", "Miss!"],
       });

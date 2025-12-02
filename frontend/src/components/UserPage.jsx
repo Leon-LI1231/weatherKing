@@ -14,7 +14,7 @@ import BetHistoryFilter from "./BetHistoryFilter";
  *   - User account information (username, balance)
  *   - Deposit currency functionality via modal
  *   - Filterable bet history table showing user's past and active bets
- *   - Filter controls for city, contest, and outcome
+ *   - Filter controls for city, bet type, and outcome
  *
  * Props:
  *   - user: the logged-in user object (contains username, balanceUsd, etc.)
@@ -23,10 +23,10 @@ import BetHistoryFilter from "./BetHistoryFilter";
 
 function UserPage({ user, onBalanceUpdate }) {
   const [showDepositModal, setShowDepositModal] = useState(false);
-  const [filter, setFilter] = useState({ cities: [], contests: [], outcomes: [] });
+  const [filter, setFilter] = useState({ cities: [], types: [], outcomes: [] });
   const [availableOptions, setAvailableOptions] = useState({
     cities: [],
-    contests: [],
+    types: [],
     outcomes: [],
   });
 

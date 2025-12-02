@@ -83,7 +83,7 @@ describe("UserPage", () => {
 
     // Check filter tabs are present
     expect(screen.getByRole("tab", { name: /Cities/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /Contests/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Types/i })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: /Outcomes/i })).toBeInTheDocument();
   });
 
