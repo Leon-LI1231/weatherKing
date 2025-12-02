@@ -82,6 +82,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
     expect(screen.getByText("Place Your Bet")).toBeInTheDocument();
@@ -95,6 +96,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
     expect(screen.queryByText("Place Your Bet")).not.toBeInTheDocument();
@@ -108,6 +110,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
     expect(screen.getByText(/Madison: Max Temperature Over\/Under 45.0°F/)).toBeInTheDocument();
@@ -124,6 +127,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={250.75}
+        username="testuser"
       />,
     );
     expect(screen.getByText("$250.75")).toBeInTheDocument();
@@ -138,6 +142,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
     expect(screen.getByText("Over")).toBeInTheDocument();
@@ -153,6 +158,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={rainBet}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
     expect(screen.getByText("Yes")).toBeInTheDocument();
@@ -168,6 +174,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={conditionBet}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
     expect(screen.getByText("Match")).toBeInTheDocument();
@@ -183,6 +190,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -203,6 +211,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -226,6 +235,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -249,6 +259,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -274,6 +285,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={50}
+        username="testuser"
       />,
     );
 
@@ -297,6 +309,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -318,6 +331,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -335,6 +349,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -352,6 +367,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -374,6 +390,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -391,6 +408,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -414,6 +432,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -427,13 +446,13 @@ describe("PlacingBet Component Tests", () => {
     fireEvent.click(placeButton);
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith("/api/place-bet", {
+      expect(global.fetch).toHaveBeenCalledWith("http://localhost:8080/api/player-bets/place", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           betId: 1,
-          amount: 25.0,
-          outcome: "Over",
+          betAmount: 25.0,
+          username: "testuser",
         }),
       });
     });
@@ -452,6 +471,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -484,6 +504,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -508,6 +529,7 @@ describe("PlacingBet Component Tests", () => {
     global.fetch.mockResolvedValueOnce({
       ok: false,
       status: 500,
+      json: async () => ({ error: "Failed to place bet" }),
     });
 
     render(
@@ -517,6 +539,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -549,6 +572,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 
@@ -573,6 +597,7 @@ describe("PlacingBet Component Tests", () => {
         betDetails={mockBetDetails}
         onBetPlaced={mockOnBetPlaced}
         userBalance={100}
+        username="testuser"
       />,
     );
 

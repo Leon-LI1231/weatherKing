@@ -34,7 +34,7 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
           throw new Error("Failed to fetch bet history");
         }
         const data = await response.json();
-        
+
         // Transform the backend response to match the component's expected format
         const transformedBets = data.map((playerBet) => ({
           playerBetId: playerBet.playerBetId,
@@ -42,13 +42,14 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
           city: playerBet.bet.cityName,
           type: playerBet.bet.betType,
           odds: playerBet.bet.moneylineOdds,
-          outcome: playerBet.status === "WON" ? "Hit!" : playerBet.status === "LOST" ? "Miss!" : "Pending",
+          outcome:
+            playerBet.status === "WON" ? "Hit!" : playerBet.status === "LOST" ? "Miss!" : "Pending",
           date: playerBet.timePlaced,
           payout: playerBet.actualPayout || 0,
           betAmount: playerBet.betAmount,
           potentialPayout: playerBet.potentialPayout,
         }));
-        
+
         setBets(transformedBets);
 
         // Extract unique values for filters

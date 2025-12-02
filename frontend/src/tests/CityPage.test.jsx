@@ -822,10 +822,10 @@ describe("CityPage Component Tests", () => {
             json: () => Promise.resolve(mockBetsData),
           });
         }
-        if (url === "/api/place-bet") {
+        if (url === "http://localhost:8080/api/player-bets/place") {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({ success: true, betId: 123 }),
+            json: () => Promise.resolve({ success: true, playerBetId: 123 }),
           });
         }
       });
