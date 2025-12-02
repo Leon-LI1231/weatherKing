@@ -459,8 +459,20 @@ describe("PlacingBet Component Tests", () => {
 
     await waitFor(() => {
       expect(mockOnBetPlaced).toHaveBeenCalledWith({ success: true, betId: 123 });
-      expect(mockOnClose).toHaveBeenCalled();
     });
+
+    // Check success message is displayed
+    await waitFor(() => {
+      expect(screen.getByText(/Bet placed successfully!/i)).toBeInTheDocument();
+    });
+
+    // Modal should close after 2 seconds
+    await waitFor(
+      () => {
+        expect(mockOnClose).toHaveBeenCalled();
+      },
+      { timeout: 2500 },
+    );
   });
 
   test("prevents submission with invalid data", () => {
@@ -585,9 +597,18 @@ describe("PlacingBet Component Tests", () => {
     const placeButton = screen.getByText("Place Bet");
     fireEvent.click(placeButton);
 
+    // Check success message is displayed
     await waitFor(() => {
-      expect(mockOnClose).toHaveBeenCalled();
+      expect(screen.getByText(/Bet placed successfully!/i)).toBeInTheDocument();
     });
+
+    // Modal should close after 2 seconds
+    await waitFor(
+      () => {
+        expect(mockOnClose).toHaveBeenCalled();
+      },
+      { timeout: 2500 },
+    );
 
     // Reopen modal to check if form is reset
     rerender(

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Alert } from "react-bootstrap";
 import "./PlacingBet.css";
 import { formatBetType } from "../utils/betTypeFormatter";
 
@@ -28,6 +29,7 @@ function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0,
   const [selectedOutcome, setSelectedOutcome] = useState("");
   const [isPlacingBet, setIsPlacingBet] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -35,6 +37,7 @@ function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0,
       setBetAmount("");
       setSelectedOutcome("");
       setErrorMessage("");
+      setSuccessMessage("");
     }
   }, [isOpen]);
 
@@ -137,12 +140,20 @@ function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0,
       }
 
       const result = await response.json();
-      onBetPlaced(result);
-
+      
+      // Show success message
+      setSuccessMessage(`Bet placed successfully! Amount: $${parseFloat(betAmount).toFixed(2)}`);
+      
       // Reset form
       setBetAmount("");
       setSelectedOutcome("");
-      onClose();
+      
+      // Call callback and close after a short delay to show success message
+      onBetPlaced(result);
+      setTimeout(() => {
+        setSuccessMessage("");
+        onClose();
+      }, 2000);
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
@@ -243,6 +254,13 @@ function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0,
             className="amount-input"
           />
         </div>
+
+        {/* Success Message */}
+        {successMessage && (
+          <Alert variant="success" className="mt-3">
+            {successMessage}
+          </Alert>
+        )}
 
         {/* Error Message */}
         {errorMessage && <p className="error-message">{errorMessage}</p>}

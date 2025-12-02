@@ -853,9 +853,18 @@ describe("CityPage Component Tests", () => {
       const placeButton = screen.getByText("Place Bet");
       fireEvent.click(placeButton);
 
+      // Check success message is displayed
       await waitFor(() => {
-        expect(screen.queryByText("Place Your Bet")).not.toBeInTheDocument();
+        expect(screen.getByText(/Bet placed successfully!/i)).toBeInTheDocument();
       });
+
+      // Modal should close after 2 seconds
+      await waitFor(
+        () => {
+          expect(screen.queryByText("Place Your Bet")).not.toBeInTheDocument();
+        },
+        { timeout: 2500 },
+      );
     });
 
     test("opens modal for different bets", async () => {
