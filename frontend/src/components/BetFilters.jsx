@@ -62,8 +62,9 @@ function BetFilters({
   return (
     <div
       style={{
-        backgroundColor: "#f8f9fa",
-        color: "black",
+        backgroundColor: "#242424",
+        color: "#e6e6e6",
+        border: "1px solid #333",
         padding: "15px",
         borderRadius: "10px",
         height: "100%",

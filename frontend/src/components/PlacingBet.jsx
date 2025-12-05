@@ -140,14 +140,14 @@ function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0,
       }
 
       const result = await response.json();
-      
+
       // Show success message
       setSuccessMessage(`Bet placed successfully! Amount: $${parseFloat(betAmount).toFixed(2)}`);
-      
+
       // Reset form
       setBetAmount("");
       setSelectedOutcome("");
-      
+
       // Call callback and close after a short delay to show success message
       onBetPlaced(result);
       setTimeout(() => {
