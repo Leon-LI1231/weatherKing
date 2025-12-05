@@ -105,7 +105,19 @@ function CreateAccount({ onNavigateToLogin }) {
   const isUsernameTaken = message === "Username already exists";
   const isEmailTaken = message === "Email already exists";
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
+    <div
+      className="auth-card"
+      style={{
+        backgroundColor: "white",
+        color: "black",
+        maxWidth: "420px",
+        margin: "80px auto",
+        padding: "30px",
+        borderRadius: "12px",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+        textAlign: "center",
+      }}
+    >
       <h2>Create Account</h2> {/* Heading for the create account page */}
       <div style={{ marginBottom: "10px" }}>
         <input

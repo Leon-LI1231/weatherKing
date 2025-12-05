@@ -31,7 +31,9 @@ function BetListTable({ bets, onEnterBet }) {
       <Table striped hover responsive style={{ margin: 0 }}>
         <thead
           style={{
-            backgroundColor: "#f8f9fa",
+            backgroundColor: "#2c2c2c",
+            color: "#e6e6e6",
+            borderBottom: "1px solid #444",
             position: "sticky",
             top: 0,
             zIndex: 1,

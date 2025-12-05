@@ -55,7 +55,13 @@ function BetHistoryFilter({ onFilterChange, initialFilter = {}, availableOptions
   return (
     <div
       className="bet-history-filter"
-      style={{ padding: "15px", backgroundColor: "#f8f9fa", borderRadius: "8px" }}
+      style={{
+        padding: "15px",
+        backgroundColor: "#242424",
+        color: "#e6e6e6",
+        borderRadius: "8px",
+        border: "1px solid #333",
+      }}
     >
       <style>
         {`

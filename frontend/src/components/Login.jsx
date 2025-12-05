@@ -62,13 +62,25 @@ function Login({ onNavigateToCreateAccount, onSuccessfulLogin }) {
     onNavigateToCreateAccount();
   };
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
+    <div
+      className="auth-card"
+      style={{
+        backgroundColor: "white",
+        color: "black",
+        maxWidth: "400px",
+        margin: "80px auto",
+        padding: "30px",
+        borderRadius: "12px",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+        textAlign: "center",
+      }}
+    >
       {/* WeatherKings Branding */}
       <h1
         style={{
           fontSize: "2.5rem",
           fontWeight: "bold",
-          color: "#2c3e50",
+          color: "black",
           marginBottom: "20px",
         }}
       >
@@ -83,7 +95,7 @@ function Login({ onNavigateToCreateAccount, onSuccessfulLogin }) {
           marginBottom: "30px",
         }}
       />
-      <h2>Login</h2> {/* Heading for the login page */}
+      <h2 style={{ color: "black" }}>Login</h2> {/* Heading for the login page */}
       <div style={{ marginBottom: "15px" }}>
         <input
           type="text"

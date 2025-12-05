@@ -105,8 +105,13 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
   }
 
   return (
-    <Table striped bordered hover>
-      <thead>
+    <Table
+      striped
+      bordered
+      hover
+      style={{ backgroundColor: "#242424", color: "#e6e6e6", borderColor: "#444" }}
+    >
+      <thead style={{ backgroundColor: "#2c2c2c", color: "#e6e6e6" }}>
         <tr>
           <th>Contest</th>
           <th>City</th>
