@@ -608,7 +608,7 @@ describe("App Component Tests", () => {
     const losAngelesElements = screen.getAllByText("Los Angeles");
     expect(losAngelesElements.length).toBeGreaterThan(0);
 
-    const newYorkElements = screen.getAllByText("New York City");
+    const newYorkElements = screen.getAllByText("London");
     expect(newYorkElements.length).toBeGreaterThan(0);
 
     expect(screen.getByText("Logout")).toBeInTheDocument();
@@ -645,10 +645,10 @@ describe("App Component Tests", () => {
     fireEvent.click(menuButton);
 
     const drawer = screen.getByTestId("offcanvas");
-    const newYorkCityLink = drawer.querySelector('[data-event-key="New York City"]');
+    const newYorkCityLink = drawer.querySelector('[data-event-key="London"]');
     fireEvent.click(newYorkCityLink);
 
-    expect(screen.getByText("New York City Bets")).toBeInTheDocument();
+    expect(screen.getByText("London Bets")).toBeInTheDocument();
   });
 
   test("handles invalid city navigation gracefully", () => {

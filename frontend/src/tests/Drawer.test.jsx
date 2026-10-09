@@ -136,7 +136,7 @@ describe("Drawer Component Tests", () => {
     expect(screen.getByText("User Page")).toBeInTheDocument();
     expect(screen.getByText("Madison")).toBeInTheDocument();
     expect(screen.getByText("Los Angeles")).toBeInTheDocument();
-    expect(screen.getByText("New York City")).toBeInTheDocument();
+    expect(screen.getByText("London")).toBeInTheDocument();
     expect(screen.getByText("Logout")).toBeInTheDocument();
   });
 
@@ -181,13 +181,13 @@ describe("Drawer Component Tests", () => {
     expect(mockProps.onNavigate).toHaveBeenCalledTimes(1);
   });
 
-  test("New York City navigation works", () => {
+  test("London navigation works", () => {
     render(<Drawer {...mockProps} />);
 
-    const newYorkCityLink = screen.getByText("New York City");
+    const newYorkCityLink = screen.getByText("London");
     fireEvent.click(newYorkCityLink);
 
-    expect(mockProps.onNavigate).toHaveBeenCalledWith("New York City");
+    expect(mockProps.onNavigate).toHaveBeenCalledWith("London");
     expect(mockProps.onNavigate).toHaveBeenCalledTimes(1);
   });
 
@@ -296,7 +296,7 @@ describe("Drawer Component Tests", () => {
     expect(screen.getByText("Landing Page")).toBeInTheDocument();
     expect(screen.getByText("Madison")).toBeInTheDocument();
     expect(screen.getByText("Los Angeles")).toBeInTheDocument();
-    expect(screen.getByText("New York City")).toBeInTheDocument();
+    expect(screen.getByText("London")).toBeInTheDocument();
     expect(screen.getByText("Logout")).toBeInTheDocument();
   });
 

@@ -24,19 +24,20 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function LandingPage({ onNavigateToCity }) {
   return (
-    <Container style={{ marginTop: "140px", textAlign: "center" }}>
-      {/* Welcome Section */}
+    <Container className="landing">
       <Row className="mb-5">
         <Col>
-          <h2 className="mb-3">Welcome to WeatherKings!</h2>
-          <p className="lead text-muted">Choose a city to explore local weather bets</p>
+          <h1 className="hero-title">Welcome to WeatherKings!</h1>
+          <p className="hero-sub">
+            Bet on tomorrow&apos;s weather. Will it rain in London? Will Austin hit a new high? Pick
+            a city, place your bet, climb the leaderboard.
+          </p>
         </Col>
       </Row>
 
-      {/* City Selector */}
-      <Row className="mb-4">
+      <Row>
         <Col>
-          <h3 className="mb-4">Select a City</h3>
+          <h3 className="section-title">Select a City</h3>
           <CitySelector selectedCity={null} onCityChange={onNavigateToCity} />
         </Col>
       </Row>

@@ -2,6 +2,7 @@
 import React from "react";
 import { Offcanvas, Nav } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { CITIES } from "../cities";
 
 /**
  * =======================================================
@@ -34,18 +35,15 @@ function Drawer({ show, onClose, currentPage, onNavigate }) {
           <Nav.Link eventKey="user" onClick={() => onNavigate && onNavigate("user")}>
             User Page
           </Nav.Link>
-          <Nav.Link eventKey="Madison" onClick={() => onNavigate && onNavigate("Madison")}>
-            Madison
-          </Nav.Link>
-          <Nav.Link eventKey="Los Angeles" onClick={() => onNavigate && onNavigate("Los Angeles")}>
-            Los Angeles
-          </Nav.Link>
-          <Nav.Link
-            eventKey="New York City"
-            onClick={() => onNavigate && onNavigate("New York City")}
-          >
-            New York City
-          </Nav.Link>
+          {CITIES.map((city) => (
+            <Nav.Link
+              key={city.id}
+              eventKey={city.id}
+              onClick={() => onNavigate && onNavigate(city.id)}
+            >
+              {city.name}
+            </Nav.Link>
+          ))}
           <Nav.Link
             eventKey="logout"
             onClick={() => onNavigate && onNavigate("logout")}

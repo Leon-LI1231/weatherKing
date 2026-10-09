@@ -72,7 +72,7 @@ jest.mock("../components/Drawer", () => {
         <button onClick={() => onNavigate && onNavigate("landing")}>Landing Page</button>
         <button onClick={() => onNavigate && onNavigate("Madison")}>Madison</button>
         <button onClick={() => onNavigate && onNavigate("Los Angeles")}>Los Angeles</button>
-        <button onClick={() => onNavigate && onNavigate("New York City")}>New York City</button>
+        <button onClick={() => onNavigate && onNavigate("London")}>London</button>
         <button onClick={() => onNavigate && onNavigate("logout")} style={{ color: "red" }}>
           Logout
         </button>
@@ -170,7 +170,7 @@ describe("UserInfoHeader Component Tests", () => {
     expect(screen.getByText("Landing Page")).toBeInTheDocument();
     expect(screen.getByText("Madison")).toBeInTheDocument();
     expect(screen.getByText("Los Angeles")).toBeInTheDocument();
-    expect(screen.getByText("New York City")).toBeInTheDocument();
+    expect(screen.getByText("London")).toBeInTheDocument();
     expect(screen.getByText("Logout")).toBeInTheDocument();
   });
 
@@ -234,16 +234,16 @@ describe("UserInfoHeader Component Tests", () => {
     expect(mockProps.onNavigateToCity).toHaveBeenCalledWith("Los Angeles");
   });
 
-  test("New York City navigation works", () => {
+  test("London navigation works", () => {
     render(<UserInfoHeader {...mockProps} />);
 
     const menuButton = screen.getByText("☰");
     fireEvent.click(menuButton);
 
-    const newYorkCityLink = screen.getByText("New York City");
+    const newYorkCityLink = screen.getByText("London");
     fireEvent.click(newYorkCityLink);
 
-    expect(mockProps.onNavigateToCity).toHaveBeenCalledWith("New York City");
+    expect(mockProps.onNavigateToCity).toHaveBeenCalledWith("London");
   });
 
   // State Management Tests

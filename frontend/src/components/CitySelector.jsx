@@ -1,68 +1,31 @@
 import React from "react";
-import { Button, Card, Row, Col } from "react-bootstrap";
+import { Row, Col } from "react-bootstrap";
+import { CITIES } from "../cities";
 
 /**
- * =======================================================
- *                    CITY SELECTOR COMPONENT
- * =======================================================
- *
- * This component displays a selection interface for choosing a city.
- * It shows buttons for Madison, Middleton, and Chicago that navigate
- * to their respective city pages when clicked.
+ * Grid of city cards. Clicking a card selects that city.
  *
  * Props:
- *   - selectedCity: Currently selected city (for styling purposes)
- *   - onCityChange: Callback function when a city is selected
+ *   - selectedCity: id of the currently selected city (highlighted)
+ *   - onCityChange: callback invoked with the city id when a card is clicked
  */
-
 function CitySelector({ selectedCity, onCityChange }) {
-  const cities = [
-    {
-      id: "Madison",
-      name: "Madison",
-      icon: "🏛️",
-      description: "Capital city with university bets and local events",
-    },
-    {
-      id: "Los Angeles",
-      name: "Los Angeles",
-      icon: "🏘️",
-      description: "la la land",
-    },
-    {
-      id: "New York City",
-      name: "New York City",
-      icon: "🏙️",
-      description: "Christmas city",
-    },
-  ];
-
   return (
     <div className="city-selector">
       <Row className="g-4">
-        {cities.map((city) => (
-          <Col md={4} key={city.id}>
-            <Card
-              className={`h-100 city-card ${selectedCity === city.id ? "border-primary" : ""}`}
-              style={{ cursor: "pointer", transition: "transform 0.2s" }}
+        {CITIES.map((city) => (
+          <Col xs={12} sm={6} lg={3} key={city.id}>
+            <button
+              type="button"
+              className={`city-card ${selectedCity === city.id ? "selected" : ""}`}
               onClick={() => onCityChange(city.id)}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-5px)")}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
-              <Card.Body className="text-center d-flex flex-column">
-                <div className="mb-3" style={{ fontSize: "3rem" }}>
-                  {city.icon}
-                </div>
-                <Card.Title className="mb-3">{city.name}</Card.Title>
-                <Card.Text className="flex-grow-1 text-muted">{city.description}</Card.Text>
-                <Button
-                  variant={selectedCity === city.id ? "primary" : "outline-primary"}
-                  className="mt-auto"
-                >
-                  View {city.name} Bets
-                </Button>
-              </Card.Body>
-            </Card>
+              <span className="city-icon">{city.icon}</span>
+              <span className="city-name">{city.name}</span>
+              <span className="city-region">{city.region}</span>
+              <span className="city-blurb">{city.blurb}</span>
+              <span className="city-cta">View {city.name} Bets</span>
+            </button>
           </Col>
         ))}
       </Row>

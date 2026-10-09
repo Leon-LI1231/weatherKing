@@ -12,7 +12,7 @@ import CitySelector from "../components/CitySelector";
  * Test Cases:
  * -----------
  * 1. Rendering Tests:
- *    ✓ renders all city cards (Madison, Los Angeles, New York City)
+ *    ✓ renders all city cards (Madison, Los Angeles, London)
  *    ✓ displays city names and descriptions correctly
  *    ✓ shows city icons and buttons
  *
@@ -47,32 +47,30 @@ describe("CitySelector Component Tests", () => {
 
     // Check Madison card
     expect(screen.getByText("Madison")).toBeInTheDocument();
-    expect(
-      screen.getByText("Capital city with university bets and local events"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Rain, snow or shine on the isthmus.")).toBeInTheDocument();
     expect(screen.getByText("View Madison Bets")).toBeInTheDocument();
-    expect(screen.getByText("🏛️")).toBeInTheDocument();
+    expect(screen.getByText("❄️")).toBeInTheDocument();
 
     // Check Los Angeles card
     expect(screen.getByText("Los Angeles")).toBeInTheDocument();
-    expect(screen.getByText("la la land")).toBeInTheDocument();
+    expect(screen.getByText("Sunny again? Don't be so sure.")).toBeInTheDocument();
     expect(screen.getByText("View Los Angeles Bets")).toBeInTheDocument();
-    expect(screen.getByText("🏘️")).toBeInTheDocument();
+    expect(screen.getByText("🌴")).toBeInTheDocument();
 
-    // Check New York City card
-    expect(screen.getByText("New York City")).toBeInTheDocument();
-    expect(screen.getByText("Christmas city")).toBeInTheDocument();
-    expect(screen.getByText("View New York City Bets")).toBeInTheDocument();
-    expect(screen.getByText("🏙️")).toBeInTheDocument();
+    // Check London card
+    expect(screen.getByText("London")).toBeInTheDocument();
+    expect(screen.getByText("Will it rain tomorrow? Place your bet.")).toBeInTheDocument();
+    expect(screen.getByText("View London Bets")).toBeInTheDocument();
+    expect(screen.getByText("☔")).toBeInTheDocument();
   });
 
   test("displays city cards in proper layout", () => {
     render(<CitySelector selectedCity={null} onCityChange={mockOnCityChange} />);
 
     // Should have 3 city cards
-    const madisonCard = screen.getByText("Madison").closest(".card");
-    const losAngelesCard = screen.getByText("Los Angeles").closest(".card");
-    const newYorkCityCard = screen.getByText("New York City").closest(".card");
+    const madisonCard = screen.getByText("Madison").closest(".city-card");
+    const losAngelesCard = screen.getByText("Los Angeles").closest(".city-card");
+    const newYorkCityCard = screen.getByText("London").closest(".city-card");
 
     expect(madisonCard).toBeInTheDocument();
     expect(losAngelesCard).toBeInTheDocument();
@@ -83,7 +81,7 @@ describe("CitySelector Component Tests", () => {
   test("clicking Madison card calls onCityChange with Madison", () => {
     render(<CitySelector selectedCity={null} onCityChange={mockOnCityChange} />);
 
-    const madisonCard = screen.getByText("Madison").closest(".card");
+    const madisonCard = screen.getByText("Madison").closest(".city-card");
     fireEvent.click(madisonCard);
 
     expect(mockOnCityChange).toHaveBeenCalledWith("Madison");
@@ -93,20 +91,20 @@ describe("CitySelector Component Tests", () => {
   test("clicking Los Angeles card calls onCityChange with Los Angeles", () => {
     render(<CitySelector selectedCity={null} onCityChange={mockOnCityChange} />);
 
-    const losAngelesCard = screen.getByText("Los Angeles").closest(".card");
+    const losAngelesCard = screen.getByText("Los Angeles").closest(".city-card");
     fireEvent.click(losAngelesCard);
 
     expect(mockOnCityChange).toHaveBeenCalledWith("Los Angeles");
     expect(mockOnCityChange).toHaveBeenCalledTimes(1);
   });
 
-  test("clicking New York City card calls onCityChange with New York City", () => {
+  test("clicking London card calls onCityChange with London", () => {
     render(<CitySelector selectedCity={null} onCityChange={mockOnCityChange} />);
 
-    const newYorkCityCard = screen.getByText("New York City").closest(".card");
+    const newYorkCityCard = screen.getByText("London").closest(".city-card");
     fireEvent.click(newYorkCityCard);
 
-    expect(mockOnCityChange).toHaveBeenCalledWith("New York City");
+    expect(mockOnCityChange).toHaveBeenCalledWith("London");
     expect(mockOnCityChange).toHaveBeenCalledTimes(1);
   });
 
@@ -120,56 +118,34 @@ describe("CitySelector Component Tests", () => {
   });
 
   // Styling Tests
-  test("selected city has primary button variant", () => {
+  test("selected city card is highlighted", () => {
     render(<CitySelector selectedCity="Madison" onCityChange={mockOnCityChange} />);
 
-    const madisonButton = screen.getByText("View Madison Bets");
-    expect(madisonButton).toHaveClass("btn-primary");
+    const madisonCard = screen.getByText("Madison").closest(".city-card");
+    expect(madisonCard).toHaveClass("selected");
   });
 
-  test("non-selected cities have outline button variant", () => {
+  test("non-selected city cards are not highlighted", () => {
     render(<CitySelector selectedCity="Madison" onCityChange={mockOnCityChange} />);
 
-    const losAngelesButton = screen.getByText("View Los Angeles Bets");
-    const newYorkCityButton = screen.getByText("View New York City Bets");
-
-    expect(losAngelesButton).toHaveClass("btn-outline-primary");
-    expect(newYorkCityButton).toHaveClass("btn-outline-primary");
-  });
-
-  test("selected city card has primary border", () => {
-    render(<CitySelector selectedCity="Madison" onCityChange={mockOnCityChange} />);
-
-    const madisonCard = screen.getByText("Madison").closest(".card");
-    expect(madisonCard).toHaveClass("border-primary");
+    expect(screen.getByText("Los Angeles").closest(".city-card")).not.toHaveClass("selected");
+    expect(screen.getByText("London").closest(".city-card")).not.toHaveClass("selected");
   });
 
   // Accessibility Tests
-  test("cards are keyboard accessible", () => {
+  test("cards are native buttons, so they are keyboard accessible", () => {
     render(<CitySelector selectedCity={null} onCityChange={mockOnCityChange} />);
 
-    const madisonCard = screen.getByText("Madison").closest(".card");
-
-    // Card should have cursor pointer styling
-    expect(madisonCard).toHaveStyle("cursor: pointer");
-  });
-
-  test("buttons have proper accessibility attributes", () => {
-    render(<CitySelector selectedCity={null} onCityChange={mockOnCityChange} />);
-
-    const madisonButton = screen.getByText("View Madison Bets");
-    expect(madisonButton).toBeInTheDocument();
-    expect(madisonButton.tagName).toBe("BUTTON");
+    const madisonCard = screen.getByText("Madison").closest(".city-card");
+    expect(madisonCard.tagName).toBe("BUTTON");
   });
 
   // Edge Cases
   test("handles no selected city", () => {
     render(<CitySelector selectedCity={null} onCityChange={mockOnCityChange} />);
 
-    // All buttons should be outline variant
-    expect(screen.getByText("View Madison Bets")).toHaveClass("btn-outline-primary");
-    expect(screen.getByText("View Los Angeles Bets")).toHaveClass("btn-outline-primary");
-    expect(screen.getByText("View New York City Bets")).toHaveClass("btn-outline-primary");
+    expect(document.querySelectorAll(".city-card.selected")).toHaveLength(0);
+    expect(document.querySelectorAll(".city-card")).toHaveLength(4);
   });
 
   test("handles undefined selectedCity", () => {
@@ -178,6 +154,6 @@ describe("CitySelector Component Tests", () => {
     // Should render without crashing
     expect(screen.getByText("Madison")).toBeInTheDocument();
     expect(screen.getByText("Los Angeles")).toBeInTheDocument();
-    expect(screen.getByText("New York City")).toBeInTheDocument();
+    expect(screen.getByText("London")).toBeInTheDocument();
   });
 });

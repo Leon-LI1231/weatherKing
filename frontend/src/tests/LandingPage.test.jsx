@@ -54,7 +54,11 @@ describe("LandingPage Component Tests", () => {
     render(<LandingPage {...mockProps} />);
 
     expect(screen.getByText("Welcome to WeatherKings!")).toBeInTheDocument();
-    expect(screen.getByText("Choose a city to explore local weather bets")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Bet on tomorrow's weather. Will it rain in London? Will Austin hit a new high? Pick a city, place your bet, climb the leaderboard.",
+      ),
+    ).toBeInTheDocument();
   });
 
   test("displays city selector component", () => {
@@ -65,7 +69,7 @@ describe("LandingPage Component Tests", () => {
     // Check that CitySelector is rendered with city options
     expect(screen.getByText("Madison")).toBeInTheDocument();
     expect(screen.getByText("Los Angeles")).toBeInTheDocument();
-    expect(screen.getByText("New York City")).toBeInTheDocument();
+    expect(screen.getByText("London")).toBeInTheDocument();
   });
 
   test("shows proper page structure and layout", () => {
@@ -76,7 +80,11 @@ describe("LandingPage Component Tests", () => {
     expect(screen.getByRole("heading", { name: /Select a City/i })).toBeInTheDocument();
 
     // Check descriptive text
-    expect(screen.getByText("Choose a city to explore local weather bets")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Bet on tomorrow's weather. Will it rain in London? Will Austin hit a new high? Pick a city, place your bet, climb the leaderboard.",
+      ),
+    ).toBeInTheDocument();
   });
 
   // City Selection Tests
@@ -119,14 +127,12 @@ describe("LandingPage Component Tests", () => {
     // Check that all city options are available
     expect(screen.getByText("Madison")).toBeInTheDocument();
     expect(screen.getByText("Los Angeles")).toBeInTheDocument();
-    expect(screen.getByText("New York City")).toBeInTheDocument();
+    expect(screen.getByText("London")).toBeInTheDocument();
 
     // Check that city descriptions are shown
-    expect(
-      screen.getByText("Capital city with university bets and local events"),
-    ).toBeInTheDocument();
-    expect(screen.getByText("la la land")).toBeInTheDocument();
-    expect(screen.getByText("Christmas city")).toBeInTheDocument();
+    expect(screen.getByText("Rain, snow or shine on the isthmus.")).toBeInTheDocument();
+    expect(screen.getByText("Sunny again? Don't be so sure.")).toBeInTheDocument();
+    expect(screen.getByText("Will it rain tomorrow? Place your bet.")).toBeInTheDocument();
   });
 
   // Props Tests
@@ -162,9 +168,9 @@ describe("LandingPage Component Tests", () => {
   test("has proper heading hierarchy", () => {
     render(<LandingPage {...mockProps} />);
 
-    // Should have h2 for main welcome
+    // Should have h1 for main welcome
     const welcomeHeading = screen.getByRole("heading", { name: /Welcome to WeatherKings!/i });
-    expect(welcomeHeading.tagName).toBe("H2");
+    expect(welcomeHeading.tagName).toBe("H1");
 
     // Should have h3 for city selection
     const cityHeading = screen.getByRole("heading", { name: /Select a City/i });
@@ -186,10 +192,11 @@ describe("LandingPage Component Tests", () => {
   test("has proper text content structure", () => {
     render(<LandingPage {...mockProps} />);
 
-    // Check lead text class for subtitle
-    const leadText = screen.getByText("Choose a city to explore local weather bets");
-    expect(leadText).toHaveClass("lead");
-    expect(leadText).toHaveClass("text-muted");
+    // Check subtitle class
+    const leadText = screen.getByText(
+      "Bet on tomorrow's weather. Will it rain in London? Will Austin hit a new high? Pick a city, place your bet, climb the leaderboard.",
+    );
+    expect(leadText).toHaveClass("hero-sub");
   });
 
   // Edge Cases

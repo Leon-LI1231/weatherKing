@@ -4,27 +4,32 @@ import logo from "../assets/logo.png";
 
 /**
  * =======================================================
- *                  LOGIN COMPONENT
- * ======================================================
+ *                        LOGIN COMPONENT
+ * =======================================================
  *
- * This component will be an endpoint for users to log in to their account.
- * The fields will be username and password checking against the backend
- * for existing usernames. Successful login will redirect
- * to the home page. The user will have the option to create an account.
- * If the username or password is incorrect, an error message will be displayed
- * telling the user to try again.
+ * This component allows users to log into their account.
+ *
+ * Features:
+ * - Collects username and password.
+ * - Validates empty fields.
+ * - Sends login request to backend (/api/login).
+ * - Shows error message if login fails.
+ * - Calls onSuccessfulLogin when login succeeds.
+ * - Provides a button to navigate to the Create Account page.
  *
  */
 function Login({ onNavigateToCreateAccount, onSuccessfulLogin }) {
-  // State variables for username and password
+  // Store username and password input values
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
+
+  // Store status messages (errors or login success)
   const [message, setMessage] = React.useState("");
 
-  // Function to handle login
-  // Checks with backend if username and password are correct
+  // Called when user clicks "Login"
+  // Sends POST request to backend and checks credentials
   const handleLogin = async () => {
-    // Validate that username and password are not empty
+    // Prevent empty input submission
     if (!username.trim() || !password.trim()) {
       setMessage("Please enter both username and password.");
       return;
@@ -41,13 +46,14 @@ function Login({ onNavigateToCreateAccount, onSuccessfulLogin }) {
         const data = await response.json();
         setMessage(data.message);
 
+        // Backend confirms login success
         if (data.message === "Login successful.") {
           console.log("🎉 Login successful for username:", username);
           console.log("🚀 Calling onSuccessfulLogin with userData:", { username });
-          onSuccessfulLogin({ username }); // Navigate to dashboard
+          onSuccessfulLogin({ username });
         }
       } else {
-        // Handle HTTP error responses (like 401 Unauthorized)
+        // Backend returned an error (e.g., wrong password)
         const errorData = await response.json();
         setMessage(errorData.message || "Login failed. Please try again.");
       }
@@ -57,30 +63,19 @@ function Login({ onNavigateToCreateAccount, onSuccessfulLogin }) {
     }
   };
 
-  // Function to handle navigation to create account page
+  // Navigate to Create Account page
   const navigateToCreateAccount = () => {
     onNavigateToCreateAccount();
   };
+
   return (
-    <div
-      className="auth-card"
-      style={{
-        backgroundColor: "white",
-        color: "black",
-        maxWidth: "400px",
-        margin: "80px auto",
-        padding: "30px",
-        borderRadius: "12px",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-        textAlign: "center",
-      }}
-    >
-      {/* WeatherKings Branding */}
+    <div style={{ textAlign: "center", marginTop: "50px" }}>
+      {/* App logo and title */}
       <h1
         style={{
           fontSize: "2.5rem",
           fontWeight: "bold",
-          color: "black",
+          color: "#2c3e50",
           marginBottom: "20px",
         }}
       >
@@ -95,7 +90,11 @@ function Login({ onNavigateToCreateAccount, onSuccessfulLogin }) {
           marginBottom: "30px",
         }}
       />
-      <h2 style={{ color: "black" }}>Login</h2> {/* Heading for the login page */}
+
+      {/* Login Form */}
+      <h2>Login</h2>
+
+      {/* Username input */}
       <div style={{ marginBottom: "15px" }}>
         <input
           type="text"
@@ -112,6 +111,8 @@ function Login({ onNavigateToCreateAccount, onSuccessfulLogin }) {
           }}
         />
       </div>
+
+      {/* Password input */}
       <div style={{ marginBottom: "20px" }}>
         <input
           type="password"
@@ -128,6 +129,8 @@ function Login({ onNavigateToCreateAccount, onSuccessfulLogin }) {
           }}
         />
       </div>
+
+      {/* Login + Create Account Buttons */}
       <div
         style={{
           display: "flex",
@@ -146,6 +149,7 @@ function Login({ onNavigateToCreateAccount, onSuccessfulLogin }) {
         >
           Login
         </button>
+
         <button
           onClick={navigateToCreateAccount}
           style={{
@@ -157,6 +161,8 @@ function Login({ onNavigateToCreateAccount, onSuccessfulLogin }) {
           Create Account
         </button>
       </div>
+
+      {/* Error or success message */}
       {message && <p>{message}</p>}
     </div>
   );

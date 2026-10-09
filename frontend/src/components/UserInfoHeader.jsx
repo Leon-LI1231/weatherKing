@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Navbar, Container, Nav, Badge, Button } from "react-bootstrap";
 import Drawer from "./Drawer";
+import { CITY_IDS } from "../cities";
 
 /**
  * =======================================================
@@ -60,7 +61,7 @@ function UserInfoHeader({
       } else if (page === "landing") {
         console.log("Navigating to landing...");
         onNavigateToLanding && onNavigateToLanding();
-      } else if (["Madison", "Los Angeles", "New York City"].includes(page)) {
+      } else if (CITY_IDS.includes(page)) {
         console.log("Navigating to city:", page);
         onNavigateToCity(page); // Navigate to dedicated city page
       } else if (page === "user") {
