@@ -16,6 +16,17 @@ services:
       timeout: 20s
       retries: 10
 
+  # Redis: application-layer cache for forecasts and daily bets
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 5s
+      retries: 10
+
   # Backend service
   # Spring Boot API accessible at http://localhost:8080
   backend:
@@ -25,7 +36,11 @@ services:
     depends_on:
       db1:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
+      REDIS_HOST: redis
+      CACHE_ENABLED: ${CACHE_ENABLED:-true}
       SPRING_DATASOURCE_URL: jdbc:mysql://db1:3306/weatherkings_db
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root

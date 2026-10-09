@@ -1,5 +1,7 @@
 package edu.wisc.cs506.WeatherKings.weather.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import edu.wisc.cs506.WeatherKings.cache.JsonCache;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -7,6 +9,8 @@ import org.springframework.web.client.RestClientResponseException;
 
 import edu.wisc.cs506.WeatherKings.weather.dto.PointsResponse;
 import edu.wisc.cs506.WeatherKings.weather.dto.WeatherForecastResponse;
+
+import java.time.Duration;
 
 /**
  * Service for interacting with the National Weather Service API
@@ -22,6 +26,8 @@ public class WeatherApiService {
     
     private final RestClient restClient;
     private final OpenMeteoService openMeteoService;
+    private final JsonCache cache;
+    private final Duration forecastTtl;
     
     /**
      * Constructor - Spring automatically injects values from application.properties
@@ -32,9 +38,13 @@ public class WeatherApiService {
     public WeatherApiService(
             @Value("${weather.api.base-url}") String baseUrl,
             @Value("${weather.api.user-agent}") String userAgent,
-            OpenMeteoService openMeteoService) {
+            OpenMeteoService openMeteoService,
+            JsonCache cache,
+            @Value("${cache.forecast-ttl-seconds:600}") long forecastTtlSeconds) {
         
         this.openMeteoService = openMeteoService;
+        this.cache = cache;
+        this.forecastTtl = Duration.ofSeconds(forecastTtlSeconds);
         // Build RestClient with base configuration
         this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
@@ -56,6 +66,18 @@ public class WeatherApiService {
      * @throws WeatherApiException if API call fails or returns invalid data
      */
     public WeatherForecastResponse getForecast(double latitude, double longitude) {
+        // Redis cache (application layer): forecasts change slowly, so reuse them for a while
+        String cacheKey = String.format("forecast:%.4f,%.4f", latitude, longitude);
+        var cached = cache.get(cacheKey, new TypeReference<WeatherForecastResponse>() { });
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+        WeatherForecastResponse forecast = fetchForecast(latitude, longitude);
+        cache.put(cacheKey, forecast, forecastTtl);
+        return forecast;
+    }
+
+    private WeatherForecastResponse fetchForecast(double latitude, double longitude) {
         // NWS only covers the US; other locations (e.g. London) use Open-Meteo
         if (OpenMeteoService.isOutsideNwsCoverage(latitude, longitude)) {
             try {

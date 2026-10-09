@@ -1,10 +1,13 @@
 package edu.wisc.cs506.WeatherKings.bets.controller;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.wisc.cs506.WeatherKings.bets.model.Bet;
+import edu.wisc.cs506.WeatherKings.cache.JsonCache;
 import edu.wisc.cs506.WeatherKings.bets.model.dto.BetGenerationRequest;
 import edu.wisc.cs506.WeatherKings.bets.service.BetGenerationService;
 import edu.wisc.cs506.WeatherKings.bets.service.BetResolutionService;
@@ -35,10 +39,16 @@ public class BetController {
     private final BetGenerationService betGenerationService;
     private final BetService betService;
     private final BetResolutionService betResolutionService;
+    private final JsonCache cache;
+    private final Duration betsTtl;
 
     public BetController(BetGenerationService betGenerationService, 
                         BetService betService,
-                        BetResolutionService betResolutionService) {
+                        BetResolutionService betResolutionService,
+                        JsonCache cache,
+                        @Value("${cache.bets-ttl-seconds:30}") long betsTtlSeconds) {
+        this.cache = cache;
+        this.betsTtl = Duration.ofSeconds(betsTtlSeconds);
         this.betGenerationService = betGenerationService;
         this.betService = betService;
         this.betResolutionService = betResolutionService;
@@ -50,8 +60,20 @@ public class BetController {
      */
     @GetMapping("/daily")
     public ResponseEntity<List<Bet>> getDailyBets() {
+        // Redis cache (application layer) keeps repeated reads off MySQL.
+        // X-Cache tells the client whether this response came from Redis.
+        String key = dailyBetsKey();
+        var cached = cache.get(key, new TypeReference<List<Bet>>() { });
+        if (cached.isPresent()) {
+            return ResponseEntity.ok().header("X-Cache", "HIT").body(cached.get());
+        }
         List<Bet> dailyBets = betService.getDailyBetsForNextDay();
-        return ResponseEntity.ok(dailyBets);
+        cache.put(key, dailyBets, betsTtl);
+        return ResponseEntity.ok().header("X-Cache", "MISS").body(dailyBets);
+    }
+
+    private static String dailyBetsKey() {
+        return "bets:daily:" + DateUtil.getTomorrowDate();
     }
 
     /**
@@ -61,6 +83,7 @@ public class BetController {
     @PostMapping("/generate-daily")
     public ResponseEntity<List<Bet>> generateDailyBets() {
         List<Bet> newBets = betGenerationService.generateDailyBets();
+        cache.evict(dailyBetsKey());
         return ResponseEntity.ok(newBets);
     }
 
@@ -85,6 +108,7 @@ public class BetController {
                 request.getCityName(), 
                 targetDate
             );
+            cache.evict(dailyBetsKey());
             
             if (!existingBets.isEmpty()) {
                 Map<String, Object> response = new HashMap<>();
@@ -122,6 +146,7 @@ public class BetController {
     public ResponseEntity<?> resolveBet(@PathVariable Integer betId) {
         try {
             Map<String, Object> result = betResolutionService.resolveBet(betId);
+            cache.evict(dailyBetsKey());
             return ResponseEntity.ok(result);
             
         } catch (IllegalArgumentException e) {
@@ -151,6 +176,7 @@ public class BetController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         try {
             Map<String, Object> summary = betResolutionService.resolveDailyBets(date);
+            cache.evict(dailyBetsKey());
             return ResponseEntity.ok(summary);
             
         } catch (Exception e) {
