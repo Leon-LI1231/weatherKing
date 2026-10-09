@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { API_BASE } from "../api";
 
 /**
  * ===============================
@@ -70,7 +71,7 @@ const DepositCurrency = ({ onDeposit, onCancel, username }) => {
     // Call backend API to deposit
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8080/api/deposit", {
+      const response = await fetch(`${API_BASE}/api/deposit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, amount: depositAmount }),

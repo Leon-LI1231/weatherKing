@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { API_BASE } from "../api";
 
 /**
  * ===============================
@@ -29,7 +30,7 @@ function BetHistory({ username, filter, onAvailableOptionsChange }) {
     const fetchBetHistory = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:8080/api/player-bets/history/${username}`);
+        const response = await fetch(`${API_BASE}/api/player-bets/history/${username}`);
         if (!response.ok) {
           throw new Error("Failed to fetch bet history");
         }

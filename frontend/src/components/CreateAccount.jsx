@@ -1,5 +1,6 @@
 //Create Account Component
 import React from "react";
+import { API_BASE } from "../api";
 
 /**
  * =======================================================
@@ -67,7 +68,7 @@ function CreateAccount({ onNavigateToLogin }) {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/register", {
+      const response = await fetch(`${API_BASE}/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),

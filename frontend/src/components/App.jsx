@@ -7,6 +7,7 @@ import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import UserInfoHeader from "./UserInfoHeader";
 import UserPage from "./UserPage";
+import { API_BASE } from "../api";
 
 /**
  * =======================================================
@@ -60,7 +61,7 @@ function App() {
 
       try {
         console.log("🔄 Refreshing user data from backend for:", username);
-        const response = await fetch(`http://localhost:8080/api/user/${username}`);
+        const response = await fetch(`${API_BASE}/api/user/${username}`);
         if (response.ok) {
           const updatedUserData = await response.json();
           console.log("✅ Successfully refreshed user data:", updatedUserData);
@@ -230,7 +231,7 @@ function App() {
       // If userData contains just username (from login), fetch full user info
       if (userData && userData.username && !userData.balanceUsd) {
         console.log("📡 Fetching full user data from backend for username:", userData.username);
-        const response = await fetch(`http://localhost:8080/api/user/${userData.username}`);
+        const response = await fetch(`${API_BASE}/api/user/${userData.username}`);
         if (response.ok) {
           const fullUserData = await response.json();
           console.log("✅ Successfully fetched user data from backend:", fullUserData);

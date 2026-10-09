@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Alert } from "react-bootstrap";
 import "./PlacingBet.css";
 import { formatBetType } from "../utils/betTypeFormatter";
+import { API_BASE } from "../api";
 
 /**
  * =================================================
@@ -122,7 +123,7 @@ function PlacingBet({ isOpen, onClose, betDetails, onBetPlaced, userBalance = 0,
     setIsPlacingBet(true);
     setErrorMessage("");
     try {
-      const response = await fetch("http://localhost:8080/api/player-bets/place", {
+      const response = await fetch(`${API_BASE}/api/player-bets/place`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

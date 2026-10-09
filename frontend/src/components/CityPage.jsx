@@ -4,6 +4,7 @@ import BetListTable from "./BetListTable";
 import BetFilters from "./BetFilters";
 import PlacingBet from "./PlacingBet";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { API_BASE } from "../api";
 
 /**
  * =======================================================
@@ -94,7 +95,7 @@ function CityPage({ cityName, user, onNavigateBack }) {
       setIsLoading(true);
       try {
         console.log("Fetching daily bets...");
-        const response = await fetch("http://localhost:8080/api/bets/daily");
+        const response = await fetch(`${API_BASE}/api/bets/daily`);
         if (!response.ok) throw new Error(`HTTP error! ${response.status}`);
         const data = await response.json();
 
@@ -102,14 +103,14 @@ function CityPage({ cityName, user, onNavigateBack }) {
         if (data.length === 0) {
           console.log("No daily bets found, generating daily bets...");
           try {
-            await fetch("http://localhost:8080/api/bets/generate-daily", {
+            await fetch(`${API_BASE}/api/bets/generate-daily`, {
               method: "POST",
             });
 
             console.log("Daily bets generated successfully, fetching updated bets...");
 
             // Retry fetching daily bets after generation
-            const retryResponse = await fetch("http://localhost:8080/api/bets/daily");
+            const retryResponse = await fetch(`${API_BASE}/api/bets/daily`);
             if (!retryResponse.ok) throw new Error(`HTTP error! ${retryResponse.status}`);
             const retryData = await retryResponse.json();
 

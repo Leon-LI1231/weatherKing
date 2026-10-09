@@ -1,6 +1,7 @@
 //Login Component
 import React from "react";
 import logo from "../assets/logo.png";
+import { API_BASE } from "../api";
 
 /**
  * =======================================================
@@ -36,7 +37,7 @@ function Login({ onNavigateToCreateAccount, onSuccessfulLogin }) {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/login", {
+      const response = await fetch(`${API_BASE}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
