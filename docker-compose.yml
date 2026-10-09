@@ -1,6 +1,6 @@
 services:
   db1:
-    image: mysql/mysql-server:latest
+    image: mysql:8.4
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -20,7 +20,6 @@ services:
   # Spring Boot API accessible at http://localhost:8080
   backend:
     build: ./backend
-    container_name: weatherkings-backend
     ports:
       - "8080:8080"
     depends_on:
@@ -36,7 +35,6 @@ services:
   # After running `docker-compose up --build`, access the frontend at http://localhost:5173
   frontend:
     build: ./frontend
-    container_name: frontend
     ports:
       - "5173:5173"
     volumes:
