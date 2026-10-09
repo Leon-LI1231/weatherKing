@@ -66,8 +66,10 @@ class BetControllerIntegrationTest {
     private static final double MADISON_LON = -89.4012;
     private static final double LA_LAT = 34.0522;
     private static final double LA_LON = -118.2437;
-    private static final double NYC_LAT = 40.7128;
-    private static final double NYC_LON = -74.0060;
+    private static final double AUSTIN_LAT = 30.2672;
+    private static final double AUSTIN_LON = -97.7431;
+    private static final double LONDON_LAT = 51.5072;
+    private static final double LONDON_LON = -0.1276;
     private static final double SEATTLE_LAT = 47.6062;
     private static final double SEATTLE_LON = -122.3321;
 
@@ -92,7 +94,8 @@ class BetControllerIntegrationTest {
 
         when(weatherApiService.getForecast(MADISON_LAT, MADISON_LON)).thenReturn(mockForecast);
         when(weatherApiService.getForecast(LA_LAT, LA_LON)).thenReturn(mockForecast);
-        when(weatherApiService.getForecast(NYC_LAT, NYC_LON)).thenReturn(mockForecast);
+        when(weatherApiService.getForecast(AUSTIN_LAT, AUSTIN_LON)).thenReturn(mockForecast);
+        when(weatherApiService.getForecast(LONDON_LAT, LONDON_LON)).thenReturn(mockForecast);
         when(weatherApiService.getForecast(SEATTLE_LAT, SEATTLE_LON)).thenReturn(mockForecast);
         when(weatherApiService.getForecast(anyDouble(), anyDouble())).thenReturn(mockForecast);
     }
@@ -105,7 +108,7 @@ class BetControllerIntegrationTest {
                 .andExpect(jsonPath("$").isArray());
 
         List<Bet> createdBets = betRepository.findAll();
-        assertEquals(9, createdBets.size(), "Should have created 9 bets in the database.");
+        assertEquals(12, createdBets.size(), "Should have created 12 bets in the database.");
 
         Bet tempBet = createdBets.stream()
                 .filter(b -> b.getBetType().equals("MAX_TEMP_OVER_UNDER"))
@@ -132,7 +135,7 @@ class BetControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(9))
+                .andExpect(jsonPath("$.length()").value(12))
                 .andExpect(jsonPath("$[0].moneylineOdds").value(269.83))
                 .andExpect(jsonPath("$[0].betDescription").isString());
     }
@@ -147,7 +150,8 @@ class BetControllerIntegrationTest {
 
         when(weatherApiService.getForecast(MADISON_LAT, MADISON_LON)).thenReturn(incompleteForecast);
         when(weatherApiService.getForecast(LA_LAT, LA_LON)).thenReturn(incompleteForecast);
-        when(weatherApiService.getForecast(NYC_LAT, NYC_LON)).thenReturn(incompleteForecast);
+        when(weatherApiService.getForecast(AUSTIN_LAT, AUSTIN_LON)).thenReturn(incompleteForecast);
+        when(weatherApiService.getForecast(LONDON_LAT, LONDON_LON)).thenReturn(incompleteForecast);
 
         mockMvc.perform(post("/api/bets/generate-daily")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -391,28 +395,24 @@ class BetControllerIntegrationTest {
     }
 
     /**
-     * Test resolution endpoint handles weather service failures gracefully.
+     * Test resolution endpoint returns an error when the bet's city cannot be geocoded.
      */
     @Test
-    void resolveBet_shouldReturn500WhenWeatherServiceFails() throws Exception {
+    void resolveBet_shouldReturnErrorForUnknownCity() throws Exception {
         // Create an unresolved bet
         Bet bet = new Bet();
-        bet.setCityName("Test City");
+        bet.setCityName("Zzqxvw Nowhereville 99999");
         bet.setBetDate(LocalDate.now());
         bet.setBetType("MAX_TEMP_OVER_UNDER");
-        bet.setBetDescription("Test bet for weather failure");
+        bet.setBetDescription("Test bet for unknown city");
         bet.setSetLine(new BigDecimal("45.0"));
         bet.setMoneylineOdds(new BigDecimal("100.00"));
         bet.setTotalAmountBet(BigDecimal.ZERO);
         bet.setBetHit(null); // Not resolved yet
         bet = betRepository.save(bet);
 
-        // Note: This test may behave differently depending on whether
-        // the geocoding service or weather observation service fails.
-        // The actual behavior will depend on the real implementation.
-
         mockMvc.perform(post("/api/bets/resolve/" + bet.getBetId()))
-                .andExpect(status().is5xxServerError())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").exists());
     }
 }

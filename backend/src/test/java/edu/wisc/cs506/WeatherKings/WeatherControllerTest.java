@@ -95,15 +95,15 @@ class WeatherControllerTest {
     }
     
     /**
-     * Test coordinates outside NWS coverage (middle of ocean)
-     * Should return 502 Bad Gateway (API call will fail)
+     * Test coordinates with latitude out of range
+     * Should return 400 Bad Request (rejected before any API call)
      */
     @Test
-    void testGetForecast_OceanCoordinates_ReturnsBadGateway() throws Exception {
+    void testGetForecast_InvalidCoordinates_ReturnsBadRequest() throws Exception {
         mockMvc.perform(get("/api/weather/forecast")
-                .param("lat", "0.0")
+                .param("lat", "999.0")
                 .param("lon", "0.0"))
-                .andExpect(status().isBadGateway())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").isString());  // Error message
     }
     

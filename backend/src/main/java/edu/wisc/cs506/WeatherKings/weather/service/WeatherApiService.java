@@ -21,6 +21,7 @@ import edu.wisc.cs506.WeatherKings.weather.dto.WeatherForecastResponse;
 public class WeatherApiService {
     
     private final RestClient restClient;
+    private final OpenMeteoService openMeteoService;
     
     /**
      * Constructor - Spring automatically injects values from application.properties
@@ -30,8 +31,10 @@ public class WeatherApiService {
      */
     public WeatherApiService(
             @Value("${weather.api.base-url}") String baseUrl,
-            @Value("${weather.api.user-agent}") String userAgent) {
+            @Value("${weather.api.user-agent}") String userAgent,
+            OpenMeteoService openMeteoService) {
         
+        this.openMeteoService = openMeteoService;
         // Build RestClient with base configuration
         this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
@@ -53,6 +56,16 @@ public class WeatherApiService {
      * @throws WeatherApiException if API call fails or returns invalid data
      */
     public WeatherForecastResponse getForecast(double latitude, double longitude) {
+        // NWS only covers the US; other locations (e.g. London) use Open-Meteo
+        if (OpenMeteoService.isOutsideNwsCoverage(latitude, longitude)) {
+            try {
+                return openMeteoService.getForecast(latitude, longitude);
+            } catch (WeatherApiException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new WeatherApiException("Failed to fetch weather data: " + e.getMessage(), e);
+            }
+        }
         try {
             // STEP 1: Get the forecast URL for this coordinate
             // Format: /points/43.0731,-89.4012

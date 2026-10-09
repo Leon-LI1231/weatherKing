@@ -26,9 +26,10 @@ public class BetGenerationService {
 
     // Define the target cities and their coordinates
     private static final List<CityLocation> TARGET_CITIES = List.of(
+        new CityLocation("Austin, TX", 30.2672, -97.7431),
         new CityLocation("Madison, WI", 43.0731, -89.4012),
         new CityLocation("Los Angeles, CA", 34.0522, -118.2437),
-        new CityLocation("New York City, NY", 40.7128, -74.0060)
+        new CityLocation("London, UK", 51.5072, -0.1276)
     );
     
     // --- Odds and Model Constants ---

@@ -16,11 +16,14 @@ import edu.wisc.cs506.WeatherKings.weather.dto.WeatherObservation;
 public class WeatherObservationService {
     
     private final RestClient restClient;
+    private final OpenMeteoService openMeteoService;
     
     public WeatherObservationService(
             @Value("${weather.api.base-url}") String baseUrl,
-            @Value("${weather.api.user-agent}") String userAgent) {
+            @Value("${weather.api.user-agent}") String userAgent,
+            OpenMeteoService openMeteoService) {
         
+        this.openMeteoService = openMeteoService;
         this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeader("User-Agent", userAgent)
@@ -33,6 +36,9 @@ public class WeatherObservationService {
      */
     public WeatherObservation getObservationForLocation(double latitude, double longitude) {
         try {
+            if (OpenMeteoService.isOutsideNwsCoverage(latitude, longitude)) {
+                return openMeteoService.getObservation(latitude, longitude);
+            }
             String stationId = findNearestStation(latitude, longitude);
             return getLatestObservation(stationId);
         } catch (Exception e) {

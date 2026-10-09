@@ -75,10 +75,18 @@ class WeatherObservationServiceTest {
 
     @Test
     void testGetObservation_InvalidCoordinates_ThrowsException() {
-        // Ocean coordinates - outside NWS coverage
+        // Latitude out of range - rejected by the weather provider
         assertThrows(WeatherObservationService.ObservationException.class, () -> {
-            observationService.getObservationForLocation(0.0, 0.0);
+            observationService.getObservationForLocation(999.0, 0.0);
         });
+    }
+
+    @Test
+    void testGetObservation_NonUsLocation_UsesOpenMeteo() {
+        WeatherObservation observation = observationService.getObservationForLocation(51.5072, -0.1276);
+
+        assertNotNull(observation.getProperties().getTemperature());
+        assertNotNull(observation.getProperties().getTextDescription());
     }
 
     @Test

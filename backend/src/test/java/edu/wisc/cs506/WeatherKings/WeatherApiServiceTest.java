@@ -94,17 +94,31 @@ class WeatherApiServiceTest {
 
     /**
      * Test that invalid coordinates throw an exception
-     * Coordinates in the ocean (outside NWS coverage) should fail
      */
     @Test
     void testGetForecast_InvalidCoordinates_ThrowsException() {
-        // Middle of the ocean - outside NWS coverage area
-        double lat = 0.0;
+        // Latitude out of range - rejected by the weather provider
+        double lat = 999.0;
         double lon = 0.0;
         
         assertThrows(WeatherApiService.WeatherApiException.class, () -> {
             weatherApiService.getForecast(lat, lon);
-        }, "Should throw exception for coordinates outside US coverage");
+        }, "Should throw exception for invalid coordinates");
+    }
+
+    /**
+     * Locations outside the US (e.g. London) are served by Open-Meteo
+     */
+    @Test
+    void testGetForecast_NonUsLocation_UsesOpenMeteo() {
+        var forecast = weatherApiService.getForecast(51.5072, -0.1276);
+
+        var periods = forecast.getProperties().getPeriods();
+        assertFalse(periods.isEmpty(), "Should return forecast periods");
+        assertEquals("Today", periods.get(0).getName());
+        assertTrue(periods.get(1).getName().endsWith("Night"));
+        assertNotNull(periods.get(2).getTemperature());
+        assertNotNull(periods.get(2).getProbabilityOfPrecipitation());
     }
     
     /**
